@@ -35,6 +35,19 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
   background:rgba(17,24,39,.88); color:#fff; border-radius:8px; padding:12px 14px;
   box-shadow:0 8px 30px rgba(0,0,0,.28); font-size:13px; line-height:1.45; font-weight:700;
 }
+#editor {
+  position:fixed; right:12px; top:96px; z-index:10; width:310px;
+  display:none;
+  background:rgba(255,255,255,.94); border:2px solid rgba(15,23,42,.14); border-radius:8px;
+  box-shadow:0 8px 30px rgba(0,0,0,.22); padding:12px;
+}
+#editor h2 { margin:0 0 10px; font-size:14px; letter-spacing:.1em; }
+#editor select, #editor input {
+  width:100%; border:2px solid #1f2937; border-radius:6px; padding:8px;
+  margin-bottom:8px; font-weight:800; background:#fff; color:#111827;
+}
+#editor .btn { width:100%; margin-top:6px; }
+#drawHint { margin-top:8px; font-size:12px; line-height:1.35; font-weight:800; color:#334155; }
 </style>
 </head>
 <body>
@@ -50,11 +63,29 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
     <button class="btn" id="roadBtn" type="button">TÉRKÉP</button>
     <button class="btn active" id="satBtn" type="button">SATELLITE</button>
     <button class="btn" id="hybridBtn" type="button">HYBRID</button>
-    <button class="btn active" id="osmBtn" type="button">OSM KONTÚR</button>
+    <button class="btn active" id="osmBtn" type="button">TELJES DAM</button>
     <button class="btn active" id="overlayBtn" type="button">KATEGÓRIA RÉTEG</button>
+    <button class="btn" id="drawToggleBtn" type="button">RAJZOLÁS</button>
     <button class="btn" id="fitBtn" type="button">DAM-RA IGAZÍT</button>
     <button class="btn" id="hideBtn" type="button">UI KI</button>
   </div>
+</div>
+
+<div id="editor">
+  <h2>KÉZI KORREKCIÓ</h2>
+  <input id="drawName" type="text" placeholder="Név / megjegyzés">
+  <select id="drawCat">
+    <option value="bontando">Bontandó</option>
+    <option value="bontasra_javasolt">Bontásra javasolt</option>
+    <option value="hasznosításra_javasolt">Hasznosításra javasolt</option>
+    <option value="hasznosítandó">Hasznosítandó</option>
+    <option value="védett">Védett örökség</option>
+  </select>
+  <button class="btn" id="finishDrawBtn" type="button">POLIGON LEZÁRÁSA</button>
+  <button class="btn" id="undoDrawBtn" type="button">UTOLSÓ PONT TÖRLÉSE</button>
+  <button class="btn" id="exportDrawBtn" type="button">RAJZOLT JSON EXPORT</button>
+  <button class="btn" id="clearDrawBtn" type="button">RAJZOLT RÉTEG TÖRLÉS</button>
+  <div id="drawHint">Kapcsold be a RAJZOLÁS gombot, majd kattints körbe egy épületet a térképen. Legalább 3 pont után zárható.</div>
 </div>
 
 <div id="legend">
@@ -67,7 +98,7 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
 </div>
 
 <div id="note">
-  Google Satellite alap. A színes réteg nem torz PDF-geometria: OSM épületkontúrok, PDF-ből átvett becsült kategóriákkal.
+  Google Satellite alap. A teljes DAM réteg OSM épületkontúr, a színes kategória csak ott jelenik meg, ahol a PDF-egyezés elég biztos.
 </div>
 
 <script src="google_maps_key.js"></script>
@@ -93,6 +124,13 @@ let osmVisible = true;
 let bounds;
 let fitPending = false;
 let tilesSeen = false;
+let categoryCount = 0;
+let drawing = false;
+let currentPath = [];
+let tempLine = null;
+let drawnFeatures = [];
+let drawnPolygons = [];
+const DRAW_STORAGE_KEY = 'dam_google_drawn_features_v1';
 
 function status(msg) {
   document.getElementById('status').textContent = msg;
@@ -133,9 +171,13 @@ window.initMap = function() {
     google.maps.event.trigger(map, 'resize');
     if (fitPending) fitDam();
   });
+  map.addListener('click', e => {
+    if (drawing) addDrawPoint(e.latLng);
+  });
 
   bounds = new google.maps.LatLngBounds();
   wireUi();
+  loadDrawnFeatures();
   loadOverlay();
 };
 
@@ -168,10 +210,16 @@ function wireUi() {
     document.getElementById('overlayBtn').classList.toggle('active', overlayVisible);
     polygons.forEach(p => p.setMap(overlayVisible ? map : null));
   });
+  document.getElementById('drawToggleBtn').addEventListener('click', toggleDrawing);
+  document.getElementById('finishDrawBtn').addEventListener('click', finishDrawing);
+  document.getElementById('undoDrawBtn').addEventListener('click', undoDrawPoint);
+  document.getElementById('exportDrawBtn').addEventListener('click', exportDrawnFeatures);
+  document.getElementById('clearDrawBtn').addEventListener('click', clearDrawnFeatures);
   document.getElementById('fitBtn').addEventListener('click', fitDam);
   document.getElementById('hideBtn').addEventListener('click', () => {
     document.getElementById('bar').style.display = 'none';
     document.getElementById('legend').style.display = 'none';
+    document.getElementById('editor').style.display = 'none';
     document.getElementById('note').style.display = 'none';
   });
 }
@@ -179,7 +227,7 @@ function wireUi() {
 function loadOverlay() {
   status('OSM/PDF RÉTEG BETÖLTÉS...');
   Promise.all([
-    fetch('osm_dam_buildings_matched.json?cb=' + Date.now()).then(r => r.json()),
+    fetch('dam_full_osm_buildings.json?cb=' + Date.now()).then(r => r.json()),
     fetch('dam_osm_overrides.json?cb=' + Date.now()).then(r => r.json()).catch(() => ({ overrides:{} }))
   ]).then(([data, overrideData]) => {
     renderOverlay(data, overrideData && overrideData.overrides ? overrideData.overrides : {});
@@ -217,7 +265,8 @@ function renderOverlay(data, overrides) {
     polygons.push(poly);
     visible++;
   });
-  status(`GOOGLE SATELLITE · ${visible} KATEGORIZÁLT / ${osmPolygons.length} OSM ÉPÜLET`);
+  categoryCount = visible;
+  updateStatus();
   fitPending = true;
   window.setTimeout(fitDam, 350);
 }
@@ -229,12 +278,17 @@ function renderOsmContours(features) {
     const poly = new google.maps.Polygon({
       paths:path,
       strokeColor:'#ffffff',
-      strokeOpacity:0.92,
-      strokeWeight:2,
-      fillColor:'#ffffff',
-      fillOpacity:0.02,
+      strokeOpacity:0.96,
+      strokeWeight:3,
+      fillColor:'#111827',
+      fillOpacity:0.18,
       map
     });
+    const label = f.tags && f.tags.name ? f.tags.name : 'OSM épület';
+    const info = new google.maps.InfoWindow({
+      content:`<strong>${label}</strong><br>Teljes DAM épületkontúr<br>OSM way: ${f.id}`
+    });
+    poly.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
     osmPolygons.push(poly);
   });
 }
@@ -246,6 +300,122 @@ function fitDam() {
   if (!tilesSeen) {
     window.setTimeout(() => google.maps.event.trigger(map, 'resize'), 250);
   }
+}
+
+function updateStatus() {
+  status(`TELJES DAM · ${osmPolygons.length} ÉPÜLET · ${categoryCount} PDF-KATEGÓRIA · ${drawnFeatures.length} KÉZI`);
+}
+
+function toggleDrawing() {
+  drawing = !drawing;
+  document.getElementById('drawToggleBtn').classList.toggle('active', drawing);
+  document.getElementById('editor').style.display = drawing ? 'block' : 'none';
+  document.getElementById('drawHint').textContent = drawing
+    ? 'Rajzolás aktív: kattints körbe egy épületet, majd POLIGON LEZÁRÁSA.'
+    : 'Rajzolás kikapcsolva. Kapcsold be a RAJZOLÁS gombot új épülethez.';
+}
+
+function addDrawPoint(latLng) {
+  currentPath.push(latLng);
+  if (!tempLine) {
+    tempLine = new google.maps.Polyline({
+      path:currentPath,
+      strokeColor:'#facc15',
+      strokeOpacity:1,
+      strokeWeight:4,
+      map
+    });
+  } else {
+    tempLine.setPath(currentPath);
+  }
+}
+
+function undoDrawPoint() {
+  currentPath.pop();
+  if (tempLine) tempLine.setPath(currentPath);
+}
+
+function finishDrawing() {
+  if (currentPath.length < 3) {
+    document.getElementById('drawHint').textContent = 'Legalább 3 pont kell egy épületpoligonhoz.';
+    return;
+  }
+  const feature = {
+    id:'manual_' + Date.now(),
+    name:document.getElementById('drawName').value.trim(),
+    cat:document.getElementById('drawCat').value,
+    coords:currentPath.map(p => [p.lat(), p.lng()])
+  };
+  drawnFeatures.push(feature);
+  persistDrawnFeatures();
+  renderDrawnFeature(feature);
+  resetTempDrawing();
+  updateStatus();
+}
+
+function resetTempDrawing() {
+  currentPath = [];
+  if (tempLine) tempLine.setMap(null);
+  tempLine = null;
+}
+
+function renderDrawnFeature(feature) {
+  const cfg = CAT[feature.cat] || CAT.egyeb;
+  const poly = new google.maps.Polygon({
+    paths:feature.coords.map(c => ({ lat:c[0], lng:c[1] })),
+    strokeColor:'#facc15',
+    strokeOpacity:1,
+    strokeWeight:5,
+    fillColor:cfg.fill,
+    fillOpacity:0.72,
+    editable:true,
+    map
+  });
+  const info = new google.maps.InfoWindow({
+    content:`<strong>${feature.name || 'Kézi rajzolt épület'}</strong><br>${cfg.label}<br>${feature.id}`
+  });
+  poly.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
+  const saveEditedPath = () => {
+    feature.coords = poly.getPath().getArray().map(p => [p.lat(), p.lng()]);
+    persistDrawnFeatures();
+  };
+  poly.getPath().addListener('set_at', saveEditedPath);
+  poly.getPath().addListener('insert_at', saveEditedPath);
+  poly.getPath().addListener('remove_at', saveEditedPath);
+  drawnPolygons.push(poly);
+}
+
+function loadDrawnFeatures() {
+  try {
+    drawnFeatures = JSON.parse(localStorage.getItem(DRAW_STORAGE_KEY) || '[]');
+    drawnFeatures.forEach(renderDrawnFeature);
+  } catch (err) {
+    drawnFeatures = [];
+    console.warn('Rajzolt réteg betöltési hiba', err);
+  }
+}
+
+function persistDrawnFeatures() {
+  localStorage.setItem(DRAW_STORAGE_KEY, JSON.stringify(drawnFeatures));
+}
+
+function exportDrawnFeatures() {
+  const blob = new Blob([JSON.stringify({ type:'dam_manual_google_drawings', features:drawnFeatures }, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'dam_google_manual_drawings.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function clearDrawnFeatures() {
+  if (!confirm('Biztos törlöd a böngészőben tárolt kézi rajzolt réteget?')) return;
+  drawnPolygons.forEach(p => p.setMap(null));
+  drawnPolygons = [];
+  drawnFeatures = [];
+  resetTempDrawing();
+  persistDrawnFeatures();
+  updateStatus();
 }
 
 loadGoogle();
