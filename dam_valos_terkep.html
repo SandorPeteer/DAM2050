@@ -49,6 +49,16 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
 }
 #note strong { color:#bfdbfe; }
 
+#calibration {
+  position:fixed; right:18px; top:112px; z-index:520; width:330px; display:none;
+  background:rgba(255,255,255,.96); border:2px solid rgba(15,23,42,.16); border-radius:8px;
+  box-shadow:0 8px 30px rgba(15,23,42,.20); padding:14px 16px;
+}
+#calibration h2 { margin:0 0 10px; font-size:15px; letter-spacing:.10em; }
+.cal-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.cal-grid .btn { padding:8px 6px; font-size:12px; }
+#cal-values { margin-top:10px; color:#475569; font-size:12px; font-weight:800; line-height:1.45; }
+
 .leaflet-control-layers, .leaflet-control-zoom {
   border:2px solid rgba(15,23,42,.18) !important;
   box-shadow:0 5px 20px rgba(15,23,42,.16) !important;
@@ -58,6 +68,10 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
 .pop-title { font-size:16px; font-weight:900; color:#0f172a; margin-bottom:6px; }
 .pop-cat { display:inline-block; padding:3px 8px; border-radius:5px; color:#fff; font-weight:900; font-size:12px; margin-bottom:8px; }
 .pop-note { color:#475569; font-weight:700; }
+.cooling-anchor {
+  width:18px; height:18px; border-radius:50%; background:#0f172a; border:4px solid #facc15;
+  box-shadow:0 0 0 4px rgba(250,204,21,.28), 0 0 18px rgba(15,23,42,.5);
+}
 
 @media (max-width:900px) {
   #topbar { flex-direction:column; align-items:flex-start; }
@@ -73,13 +87,14 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
 <div id="topbar">
   <div>
     <div id="title">DAM · VALÓS TÉRKÉPI ILLESZTÉS</div>
-    <div id="subtitle">Műholdkép / OSM alaptérkép + PDF-ből georeferált épületkataszter és infrastruktúra</div>
+    <div id="subtitle">OpenStreetMap/Leaflet alaptérkép + PDF/drónos épületkataszter kalibrált rávetítése</div>
   </div>
   <div id="actions">
     <a class="btn" href="index.html">FŐOLDAL</a>
-    <button class="btn blue active" id="satBtn" type="button">MŰHOLD</button>
-    <button class="btn blue" id="osmBtn" type="button">TÉRKÉP</button>
+    <button class="btn blue active" id="osmBtn" type="button">OSM / LEAFLET</button>
+    <button class="btn blue" id="satBtn" type="button">MŰHOLD</button>
     <button class="btn" id="fitBtn" type="button">DAM-RA IGAZÍT</button>
+    <button class="btn" id="calBtn" type="button">KALIBRÁCIÓ</button>
     <button class="btn" id="focusBtn" type="button">PREZENTÁCIÓ</button>
   </div>
 </div>
@@ -91,19 +106,28 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
   <div class="row"><span class="sw" style="background:#84cc16"></span>Hasznosításra javasolt</div>
   <div class="row"><span class="sw" style="background:#16a34a"></span>Hasznosítandó</div>
   <div class="row"><span class="sw" style="background:#2563eb"></span>Védett örökség</div>
-  <div class="row"><span class="sw line-sw" style="background:#111827"></span>Vasút</div>
-  <div class="row"><span class="sw line-sw" style="background:#64748b"></span>Út / feltárt nyomvonal</div>
   <div id="stats">
-    <div>491 <span>PDF-poligon</span></div>
+    <div>453 <span>PDF-poligon</span></div>
     <div>130 ha <span>terület</span></div>
-    <div>209 <span>vasúti szakasz</span></div>
-    <div>2850 <span>út/sétány szakasz</span></div>
+    <div>OSM <span>út/vasút alap</span></div>
+    <div>Leaflet <span>élő alaptérkép</span></div>
   </div>
 </div>
 
 <div id="note">
-  <strong>Megjegyzés:</strong> ez nem Google Maps tile-hack. A műholdas alaptérkép Esri World Imagery,
-  a térképi alaptérkép OpenStreetMap. A PDF-kataszter georeferált GPS-poligonként kerül rá a valós területre.
+  <strong>Megjegyzés:</strong> az utak és a vasút most az OpenStreetMap/Leaflet alaptérképről jönnek.
+  A PDF/drónos épületkataszter külön, kalibrálható rétegként kerül rá, mert a korábbi GPS-illesztés hibás volt.
+</div>
+
+<div id="calibration">
+  <h2>FINOM ILLESZTÉS</h2>
+  <div class="cal-grid">
+    <span></span><button class="btn" data-cal="north">FEL</button><span></span>
+    <button class="btn" data-cal="west">BAL</button><button class="btn" data-cal="reset">RESET</button><button class="btn" data-cal="east">JOBB</button>
+    <span></span><button class="btn" data-cal="south">LE</button><span></span>
+    <button class="btn" data-cal="smaller">KISEBB</button><button class="btn" data-cal="save">MENT</button><button class="btn" data-cal="larger">NAGYOBB</button>
+  </div>
+  <div id="cal-values"></div>
 </div>
 
 <script src="leaflet.js"></script>
@@ -120,7 +144,7 @@ const CAT = {
 const map = L.map('map', {
   zoomControl:false,
   preferCanvas:true,
-  center:[48.109, 20.736],
+  center:[48.094722, 20.740000],
   zoom:15
 });
 L.control.zoom({ position:'bottomright' }).addTo(map);
@@ -133,12 +157,13 @@ const osm = L.tileLayer(
   'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
   { maxZoom:19, attribution:'&copy; OpenStreetMap contributors' }
 );
-esri.addTo(map);
+osm.addTo(map);
 
 const buildingLayer = L.layerGroup().addTo(map);
-const railLayer = L.layerGroup().addTo(map);
-const roadLayer = L.layerGroup().addTo(map);
-const bounds = L.latLngBounds([]);
+const anchorLayer = L.layerGroup().addTo(map);
+let currentBounds = L.latLngBounds([]);
+let sourceBuildings = null;
+let calibration = loadCalibration();
 
 function popupFor(b, cfg) {
   const name = b.name || 'Névtelen épület';
@@ -147,11 +172,45 @@ function popupFor(b, cfg) {
     <div class="pop-note">PDF-kataszterből georeferált épületpoligon.</div>`;
 }
 
+const PDF = {
+  minX:0.028072,
+  maxX:0.751621,
+  minY:0.192043,
+  maxY:0.975782,
+  cx:(0.028072 + 0.751621) / 2,
+  cy:(0.192043 + 0.975782) / 2
+};
+
+const DEFAULT_CAL = {
+  west:20.7240,
+  east:20.7540,
+  south:48.0878,
+  north:48.1012,
+  dx:0,
+  dy:0,
+  scale:1
+};
+
+function loadCalibration() {
+  try {
+    return { ...DEFAULT_CAL, ...JSON.parse(localStorage.getItem('damMapCalibration') || '{}') };
+  } catch {
+    return { ...DEFAULT_CAL };
+  }
+}
+
+function saveCalibration() {
+  localStorage.setItem('damMapCalibration', JSON.stringify(calibration));
+}
+
 function normToLatLng(x, y) {
-  return [
-    0.0001963488854244133 * x + 0.016152994295623557 * y + 48.099491795729186,
-    0.033234315746344834 * x - 0.016248664530145618 * y + 20.729425893521785
-  ];
+  const x2 = PDF.cx + (x - PDF.cx) * calibration.scale;
+  const y2 = PDF.cy + (y - PDF.cy) * calibration.scale;
+  const nx = (x2 - PDF.minX) / (PDF.maxX - PDF.minX);
+  const ny = (y2 - PDF.minY) / (PDF.maxY - PDF.minY);
+  const lat = calibration.north - ny * (calibration.north - calibration.south) + calibration.dy;
+  const lng = calibration.west + nx * (calibration.east - calibration.west) + calibration.dx;
+  return [lat, lng];
 }
 
 function styleFor(cat) {
@@ -166,34 +225,45 @@ function styleFor(cat) {
 }
 
 function loadBuildings(data) {
-  data.buildings.forEach(b => {
-    if (!b.gps || b.gps.length < 3) return;
-    const cfg = CAT[b.cat] || CAT.egyeb;
-    const polygon = L.polygon(b.gps, styleFor(b.cat)).bindPopup(popupFor(b, cfg));
-    polygon.on('mouseover', () => polygon.setStyle({ weight:4, fillOpacity:0.78 }));
-    polygon.on('mouseout', () => polygon.setStyle(styleFor(b.cat)));
-    polygon.addTo(buildingLayer);
-    b.gps.forEach(p => bounds.extend(p));
-  });
+  sourceBuildings = data;
+  renderBuildings();
 }
 
-function loadInfrastructure(data) {
-  (data.roads || []).forEach(s => {
-    const a = normToLatLng(s.x0, s.y0);
-    const b = normToLatLng(s.x1, s.y1);
-    L.polyline([a, b], { color:'#64748b', weight:2.4, opacity:0.58, lineCap:'round' }).addTo(roadLayer);
+function renderBuildings() {
+  if (!sourceBuildings) return;
+  buildingLayer.clearLayers();
+  anchorLayer.clearLayers();
+  const nextBounds = L.latLngBounds([]);
+  sourceBuildings.buildings.forEach(b => {
+    if (!b.pts || b.pts.length < 3) return;
+    const cfg = CAT[b.cat] || CAT.egyeb;
+    const coords = b.pts.map(p => normToLatLng(p[0], p[1]));
+    const isCoolingTower = b.name === 'Hűtőtornyok';
+    const polygon = L.polygon(coords, {
+      ...styleFor(b.cat),
+      weight:isCoolingTower ? 4.5 : 2.2,
+      fillOpacity:isCoolingTower ? 0.82 : 0.58
+    }).bindPopup(popupFor(b, cfg));
+    polygon.on('mouseover', () => polygon.setStyle({ weight:isCoolingTower ? 5.5 : 4, fillOpacity:0.78 }));
+    polygon.on('mouseout', () => polygon.setStyle({
+      ...styleFor(b.cat),
+      weight:isCoolingTower ? 4.5 : 2.2,
+      fillOpacity:isCoolingTower ? 0.82 : 0.58
+    }));
+    polygon.addTo(buildingLayer);
+    if (isCoolingTower) {
+      L.marker(normToLatLng(b.cx, b.cy), {
+        icon:L.divIcon({ className:'', html:'<div class="cooling-anchor"></div>', iconSize:[18,18], iconAnchor:[9,9] })
+      }).bindTooltip('Hűtőtorony kontrollpont', { direction:'top' }).addTo(anchorLayer);
+    }
+    coords.forEach(p => nextBounds.extend(p));
   });
-  (data.railways || []).forEach(s => {
-    const a = normToLatLng(s.x0, s.y0);
-    const b = normToLatLng(s.x1, s.y1);
-    L.polyline([a, b], { color:'#ffffff', weight:5.5, opacity:0.85, lineCap:'round' }).addTo(railLayer);
-    L.polyline([a, b], { color:'#111827', weight:3.2, opacity:0.95, lineCap:'round' }).addTo(railLayer);
-    L.polyline([a, b], { color:'#ef4444', weight:1.4, opacity:0.95, lineCap:'round' }).addTo(railLayer);
-  });
+  currentBounds = nextBounds;
+  updateCalValues();
 }
 
 function fitDam() {
-  if (bounds.isValid()) map.fitBounds(bounds.pad(0.08), { animate:true });
+  if (currentBounds.isValid()) map.fitBounds(currentBounds.pad(0.08), { animate:true });
 }
 
 function setBase(layer) {
@@ -214,26 +284,53 @@ document.getElementById('fitBtn').addEventListener('click', fitDam);
 document.getElementById('focusBtn').addEventListener('click', () => {
   document.getElementById('topbar').style.display = 'none';
   document.getElementById('note').style.display = 'none';
+  document.getElementById('calibration').style.display = 'none';
   fitDam();
+});
+document.getElementById('calBtn').addEventListener('click', () => {
+  const panel = document.getElementById('calibration');
+  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  updateCalValues();
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'f' || e.key === 'F') fitDam();
   if (e.key === 'p' || e.key === 'P') document.getElementById('focusBtn').click();
-  if (e.key === '1') setBase('sat');
-  if (e.key === '2') setBase('osm');
+  if (e.key === '1') setBase('osm');
+  if (e.key === '2') setBase('sat');
 });
 
+document.querySelectorAll('[data-cal]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const step = 0.00018;
+    const scaleStep = 0.012;
+    const action = btn.dataset.cal;
+    if (action === 'north') calibration.dy += step;
+    if (action === 'south') calibration.dy -= step;
+    if (action === 'east') calibration.dx += step;
+    if (action === 'west') calibration.dx -= step;
+    if (action === 'larger') calibration.scale += scaleStep;
+    if (action === 'smaller') calibration.scale = Math.max(0.7, calibration.scale - scaleStep);
+    if (action === 'reset') calibration = { ...DEFAULT_CAL };
+    if (action === 'save') saveCalibration();
+    renderBuildings();
+  });
+});
+
+function updateCalValues() {
+  document.getElementById('cal-values').innerHTML =
+    `eltolás: ${calibration.dx.toFixed(5)} lng, ${calibration.dy.toFixed(5)} lat<br>` +
+    `méret: ${(calibration.scale * 100).toFixed(1)}%`;
+}
+
 L.control.layers(
-  { 'Műholdkép':esri, 'OSM térkép':osm },
-  { 'PDF épületkataszter':buildingLayer, 'Vasút':railLayer, 'Út / sétány':roadLayer },
+  { 'OSM / Leaflet térkép':osm, 'Műholdkép':esri },
+  { 'PDF/drónos épületkataszter':buildingLayer, 'Hűtőtornyok kontrollpontok':anchorLayer },
   { position:'topright', collapsed:false }
 ).addTo(map);
 
-Promise.all([
-  fetch('dam_buildings_gps.json').then(r => r.json()),
-  fetch('dam_infrastructure.json').then(r => r.json())
-]).then(([buildings, infra]) => {
-  loadInfrastructure(infra);
+fetch('dam_buildings2.json')
+  .then(r => r.json())
+  .then(buildings => {
   loadBuildings(buildings);
   fitDam();
 }).catch(err => {
