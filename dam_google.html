@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAM · Google Satellite · 2026 ellenőrzés</title>
+<style>
+* { box-sizing:border-box; }
+html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sans-serif; background:#111827; color:#0f172a; overflow:hidden; }
+#map { position:fixed; inset:0; }
+#bar {
+  position:fixed; top:12px; left:12px; right:12px; z-index:10;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:rgba(255,255,255,.94); border:2px solid rgba(15,23,42,.14); border-radius:8px;
+  box-shadow:0 8px 30px rgba(0,0,0,.25); padding:10px 14px;
+}
+#title { font-size:20px; font-weight:900; letter-spacing:.08em; }
+#status { margin-top:4px; display:inline-block; padding:4px 8px; background:#111827; color:#fff; border-radius:5px; font-size:12px; font-weight:900; }
+#actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.btn {
+  border:2px solid #1f2937; border-radius:6px; background:#fff; color:#111827;
+  padding:8px 11px; font-size:12px; font-weight:900; letter-spacing:.05em; cursor:pointer;
+}
+.btn.active, .btn:hover { background:#1f2937; color:#fff; }
+#legend {
+  position:fixed; left:12px; bottom:12px; z-index:10; width:300px;
+  background:rgba(255,255,255,.94); border:2px solid rgba(15,23,42,.14); border-radius:8px;
+  box-shadow:0 8px 30px rgba(0,0,0,.22); padding:14px 16px;
+}
+#legend h2 { margin:0 0 10px; font-size:15px; letter-spacing:.12em; }
+.row { display:flex; align-items:center; gap:10px; margin:8px 0; font-size:13px; font-weight:900; }
+.sw { width:22px; height:16px; border-radius:3px; border:2px solid rgba(15,23,42,.26); }
+#note {
+  position:fixed; right:12px; bottom:12px; z-index:10; max-width:390px;
+  background:rgba(17,24,39,.88); color:#fff; border-radius:8px; padding:12px 14px;
+  box-shadow:0 8px 30px rgba(0,0,0,.28); font-size:13px; line-height:1.45; font-weight:700;
+}
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div id="bar">
+  <div>
+    <div id="title">DAM · GOOGLE SATELLITE ELLENŐRZÉS</div>
+    <div id="status">GOOGLE MAP BETÖLTÉS...</div>
+  </div>
+  <div id="actions">
+    <a class="btn" href="index.html">FŐOLDAL</a>
+    <button class="btn active" id="satBtn" type="button">SATELLITE</button>
+    <button class="btn" id="hybridBtn" type="button">HYBRID</button>
+    <button class="btn" id="overlayBtn" type="button">KATEGÓRIA RÉTEG</button>
+    <button class="btn" id="fitBtn" type="button">DAM-RA IGAZÍT</button>
+    <button class="btn" id="hideBtn" type="button">UI KI</button>
+  </div>
+</div>
+
+<div id="legend">
+  <h2>PDF-KATEGÓRIÁK OSM FORMÁN</h2>
+  <div class="row"><span class="sw" style="background:#dc2626"></span>Bontandó</div>
+  <div class="row"><span class="sw" style="background:#f97316"></span>Bontásra javasolt</div>
+  <div class="row"><span class="sw" style="background:#84cc16"></span>Hasznosításra javasolt</div>
+  <div class="row"><span class="sw" style="background:#16a34a"></span>Hasznosítandó</div>
+  <div class="row"><span class="sw" style="background:#2563eb"></span>Védett örökség</div>
+</div>
+
+<div id="note">
+  Google Satellite alap. A színes réteg nem torz PDF-geometria: OSM épületkontúrok, PDF-ből átvett becsült kategóriákkal.
+</div>
+
+<script src="google_maps_key.js"></script>
+<script>
+const CAT = {
+  bontando:                 { label:'BONTANDÓ', fill:'#dc2626' },
+  bontasra_javasolt:        { label:'BONTÁSRA JAVASOLT', fill:'#f97316' },
+  'hasznosításra_javasolt': { label:'HASZNOSÍTÁSRA JAVASOLT', fill:'#84cc16' },
+  'hasznosítandó':          { label:'HASZNOSÍTANDÓ', fill:'#16a34a' },
+  'védett':                 { label:'VÉDETT ÖRÖKSÉG', fill:'#2563eb' },
+  egyeb:                    { label:'BIZONYTALAN / NINCS PDF EGYEZÉS', fill:'#64748b' }
+};
+
+let map;
+let polygons = [];
+let overlayVisible = true;
+let bounds;
+
+function status(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+function loadGoogle() {
+  if (!window.GOOGLE_MAPS_API_KEY || window.GOOGLE_MAPS_API_KEY.includes('PASTE_')) {
+    status('HIÁNYZÓ GOOGLE API KULCS');
+    return;
+  }
+  const s = document.createElement('script');
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(window.GOOGLE_MAPS_API_KEY)}&callback=initMap&v=weekly`;
+  s.async = true;
+  s.defer = true;
+  s.onerror = () => status('GOOGLE MAPS API HIBA');
+  document.head.appendChild(s);
+}
+
+window.initMap = function() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    center:{ lat:48.0963, lng:20.7398 },
+    zoom:16,
+    mapTypeId:'satellite',
+    tilt:0,
+    fullscreenControl:false,
+    streetViewControl:false,
+    mapTypeControl:false
+  });
+
+  bounds = new google.maps.LatLngBounds();
+  wireUi();
+  loadOverlay();
+};
+
+function wireUi() {
+  document.getElementById('satBtn').addEventListener('click', () => {
+    map.setMapTypeId('satellite');
+    document.getElementById('satBtn').classList.add('active');
+    document.getElementById('hybridBtn').classList.remove('active');
+  });
+  document.getElementById('hybridBtn').addEventListener('click', () => {
+    map.setMapTypeId('hybrid');
+    document.getElementById('hybridBtn').classList.add('active');
+    document.getElementById('satBtn').classList.remove('active');
+  });
+  document.getElementById('overlayBtn').addEventListener('click', () => {
+    overlayVisible = !overlayVisible;
+    polygons.forEach(p => p.setMap(overlayVisible ? map : null));
+  });
+  document.getElementById('fitBtn').addEventListener('click', fitDam);
+  document.getElementById('hideBtn').addEventListener('click', () => {
+    document.getElementById('bar').style.display = 'none';
+    document.getElementById('legend').style.display = 'none';
+    document.getElementById('note').style.display = 'none';
+  });
+}
+
+function loadOverlay() {
+  status('OSM/PDF RÉTEG BETÖLTÉS...');
+  Promise.all([
+    fetch('osm_dam_buildings_matched.json?cb=' + Date.now()).then(r => r.json()),
+    fetch('dam_osm_overrides.json?cb=' + Date.now()).then(r => r.json()).catch(() => ({ overrides:{} }))
+  ]).then(([data, overrideData]) => {
+    renderOverlay(data, overrideData && overrideData.overrides ? overrideData.overrides : {});
+  }).catch(err => {
+    console.error(err);
+    status('RÉTEG HIBA: ' + err.message);
+  });
+}
+
+function renderOverlay(data, overrides) {
+  let visible = 0;
+  data.features.forEach(f => {
+    const override = overrides[String(f.id)];
+    const effective = override ? { ...f.match, ...override, matched:true, distance_m:0 } : f.match;
+    if (!effective.matched || effective.distance_m > 35) return;
+
+    const cfg = CAT[effective.cat] || CAT.egyeb;
+    const path = f.coords.map(c => ({ lat:c[0], lng:c[1] }));
+    path.forEach(p => bounds.extend(p));
+
+    const poly = new google.maps.Polygon({
+      paths:path,
+      strokeColor:override ? '#7c2d12' : '#0f172a',
+      strokeOpacity:1,
+      strokeWeight:override ? 5 : 3,
+      fillColor:cfg.fill,
+      fillOpacity:override ? 0.82 : 0.68,
+      map
+    });
+    const info = new google.maps.InfoWindow({
+      content:`<strong>${effective.name || f.tags.name || 'OSM épület'}</strong><br>${cfg.label}<br>OSM way: ${f.id}<br>PDF egyezés: ${effective.distance_m || 0} m`
+    });
+    poly.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
+    polygons.push(poly);
+    visible++;
+  });
+  status(`GOOGLE SATELLITE · ${visible} KATEGORIZÁLT OSM ÉPÜLET`);
+  fitDam();
+}
+
+function fitDam() {
+  if (bounds && !bounds.isEmpty()) map.fitBounds(bounds);
+}
+
+loadGoogle();
+</script>
+</body>
+</html>
