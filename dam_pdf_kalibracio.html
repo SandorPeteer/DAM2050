@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAM · PDF réteg kalibráció Google térképen</title>
+<style>
+* { box-sizing:border-box; }
+html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Arial, Helvetica, sans-serif; background:#e5e7eb; color:#0f172a; }
+#map { position:fixed; inset:0; width:100vw; height:100vh; background:#d1d5db; }
+#bar {
+  position:fixed; top:12px; left:12px; right:12px; z-index:10;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 14px; border-radius:8px; background:rgba(255,255,255,.95);
+  border:2px solid rgba(15,23,42,.16); box-shadow:0 10px 34px rgba(0,0,0,.24);
+}
+#title { font-size:22px; font-weight:950; letter-spacing:.06em; }
+#status { margin-top:4px; display:inline-block; padding:4px 8px; border-radius:5px; background:#111827; color:#fff; font-size:12px; font-weight:950; }
+#actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.btn {
+  border:2px solid #111827; background:#fff; color:#111827; border-radius:6px;
+  padding:8px 11px; font-size:12px; font-weight:950; letter-spacing:.04em; cursor:pointer; text-decoration:none;
+}
+.btn.active, .btn:hover { background:#111827; color:#fff; }
+#panel {
+  position:fixed; left:12px; bottom:12px; z-index:10; width:360px;
+  background:rgba(255,255,255,.95); border:2px solid rgba(15,23,42,.16);
+  border-radius:8px; box-shadow:0 10px 34px rgba(0,0,0,.22); padding:14px 16px;
+}
+#panel h2 { margin:0 0 10px; font-size:16px; letter-spacing:.1em; }
+.row { display:flex; align-items:center; gap:10px; margin:8px 0; font-size:13px; font-weight:900; }
+.sw { width:22px; height:16px; border-radius:3px; border:2px solid #fff; box-shadow:0 0 0 1px #111827; }
+#hint {
+  margin-top:12px; padding-top:10px; border-top:2px solid #cbd5e1;
+  font-size:13px; line-height:1.4; font-weight:800; color:#334155;
+}
+#coords {
+  margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:6px;
+  font-size:11px; font-family:Menlo, Consolas, monospace; color:#334155;
+}
+#opacityBox {
+  position:fixed; right:12px; bottom:12px; z-index:10; width:330px;
+  background:rgba(15,23,42,.9); color:#fff; border-radius:8px; padding:12px 14px;
+  box-shadow:0 10px 34px rgba(0,0,0,.28); font-size:13px; line-height:1.45; font-weight:800;
+}
+#opacityBox input { width:100%; margin-top:8px; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div id="bar">
+  <div>
+    <div id="title">DAM · PDF RÉTEG KALIBRÁCIÓ</div>
+    <div id="status">BETÖLTÉS...</div>
+  </div>
+  <div id="actions">
+    <a class="btn" href="index.html">FŐOLDAL</a>
+    <a class="btn" href="dam_google.html">ELLENŐRZŐ</a>
+    <button class="btn active" id="satBtn" type="button">MŰHOLD</button>
+    <button class="btn" id="mapBtn" type="button">TÉRKÉP</button>
+    <button class="btn active" id="pdfBtn" type="button">PDF RÉTEG</button>
+    <button class="btn" id="fitBtn" type="button">DAM-RA IGAZÍT</button>
+    <button class="btn" id="resetBtn" type="button">RESET</button>
+    <button class="btn" id="saveBtn" type="button">MENTÉS</button>
+    <button class="btn" id="exportBtn" type="button">EXPORT JSON</button>
+    <button class="btn" id="hideBtn" type="button">UI KI</button>
+  </div>
+</div>
+
+<div id="panel">
+  <h2>JELMAGYARÁZAT</h2>
+  <div class="row"><span class="sw" style="background:#dc2626"></span>Bontandó</div>
+  <div class="row"><span class="sw" style="background:#f97316"></span>Bontásra javasolt</div>
+  <div class="row"><span class="sw" style="background:#84cc16"></span>Hasznosításra javasolt</div>
+  <div class="row"><span class="sw" style="background:#16a34a"></span>Hasznosítandó</div>
+  <div class="row"><span class="sw" style="background:#2563eb"></span>Védett örökség</div>
+  <div id="hint">A négy sárga kontrollpontot húzd a Google műholdképen a DAM terület sarkaira. A PDF-ből kinyert épületek együtt torzulnak, félig áttetsző rétegként.</div>
+  <div id="coords"></div>
+</div>
+
+<div id="opacityBox">
+  Átlátszóság: a csúszkával állítsd, mennyire fedje a PDF-réteg a Google műholdképet.
+  <input id="opacity" type="range" min="0.05" max="0.85" step="0.05" value="0.38">
+</div>
+
+<script src="google_maps_key.js"></script>
+<script>
+window.gm_authFailure = function() {
+  setStatus('GOOGLE API HIBA: kulcs/referrer tiltás');
+};
+
+const CAT = {
+  bontando:                 { label:'BONTANDÓ', fill:'#dc2626' },
+  bontasra_javasolt:        { label:'BONTÁSRA JAVASOLT', fill:'#f97316' },
+  'hasznosításra_javasolt': { label:'HASZNOSÍTÁSRA JAVASOLT', fill:'#84cc16' },
+  'hasznosítandó':          { label:'HASZNOSÍTANDÓ', fill:'#16a34a' },
+  'védett':                 { label:'VÉDETT ÖRÖKSÉG', fill:'#2563eb' },
+  egyeb:                    { label:'EGYÉB', fill:'#64748b' }
+};
+const STORAGE_KEY = 'dam_pdf_corner_calibration_v1';
+const DEFAULT_CORNERS = {
+  tl:{ lat:48.1001, lng:20.7294 },
+  tr:{ lat:48.0993, lng:20.7463 },
+  br:{ lat:48.0893, lng:20.7448 },
+  bl:{ lat:48.0900, lng:20.7266 }
+};
+
+let map;
+let sourceBuildings = [];
+let polygons = [];
+let markers = {};
+let calibration = loadSaved() || DEFAULT_CORNERS;
+let pdfVisible = true;
+let layerOpacity = 0.38;
+
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+function loadGoogle() {
+  if (!window.GOOGLE_MAPS_API_KEY || window.GOOGLE_MAPS_API_KEY.includes('PASTE_')) {
+    setStatus('HIÁNYZÓ GOOGLE API KULCS: google_maps_key.js');
+    return;
+  }
+  const s = document.createElement('script');
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(window.GOOGLE_MAPS_API_KEY)}&callback=initMap&v=weekly&loading=async`;
+  s.async = true;
+  s.defer = true;
+  document.head.appendChild(s);
+}
+
+window.initMap = function() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    center:{ lat:48.0963, lng:20.7398 },
+    zoom:16,
+    mapTypeId:'satellite',
+    renderingType:'RASTER',
+    backgroundColor:'#e5e7eb',
+    tilt:0,
+    fullscreenControl:false,
+    streetViewControl:false,
+    mapTypeControl:false,
+    gestureHandling:'greedy'
+  });
+  wireUi();
+  createCornerMarkers();
+  loadPdfBuildings();
+};
+
+function wireUi() {
+  document.getElementById('satBtn').addEventListener('click', () => setBase('satellite'));
+  document.getElementById('mapBtn').addEventListener('click', () => setBase('roadmap'));
+  document.getElementById('pdfBtn').addEventListener('click', () => {
+    pdfVisible = !pdfVisible;
+    document.getElementById('pdfBtn').classList.toggle('active', pdfVisible);
+    polygons.forEach(p => p.setMap(pdfVisible ? map : null));
+  });
+  document.getElementById('fitBtn').addEventListener('click', fitToCorners);
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    calibration = structuredClone(DEFAULT_CORNERS);
+    updateMarkersFromCalibration();
+    redrawPdfLayer();
+  });
+  document.getElementById('saveBtn').addEventListener('click', saveCalibration);
+  document.getElementById('exportBtn').addEventListener('click', exportCalibration);
+  document.getElementById('hideBtn').addEventListener('click', () => {
+    document.getElementById('bar').style.display = 'none';
+    document.getElementById('panel').style.display = 'none';
+    document.getElementById('opacityBox').style.display = 'none';
+  });
+  document.getElementById('opacity').addEventListener('input', e => {
+    layerOpacity = Number(e.target.value);
+    polygons.forEach(p => p.setOptions({ fillOpacity:layerOpacity }));
+  });
+}
+
+function setBase(type) {
+  map.setMapTypeId(type);
+  document.getElementById('satBtn').classList.toggle('active', type === 'satellite');
+  document.getElementById('mapBtn').classList.toggle('active', type === 'roadmap');
+}
+
+function createCornerMarkers() {
+  const names = { tl:'TL', tr:'TR', br:'BR', bl:'BL' };
+  Object.keys(names).forEach(key => {
+    markers[key] = new google.maps.Marker({
+      position:calibration[key],
+      map,
+      draggable:true,
+      label:{ text:names[key], color:'#111827', fontSize:'11px', fontWeight:'900' },
+      icon:{
+        path:google.maps.SymbolPath.CIRCLE,
+        scale:10,
+        fillColor:'#facc15',
+        fillOpacity:1,
+        strokeColor:'#111827',
+        strokeWeight:3
+      },
+      zIndex:100
+    });
+    markers[key].addListener('drag', () => {
+      calibration[key] = latLngLiteral(markers[key].getPosition());
+      redrawPdfLayer();
+    });
+    markers[key].addListener('dragend', () => {
+      calibration[key] = latLngLiteral(markers[key].getPosition());
+      redrawPdfLayer();
+      renderCoords();
+    });
+  });
+  renderCoords();
+  fitToCorners();
+}
+
+function updateMarkersFromCalibration() {
+  Object.keys(markers).forEach(key => markers[key].setPosition(calibration[key]));
+  renderCoords();
+}
+
+function loadPdfBuildings() {
+  fetch('dam_buildings2.json?cb=' + Date.now())
+    .then(r => r.json())
+    .then(data => {
+      sourceBuildings = data.buildings.filter(b => Array.isArray(b.pts) && b.pts.length >= 3);
+      redrawPdfLayer();
+      setStatus(`PDF RÉTEG · ${sourceBuildings.length} ÉPÜLET · HÚZHATÓ SARKOK`);
+    })
+    .catch(err => setStatus('PDF RÉTEG HIBA: ' + err.message));
+}
+
+function redrawPdfLayer() {
+  polygons.forEach(p => p.setMap(null));
+  polygons = [];
+  if (!sourceBuildings.length) return;
+  sourceBuildings.forEach((b, idx) => {
+    const cfg = CAT[b.cat] || CAT.egyeb;
+    const path = b.pts.map(p => warpPoint(p[0], p[1]));
+    const halo = new google.maps.Polygon({
+      paths:path,
+      strokeColor:'#fff',
+      strokeOpacity:0.95,
+      strokeWeight:6,
+      fillOpacity:0,
+      map:pdfVisible ? map : null,
+      zIndex:5
+    });
+    const poly = new google.maps.Polygon({
+      paths:path,
+      strokeColor:cfg.fill,
+      strokeOpacity:1,
+      strokeWeight:3,
+      fillColor:cfg.fill,
+      fillOpacity:layerOpacity,
+      map:pdfVisible ? map : null,
+      zIndex:6
+    });
+    const info = new google.maps.InfoWindow({
+      content:`<strong>${b.name || 'PDF épület'}</strong><br>${cfg.label}<br>PDF index: ${idx}`
+    });
+    halo.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
+    poly.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
+    polygons.push(halo, poly);
+  });
+}
+
+function warpPoint(x, y) {
+  const tl = calibration.tl;
+  const tr = calibration.tr;
+  const br = calibration.br;
+  const bl = calibration.bl;
+  const topLat = lerp(tl.lat, tr.lat, x);
+  const topLng = lerp(tl.lng, tr.lng, x);
+  const bottomLat = lerp(bl.lat, br.lat, x);
+  const bottomLng = lerp(bl.lng, br.lng, x);
+  return {
+    lat:lerp(topLat, bottomLat, y),
+    lng:lerp(topLng, bottomLng, y)
+  };
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function fitToCorners() {
+  const b = new google.maps.LatLngBounds();
+  Object.values(calibration).forEach(p => b.extend(p));
+  map.fitBounds(b, 90);
+}
+
+function saveCalibration() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ calibration, savedAt:new Date().toISOString() }));
+  setStatus('MENTVE A BÖNGÉSZŐBE · ' + new Date().toLocaleTimeString('hu-HU'));
+  renderCoords();
+}
+
+function exportCalibration() {
+  const payload = {
+    type:'dam_pdf_corner_calibration',
+    savedAt:new Date().toISOString(),
+    calibration,
+    opacity:layerOpacity
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'dam_pdf_corner_calibration.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function loadSaved() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    return saved && saved.calibration ? saved.calibration : null;
+  } catch {
+    return null;
+  }
+}
+
+function renderCoords() {
+  const el = document.getElementById('coords');
+  el.innerHTML = Object.entries(calibration).map(([key, p]) =>
+    `<div>${key.toUpperCase()}</div><div>${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}</div>`
+  ).join('');
+}
+
+function latLngLiteral(latLng) {
+  return { lat:latLng.lat(), lng:latLng.lng() };
+}
+
+loadGoogle();
+</script>
+</body>
+</html>
