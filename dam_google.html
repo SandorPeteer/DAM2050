@@ -47,9 +47,11 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
   </div>
   <div id="actions">
     <a class="btn" href="index.html">FŐOLDAL</a>
+    <button class="btn" id="roadBtn" type="button">TÉRKÉP</button>
     <button class="btn active" id="satBtn" type="button">SATELLITE</button>
     <button class="btn" id="hybridBtn" type="button">HYBRID</button>
-    <button class="btn" id="overlayBtn" type="button">KATEGÓRIA RÉTEG</button>
+    <button class="btn active" id="osmBtn" type="button">OSM KONTÚR</button>
+    <button class="btn active" id="overlayBtn" type="button">KATEGÓRIA RÉTEG</button>
     <button class="btn" id="fitBtn" type="button">DAM-RA IGAZÍT</button>
     <button class="btn" id="hideBtn" type="button">UI KI</button>
   </div>
@@ -85,7 +87,9 @@ const CAT = {
 
 let map;
 let polygons = [];
+let osmPolygons = [];
 let overlayVisible = true;
+let osmVisible = true;
 let bounds;
 let fitPending = false;
 let tilesSeen = false;
@@ -136,18 +140,32 @@ window.initMap = function() {
 };
 
 function wireUi() {
+  document.getElementById('roadBtn').addEventListener('click', () => {
+    map.setMapTypeId('roadmap');
+    document.getElementById('roadBtn').classList.add('active');
+    document.getElementById('satBtn').classList.remove('active');
+    document.getElementById('hybridBtn').classList.remove('active');
+  });
   document.getElementById('satBtn').addEventListener('click', () => {
     map.setMapTypeId('satellite');
+    document.getElementById('roadBtn').classList.remove('active');
     document.getElementById('satBtn').classList.add('active');
     document.getElementById('hybridBtn').classList.remove('active');
   });
   document.getElementById('hybridBtn').addEventListener('click', () => {
     map.setMapTypeId('hybrid');
+    document.getElementById('roadBtn').classList.remove('active');
     document.getElementById('hybridBtn').classList.add('active');
     document.getElementById('satBtn').classList.remove('active');
   });
+  document.getElementById('osmBtn').addEventListener('click', () => {
+    osmVisible = !osmVisible;
+    document.getElementById('osmBtn').classList.toggle('active', osmVisible);
+    osmPolygons.forEach(p => p.setMap(osmVisible ? map : null));
+  });
   document.getElementById('overlayBtn').addEventListener('click', () => {
     overlayVisible = !overlayVisible;
+    document.getElementById('overlayBtn').classList.toggle('active', overlayVisible);
     polygons.forEach(p => p.setMap(overlayVisible ? map : null));
   });
   document.getElementById('fitBtn').addEventListener('click', fitDam);
@@ -173,6 +191,7 @@ function loadOverlay() {
 
 function renderOverlay(data, overrides) {
   let visible = 0;
+  renderOsmContours(data.features);
   data.features.forEach(f => {
     const override = overrides[String(f.id)];
     const effective = override ? { ...f.match, ...override, matched:true, distance_m:0 } : f.match;
@@ -198,9 +217,26 @@ function renderOverlay(data, overrides) {
     polygons.push(poly);
     visible++;
   });
-  status(`GOOGLE SATELLITE · ${visible} KATEGORIZÁLT OSM ÉPÜLET`);
+  status(`GOOGLE SATELLITE · ${visible} KATEGORIZÁLT / ${osmPolygons.length} OSM ÉPÜLET`);
   fitPending = true;
   window.setTimeout(fitDam, 350);
+}
+
+function renderOsmContours(features) {
+  features.forEach(f => {
+    const path = f.coords.map(c => ({ lat:c[0], lng:c[1] }));
+    path.forEach(p => bounds.extend(p));
+    const poly = new google.maps.Polygon({
+      paths:path,
+      strokeColor:'#ffffff',
+      strokeOpacity:0.92,
+      strokeWeight:2,
+      fillColor:'#ffffff',
+      fillOpacity:0.02,
+      map
+    });
+    osmPolygons.push(poly);
+  });
 }
 
 function fitDam() {
