@@ -89,7 +89,7 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
 </div>
 
 <div id="legend">
-  <h2>PDF-KATEGÓRIÁK OSM FORMÁN</h2>
+  <h2>PDF-KATEGÓRIÁK</h2>
   <div class="row"><span class="sw" style="background:#dc2626"></span>Bontandó</div>
   <div class="row"><span class="sw" style="background:#f97316"></span>Bontásra javasolt</div>
   <div class="row"><span class="sw" style="background:#84cc16"></span>Hasznosításra javasolt</div>
@@ -98,7 +98,7 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
 </div>
 
 <div id="note">
-  Google Satellite alap. A teljes DAM réteg OSM épületkontúr, a színes kategória csak ott jelenik meg, ahol a PDF-egyezés elég biztos.
+  Google Satellite alap. Fehérrel a jelenlegi OSM épületkontúrok, vastag színes kerettel a PDF-ből kinyert 453 kategorizált épület.
 </div>
 
 <script src="google_maps_key.js"></script>
@@ -228,47 +228,58 @@ function loadOverlay() {
   status('OSM/PDF RÉTEG BETÖLTÉS...');
   Promise.all([
     fetch('dam_full_osm_buildings.json?cb=' + Date.now()).then(r => r.json()),
+    fetch('dam_pdf_aligned_buildings.json?cb=' + Date.now()).then(r => r.json()),
     fetch('dam_osm_overrides.json?cb=' + Date.now()).then(r => r.json()).catch(() => ({ overrides:{} }))
-  ]).then(([data, overrideData]) => {
-    renderOverlay(data, overrideData && overrideData.overrides ? overrideData.overrides : {});
+  ]).then(([osmData, pdfData, overrideData]) => {
+    renderOverlay(osmData, pdfData, overrideData && overrideData.overrides ? overrideData.overrides : {});
   }).catch(err => {
     console.error(err);
     status('RÉTEG HIBA: ' + err.message);
   });
 }
 
-function renderOverlay(data, overrides) {
-  let visible = 0;
-  renderOsmContours(data.features);
-  data.features.forEach(f => {
-    const override = overrides[String(f.id)];
-    const effective = override ? { ...f.match, ...override, matched:true, distance_m:0 } : f.match;
-    if (!effective.matched || effective.distance_m > 35) return;
+function renderOverlay(osmData, pdfData, overrides) {
+  renderOsmContours(osmData.features);
+  renderPdfCategories(pdfData.features);
+  categoryCount = pdfData.features.length;
+  updateStatus();
+  fitPending = true;
+  window.setTimeout(fitDam, 350);
+}
 
-    const cfg = CAT[effective.cat] || CAT.egyeb;
+function renderPdfCategories(features) {
+  features.forEach(f => {
+    const cfg = CAT[f.cat] || CAT.egyeb;
     const path = f.coords.map(c => ({ lat:c[0], lng:c[1] }));
     path.forEach(p => bounds.extend(p));
 
     const poly = new google.maps.Polygon({
       paths:path,
-      strokeColor:override ? '#7c2d12' : '#0f172a',
+      strokeColor:cfg.fill,
       strokeOpacity:1,
-      strokeWeight:override ? 5 : 3,
+      strokeWeight:4,
       fillColor:cfg.fill,
-      fillOpacity:override ? 0.82 : 0.68,
+      fillOpacity:0.46,
       map
     });
+    const halo = new google.maps.Polygon({
+      paths:path,
+      strokeColor:'#ffffff',
+      strokeOpacity:0.95,
+      strokeWeight:9,
+      fillOpacity:0,
+      map
+    });
+    halo.setOptions({ zIndex:1 });
+    poly.setOptions({ zIndex:2 });
     const info = new google.maps.InfoWindow({
-      content:`<strong>${effective.name || f.tags.name || 'OSM épület'}</strong><br>${cfg.label}<br>OSM way: ${f.id}<br>PDF egyezés: ${effective.distance_m || 0} m`
+      content:`<strong>${f.name || 'PDF épület'}</strong><br>${cfg.label}<br>PDF elem: ${f.pdf_idx}`
     });
     poly.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
+    halo.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
+    polygons.push(halo);
     polygons.push(poly);
-    visible++;
   });
-  categoryCount = visible;
-  updateStatus();
-  fitPending = true;
-  window.setTimeout(fitDam, 350);
 }
 
 function renderOsmContours(features) {
@@ -303,7 +314,7 @@ function fitDam() {
 }
 
 function updateStatus() {
-  status(`TELJES DAM · ${osmPolygons.length} ÉPÜLET · ${categoryCount} PDF-KATEGÓRIA · ${drawnFeatures.length} KÉZI`);
+  status(`KERETEZVE · ${categoryCount} PDF-KATEGÓRIA · ${osmPolygons.length} OSM KONTÚR · ${drawnFeatures.length} KÉZI`);
 }
 
 function toggleDrawing() {
