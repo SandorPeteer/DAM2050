@@ -6,8 +6,8 @@
 <title>DAM · Google Satellite · 2026 ellenőrzés</title>
 <style>
 * { box-sizing:border-box; }
-html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sans-serif; background:#111827; color:#0f172a; overflow:hidden; }
-#map { position:fixed; inset:0; }
+html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sans-serif; background:#e5e7eb; color:#0f172a; overflow:hidden; }
+#map { position:fixed; inset:0; width:100vw; height:100vh; min-height:100vh; background:#e5e7eb; z-index:0; }
 #bar {
   position:fixed; top:12px; left:12px; right:12px; z-index:10;
   display:flex; align-items:center; justify-content:space-between; gap:12px;
@@ -87,6 +87,8 @@ let map;
 let polygons = [];
 let overlayVisible = true;
 let bounds;
+let fitPending = false;
+let tilesSeen = false;
 
 function status(msg) {
   document.getElementById('status').textContent = msg;
@@ -98,7 +100,7 @@ function loadGoogle() {
     return;
   }
   const s = document.createElement('script');
-  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(window.GOOGLE_MAPS_API_KEY)}&callback=initMap&v=weekly`;
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(window.GOOGLE_MAPS_API_KEY)}&callback=initMap&v=weekly&loading=async`;
   s.async = true;
   s.defer = true;
   s.onerror = () => status('GOOGLE MAPS API SCRIPT HIBA');
@@ -110,10 +112,22 @@ window.initMap = function() {
     center:{ lat:48.0963, lng:20.7398 },
     zoom:16,
     mapTypeId:'satellite',
+    renderingType:'RASTER',
+    backgroundColor:'#e5e7eb',
     tilt:0,
     fullscreenControl:false,
     streetViewControl:false,
-    mapTypeControl:false
+    mapTypeControl:false,
+    gestureHandling:'greedy'
+  });
+
+  google.maps.event.addListenerOnce(map, 'tilesloaded', () => {
+    tilesSeen = true;
+    if (fitPending) fitDam();
+  });
+  google.maps.event.addListenerOnce(map, 'idle', () => {
+    google.maps.event.trigger(map, 'resize');
+    if (fitPending) fitDam();
   });
 
   bounds = new google.maps.LatLngBounds();
@@ -185,11 +199,17 @@ function renderOverlay(data, overrides) {
     visible++;
   });
   status(`GOOGLE SATELLITE · ${visible} KATEGORIZÁLT OSM ÉPÜLET`);
-  fitDam();
+  fitPending = true;
+  window.setTimeout(fitDam, 350);
 }
 
 function fitDam() {
-  if (bounds && !bounds.isEmpty()) map.fitBounds(bounds);
+  if (!map || !bounds || bounds.isEmpty()) return;
+  map.fitBounds(bounds, 60);
+  fitPending = false;
+  if (!tilesSeen) {
+    window.setTimeout(() => google.maps.event.trigger(map, 'resize'), 250);
+  }
 }
 
 loadGoogle();
