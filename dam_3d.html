@@ -165,34 +165,47 @@ const KB = {
 };
 
 // ─── KOORDINÁTA RENDSZER ─────────────────────────────────────────────────────
-// Minden koordináta GPS (lat/lng) → scene (x, z) úton megy át.
-// gps2scene: a kalibráció 4 sarokpontja alapján lineárisan leképezi
-// a GPS pontot 3D scene koordinátára. Épületek pts-je előbb warpPoint-tal
-// GPS-re megy, utána ugyanide — így épület és infra garantáltan egy rendszerben.
-let _cal = null;
-let _sceneOx = 0, _sceneOy = 0, _sceneS = 1; // origó és skála
+// Minden pont PDF [0..1] koordinátaként kerül a scene-be p2s() segítségével.
+// Épületek: pts közvetlenül PDF koordináta.
+// Infra: GPS lat/lng → latlng2pdf() → PDF [0..1] → p2s().
+// A latlng2pdf() a warpPoint() pontos inverze (Newton-iteráció, Python-ban ellenőrizve).
 
-function warpPoint(px, py, cal) {
+let PDF_CX = 0.39, PDF_CY = 0.584, SS = 0.90;
+
+function p2s(px, py) {
+  return [ (px - PDF_CX) * SS, (PDF_CY - py) * SS ];
+}
+
+function latlng2pdf(lat, lng, cal) {
   const tl = cal.tl, tr = cal.tr, bl = cal.bl, br = cal.br;
-  const topLat = tl.lat + (tr.lat - tl.lat) * px;
-  const topLng = tl.lng + (tr.lng - tl.lng) * px;
-  const botLat = bl.lat + (br.lat - bl.lat) * px;
-  const botLng = bl.lng + (br.lng - bl.lng) * px;
-  return [topLat + (botLat - topLat) * py, topLng + (botLng - topLng) * py];
+  let x = 0.5, y = 0.5;
+  for (let n = 0; n < 60; n++) {
+    const topLat = tl.lat + (tr.lat - tl.lat) * x;
+    const topLng = tl.lng + (tr.lng - tl.lng) * x;
+    const botLat = bl.lat + (br.lat - bl.lat) * x;
+    const botLng = bl.lng + (br.lng - bl.lng) * x;
+    const eLat = topLat + (botLat - topLat) * y - lat;
+    const eLng = topLng + (botLng - topLng) * y - lng;
+    const dLdx = (tr.lat - tl.lat) * (1 - y) + (br.lat - bl.lat) * y;
+    const dGdx = (tr.lng - tl.lng) * (1 - y) + (br.lng - bl.lng) * y;
+    const dLdy = botLat - topLat;
+    const dGdy = botLng - topLng;
+    const det = dLdx * dGdy - dGdx * dLdy;
+    if (Math.abs(det) < 1e-20) break;
+    const dx = (eLat * dGdy - eLng * dLdy) / det;
+    const dy = (dLdx * eLng - dGdx * eLat) / det;
+    x -= dx; y -= dy;
+    if (Math.abs(dx) < 1e-9 && Math.abs(dy) < 1e-9) break;
+  }
+  return [x, y];
 }
 
-// GPS → scene (x, z): lng → x, lat → z (észak = -z, dél = +z)
-function gps2scene(lat, lng) {
-  return [(lng - _sceneOy) * _sceneS, -( lat - _sceneOx) * _sceneS];
-}
-
-// GPS útvonal → szegmens tömb
-function pathToSegments(path, lw) {
+function pathToSegments(path, lw, cal) {
   const segs = [];
   for (let i = 0; i < path.length - 1; i++) {
-    const [x0, z0] = gps2scene(path[i].lat, path[i].lng);
-    const [x1, z1] = gps2scene(path[i+1].lat, path[i+1].lng);
-    segs.push({ x0, y0: z0, x1, y1: z1, lw });
+    const [x0, y0] = latlng2pdf(path[i].lat, path[i].lng, cal);
+    const [x1, y1] = latlng2pdf(path[i + 1].lat, path[i + 1].lng, cal);
+    segs.push({ x0, y0, x1, y1, lw });
   }
   return segs;
 }
@@ -208,8 +221,8 @@ function kindToLw(kind) {
 function polyArea(pts) {
   let a = 0;
   for (let i = 0; i < pts.length; i++) {
-    const j = (i+1) % pts.length;
-    a += pts[i][0]*pts[j][1] - pts[j][0]*pts[i][1];
+    const j = (i + 1) % pts.length;
+    a += pts[i][0] * pts[j][1] - pts[j][0] * pts[i][1];
   }
   return Math.abs(a) / 2;
 }
@@ -273,8 +286,7 @@ function addBuilding(b) {
   const shape = new THREE.Shape();
   let first = true;
   for (const pt of b.pts) {
-    const [glat, glng] = warpPoint(pt[0], pt[1], _cal);
-    const [sx, sz] = gps2scene(glat, glng);
+    const [sx, sz] = p2s(pt[0], pt[1]);
     if (first) { shape.moveTo(sx, sz); first = false; }
     else shape.lineTo(sx, sz);
   }
@@ -307,7 +319,8 @@ function addSegmentBand(segments, opts) {
   const y = opts.y;
 
   for (const s of segments) {
-    const x0 = s.x0, z0 = s.y0, x1 = s.x1, z1 = s.y1;
+    const [x0, z0] = p2s(s.x0, s.y0);
+    const [x1, z1] = p2s(s.x1, s.y1);
     const dx = x1 - x0;
     const dz = z1 - z0;
     const len = Math.hypot(dx, dz);
@@ -347,14 +360,14 @@ function addSegmentBand(segments, opts) {
   return mesh;
 }
 
-function addInfrastructure(prezInfra) {
+function addInfrastructure(prezInfra, cal) {
   const roads = [];
   for (const r of (prezInfra.roads || [])) {
-    for (const s of pathToSegments(r.path, kindToLw(r.kind))) roads.push(s);
+    for (const s of pathToSegments(r.path, kindToLw(r.kind), cal)) roads.push(s);
   }
   const railways = [];
   for (const r of (prezInfra.railways || [])) {
-    for (const s of pathToSegments(r.path, 1.0)) railways.push(s);
+    for (const s of pathToSegments(r.path, 1.0, cal)) railways.push(s);
   }
 
   if (roads.length > 0) {
@@ -532,29 +545,22 @@ Promise.all([
   fetch('dam_prez_infrastructure.json').then(r => r.json()),
   fetch('dam_pdf_corner_calibration.json').then(r => r.json()),
 ]).then(([bData, prezInfra, calData]) => {
-  _cal = calData.calibration;
+  const cal = calData.calibration;
   setP(20);
 
-  // Origó és skála: az épületek GPS bounding boxából
+  // Origó és skála az épületek PDF bounding boxából
   const bs = bData.buildings.filter(b => b.pts && b.pts.length >= 3);
-  let minLat=Infinity, maxLat=-Infinity, minLng=Infinity, maxLng=-Infinity;
-  for (const b of bs) {
-    for (const pt of b.pts) {
-      const [lat, lng] = warpPoint(pt[0], pt[1], _cal);
-      if (lat < minLat) minLat=lat; if (lat > maxLat) maxLat=lat;
-      if (lng < minLng) minLng=lng; if (lng > maxLng) maxLng=lng;
-    }
+  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+  for (const b of bs) for (const pt of b.pts) {
+    if (pt[0] < minX) minX=pt[0]; if (pt[0] > maxX) maxX=pt[0];
+    if (pt[1] < minY) minY=pt[1]; if (pt[1] > maxY) maxY=pt[1];
   }
-  _sceneOx = (minLat + maxLat) / 2;
-  _sceneOy = (minLng + maxLng) / 2;
-  // lng-fok és lat-fok aránya (cos(lat) korrekció)
-  const cosLat = Math.cos(_sceneOx * Math.PI / 180);
-  const spanLat = (maxLat - minLat) * 111320;
-  const spanLng = (maxLng - minLng) * 111320 * cosLat;
-  _sceneS = 0.90 / Math.max(spanLat, spanLng);
+  PDF_CX = (minX + maxX) / 2;
+  PDF_CY = (minY + maxY) / 2;
+  SS = 0.90 / Math.max(maxX - minX, maxY - minY);
 
   setP(30);
-  addInfrastructure(prezInfra);
+  addInfrastructure(prezInfra, cal);
   setP(50);
 
   let i = 0;
