@@ -37,13 +37,6 @@ canvas { display:block; }
 .li-dot { width:22px; height:15px; border-radius:3px; flex-shrink:0; border:2px solid #fff; box-shadow:0 0 0 2px #111827; }
 .li-sep { height:2px; background:#e2e8f0; margin:10px 0; }
 
-#hint {
-  position:fixed; bottom:18px; right:18px; z-index:10;
-  background:rgba(255,255,255,.95); border:2px solid rgba(15,23,42,.18); border-radius:8px;
-  padding:14px 16px; text-align:right; color:#334155; font-size:12px; line-height:2;
-  box-shadow:0 10px 34px rgba(0,0,0,.18); font-weight:800;
-}
-#hint strong { color:#111827; }
 
 #tooltip {
   position:fixed; z-index:200; pointer-events:none;
@@ -79,13 +72,12 @@ canvas { display:block; }
 <div id="top">
   <div>
     <div id="title">DAM 2050 · 3D MAKETT</div>
-    <div id="subtitle">BAL DRAG: FORGAT · SCROLL: ZOOM · SHIFT+DRAG: MOZGAT · R: RESET · F: FELÜLNÉZET</div>
+    <div id="subtitle">Drag: forgat · Scroll: zoom · Shift+drag: mozgat · R: reset · F: felülnézet</div>
   </div>
   <div id="actions">
     <a class="btn" href="index.html">FŐOLDAL</a>
     <a class="btn" href="dam_prezentacio_terkep.html">TÉRKÉP</a>
     <button class="btn active" id="btn-solid" type="button" onclick="setView('solid')">TÖMÖR</button>
-    <button class="btn" id="btn-wire" type="button" onclick="setView('wire')">DRÓTVÁZ</button>
     <button class="btn" id="btn-top" type="button" onclick="topView()">FELÜLNÉZET</button>
     <button class="btn" id="btn-reset" type="button" onclick="resetView()">RESET</button>
     <button class="btn" id="hideBtn" type="button">UI KI</button>
@@ -112,12 +104,6 @@ canvas { display:block; }
   </div>
 </div>
 
-<div id="hint">
-  <strong>BAL GOMB</strong> → FORGATÁS<br>
-  <strong>SCROLL</strong> → ZOOM<br>
-  <strong>SHIFT+DRAG</strong> → MOZGATÁS<br>
-  <strong>R</strong> → RESET &nbsp; <strong>F</strong> → FELÜLNÉZET
-</div>
 
 <div id="tooltip">
   <div id="tt-cat"></div>
@@ -129,13 +115,14 @@ canvas { display:block; }
 <script src="three.min.js"></script>
 <script>
 // ─── KATEGÓRIA CONFIG ─────────────────────────────────────────────────────────
+// h értékek reális méretekben: 1 scene egység ≈ 1800m, tehát 10m épület = 0.0056
 const CAT = {
-  bontando:                 { col:0xdc2626, emi:0x220000, h:0.014, label:'BONTANDÓ',                css:'#dc2626' },
-  bontasra_javasolt:        { col:0xf97316, emi:0x241000, h:0.010, label:'BONTÁSRA JAVASOLT',       css:'#f97316' },
-  'hasznosításra_javasolt': { col:0x84cc16, emi:0x102000, h:0.022, label:'HASZNOSÍTÁSRA JAVASOLT',  css:'#65a30d' },
-  'hasznosítandó':          { col:0x16a34a, emi:0x00200b, h:0.032, label:'HASZNOSÍTANDÓ',           css:'#16a34a' },
-  'védett':                 { col:0x2563eb, emi:0x000c2c, h:0.048, label:'VÉDETT ÖRÖKSÉG',          css:'#2563eb' },
-  egyeb:                    { col:0x64748b, emi:0x000000, h:0.003, label:'EGYÉB',                   css:'#64748b' },
+  bontando:                 { col:0xdc2626, emi:0x220000, h:0.0050, label:'BONTANDÓ',                css:'#dc2626' },
+  bontasra_javasolt:        { col:0xf97316, emi:0x241000, h:0.0056, label:'BONTÁSRA JAVASOLT',       css:'#f97316' },
+  'hasznosításra_javasolt': { col:0x84cc16, emi:0x102000, h:0.0067, label:'HASZNOSÍTÁSRA JAVASOLT',  css:'#65a30d' },
+  'hasznosítandó':          { col:0x16a34a, emi:0x00200b, h:0.0078, label:'HASZNOSÍTANDÓ',           css:'#16a34a' },
+  'védett':                 { col:0x2563eb, emi:0x000c2c, h:0.0111, label:'VÉDETT ÖRÖKSÉG',          css:'#2563eb' },
+  egyeb:                    { col:0x64748b, emi:0x000000, h:0.0033, label:'EGYÉB',                   css:'#64748b' },
 };
 const KB = {
   'Középhengermű':                    { now:'Helyi védett csarnok (1955). Üresen áll.', floors:2 },
@@ -267,9 +254,17 @@ const buildingMeshes = [];
 function addBuilding(b) {
   const cfg = CAT[b.cat] || CAT.egyeb;
   const kb  = b.name ? KB[b.name] : null;
-  const area = polyArea(b.pts);
-  const aF = Math.min(Math.sqrt(area / 0.00015), 2.5);
-  const h = cfg.h * (0.65 + 0.35 * aF);
+  // Magasság: ha KB-ban van szintszám, azt használjuk (ipari csarnok ~8m/szint, iroda ~4m/szint)
+  // Egyébként területarányos becslés a kategória alapmagasságából
+  let h;
+  if (kb && kb.floors) {
+    const mPerFloor = (b.cat === 'védett' || b.cat === 'hasznosítandó') ? 8 : 5;
+    h = (kb.floors * mPerFloor) / 1800;
+  } else {
+    const area = polyArea(b.pts);
+    const aF = Math.min(Math.sqrt(area / 0.00015), 2.0);
+    h = cfg.h * (0.7 + 0.3 * aF);
+  }
 
   const shape = new THREE.Shape();
   let first = true;
@@ -294,7 +289,7 @@ function addBuilding(b) {
   mesh._kb = kb;
   mesh._cfg = cfg;
   mesh._solidMat = mat;
-  mesh._floors = (kb && kb.floors) ? kb.floors : (cfg.h > 0.03 ? 3 : cfg.h > 0.02 ? 2 : 1);
+  mesh._floors = (kb && kb.floors) ? kb.floors : Math.max(1, Math.round(h * 1800 / 5));
 
   scene.add(mesh);
   buildingMeshes.push(mesh);
@@ -452,27 +447,15 @@ function resetView() { animCamTo(-0.5, 1.05, 0.90, new THREE.Vector3(0,0,0)); }
 function topView()   { animCamTo(theta, 0.06, 0.90, new THREE.Vector3(0,0,0)); }
 window.resetView = resetView; window.topView = topView;
 
-// ─── VIEW MODE ────────────────────────────────────────────────────────────────
-let viewMode = 'solid';
 function setView(mode) {
-  viewMode = mode;
   document.getElementById('btn-solid').classList.toggle('active', mode === 'solid');
-  document.getElementById('btn-wire').classList.toggle('active', mode === 'wire');
-  buildingMeshes.forEach(m => {
-    if (mode === 'wire') {
-      if (!m._wireMat) m._wireMat = new THREE.MeshBasicMaterial({ color: m._cfg.col, wireframe: true, transparent: true, opacity: 0.55 });
-      m.material = m._wireMat;
-    } else {
-      m.material = m._solidMat;
-    }
-  });
+  buildingMeshes.forEach(m => { m.material = m._solidMat; });
 }
 window.setView = setView;
 
 document.getElementById('hideBtn').addEventListener('click', () => {
   document.getElementById('top').style.display = 'none';
   document.getElementById('legend').style.display = 'none';
-  document.getElementById('hint').style.display = 'none';
 });
 
 // ─── TOOLTIP ─────────────────────────────────────────────────────────────────
