@@ -23,6 +23,8 @@ html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Ari
   text-decoration:none;
 }
 .btn.active, .btn:hover { background:#111827; color:#fff; }
+.btn.subtle { border-color:#64748b; color:#475569; }
+.btn.subtle:hover { background:#475569; color:#fff; }
 #legend {
   position:fixed; left:18px; bottom:18px; z-index:10; width:360px;
   background:rgba(255,255,255,.95); border:2px solid rgba(15,23,42,.18);
@@ -58,11 +60,10 @@ html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Ari
   </div>
   <div id="actions">
     <a class="btn" href="index.html">FŐOLDAL</a>
-    <a class="btn" href="dam_google.html">ELLENŐRZŐ</a>
     <button class="btn active" id="satBtn" type="button">MŰHOLD</button>
     <button class="btn" id="mapBtn" type="button">TÉRKÉP</button>
-    <button class="btn" id="osmBtn" type="button">OSM KONTÚR</button>
     <button class="btn active" id="labelBtn" type="button">CÍMKÉK</button>
+    <a class="btn subtle" href="dam_pdf_kalibracio.html">SZERKESZTÉS</a>
     <button class="btn" id="hideBtn" type="button">UI KI</button>
   </div>
 </div>
@@ -77,13 +78,13 @@ html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Ari
   <div id="stats">
     <div id="totalStat">453 PDF elem</div>
     <div id="nameStat">nevek betöltése...</div>
-    <div id="osmStat">195 OSM kontúr</div>
+    <div id="labelStat">PDF feliratok...</div>
     <div>130 ha terület</div>
   </div>
 </div>
 
 <div id="note">
-  Ez a nézet prezentációra való: a színes keretek a PDF szerinti döntési kategóriákat mutatják. Az OSM kontúr csak ellenőrző háttérréteg.
+  Ez a végleges nézet: a színes keretek a kézzel illesztett PDF-rétegből jönnek. Kattints bármelyik épületre a PDF-ből kinyert adatokhoz.
 </div>
 
 <script src="google_maps_key.js"></script>
@@ -109,10 +110,8 @@ const IMPORTANT = [
 let map;
 let bounds;
 let pdfPolygons = [];
-let osmPolygons = [];
 let labels = [];
 let labelsVisible = true;
-let osmVisible = false;
 
 function loadGoogle() {
   if (!window.GOOGLE_MAPS_API_KEY || window.GOOGLE_MAPS_API_KEY.includes('PASTE_')) {
@@ -147,11 +146,6 @@ window.initMap = function() {
 function wireUi() {
   document.getElementById('satBtn').addEventListener('click', () => setBase('satellite'));
   document.getElementById('mapBtn').addEventListener('click', () => setBase('roadmap'));
-  document.getElementById('osmBtn').addEventListener('click', () => {
-    osmVisible = !osmVisible;
-    document.getElementById('osmBtn').classList.toggle('active', osmVisible);
-    osmPolygons.forEach(p => p.setMap(osmVisible ? map : null));
-  });
   document.getElementById('labelBtn').addEventListener('click', () => {
     labelsVisible = !labelsVisible;
     document.getElementById('labelBtn').classList.toggle('active', labelsVisible);
@@ -173,26 +167,24 @@ function setBase(type) {
 function loadLayers() {
   Promise.all([
     fetch('dam_buildings2.json?cb=' + Date.now()).then(r => r.json()),
-    fetch('dam_pdf_corner_calibration.json?cb=' + Date.now()).then(r => r.json()),
-    fetch('dam_full_osm_buildings.json?cb=' + Date.now()).then(r => r.json())
-  ]).then(([pdfSource, calibrationData, osm]) => {
-    const pdfFeatures = buildPdfFeatures(pdfSource.buildings, calibrationData.calibration);
+    fetch('dam_pdf_corner_calibration.json?cb=' + Date.now()).then(r => r.json())
+  ]).then(([pdfSource, calibrationData]) => {
+    const pdfFeatures = buildPdfFeatures(pdfSource.buildings, pdfSource.labels || [], calibrationData.calibration);
     renderPdf(pdfFeatures);
-    renderOsm(osm.features);
     renderLabels(pdfFeatures);
     const named = pdfFeatures.filter(f => f.name).length;
     document.getElementById('totalStat').textContent = `${pdfFeatures.length} PDF elem`;
     document.getElementById('nameStat').textContent = `${named} név`;
-    document.getElementById('osmStat').textContent = `${osm.features.length} OSM kontúr`;
+    document.getElementById('labelStat').textContent = `${(pdfSource.labels || []).length} PDF felirat`;
     map.fitBounds(bounds, 90);
   }).catch(err => {
     document.getElementById('subtitle').textContent = 'Réteg betöltési hiba: ' + err.message;
   });
 }
 
-function buildPdfFeatures(buildings, calibration) {
+function buildPdfFeatures(buildings, pdfLabels, calibration) {
   return buildings
-    .filter(b => Array.isArray(b.pts) && b.pts.length >= 3)
+    .filter(b => Array.isArray(b.pts) && b.pts.length >= 3 && Array.isArray(b.bbox))
     .map((b, i) => {
       const coords = b.pts.map(p => warpPoint(p[0], p[1], calibration));
       return {
@@ -200,10 +192,39 @@ function buildPdfFeatures(buildings, calibration) {
         pdf_idx:i,
         cat:b.cat,
         name:b.name || '',
+        bbox:b.bbox,
+        cx:b.cx,
+        cy:b.cy,
+        pointCount:b.pts.length,
+        pdfLabels:nearbyPdfLabels(b, pdfLabels),
         coords,
         center:center(coords)
       };
     });
+}
+
+function nearbyPdfLabels(building, pdfLabels) {
+  const bbox = building.bbox;
+  const width = bbox[2] - bbox[0];
+  const height = bbox[3] - bbox[1];
+  const padX = Math.max(0.012, width * 0.8);
+  const padY = Math.max(0.012, height * 0.8);
+  const minX = bbox[0] - padX;
+  const maxX = bbox[2] + padX;
+  const minY = bbox[1] - padY;
+  const maxY = bbox[3] + padY;
+  const skip = new Set(['V', 'a', 's', 'g', 'y', 'á', 'r', 'i', 'u', 't', 'c', 'n', 'o', 'm', 'z', 'f', 'd', 'ő', 'ü', 'l', 'e', 'p', '-', '.', '(', ')']);
+  const labels = pdfLabels
+    .filter(l => l.x >= minX && l.x <= maxX && l.y >= minY && l.y <= maxY)
+    .map(l => String(l.text || '').trim())
+    .filter(t => t && (!skip.has(t) || /\d/.test(t)))
+    .filter((t, i, arr) => arr.indexOf(t) === i);
+  const ordered = [];
+  if (building.name) ordered.push(building.name);
+  labels.forEach(t => {
+    if (!ordered.includes(t)) ordered.push(t);
+  });
+  return ordered.slice(0, 24);
 }
 
 function warpPoint(x, y, calibration) {
@@ -236,7 +257,7 @@ function renderPdf(features) {
       fillColor:cfg.fill, fillOpacity:.42, map, zIndex:3
     });
     const info = new google.maps.InfoWindow({
-      content:`<strong>${f.name || 'PDF épület'}</strong><br>${cfg.label}<br>PDF elem: ${f.pdf_idx}`
+      content:infoHtml(f, cfg)
     });
     halo.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
     poly.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
@@ -244,15 +265,30 @@ function renderPdf(features) {
   });
 }
 
-function renderOsm(features) {
-  features.forEach(f => {
-    const path = f.coords.map(c => ({ lat:c[0], lng:c[1] }));
-    const poly = new google.maps.Polygon({
-      paths:path, strokeColor:'#fff', strokeOpacity:.86, strokeWeight:2,
-      fillColor:'#111827', fillOpacity:.06, map:null, zIndex:1
-    });
-    osmPolygons.push(poly);
-  });
+function infoHtml(f, cfg) {
+  const labels = f.pdfLabels.length
+    ? `<div style="margin-top:8px"><strong>PDF feliratok a közelben:</strong><br>${f.pdfLabels.map(escapeHtml).join('<br>')}</div>`
+    : '<div style="margin-top:8px"><strong>PDF feliratok:</strong> nincs közeli felirat</div>';
+  return `
+    <div style="min-width:260px; max-width:360px; font:13px Arial, sans-serif; color:#111827">
+      <div style="font-size:16px; font-weight:900; margin-bottom:6px">${escapeHtml(f.name || 'PDF épület')}</div>
+      <div><strong>Kategória:</strong> ${escapeHtml(cfg.label)}</div>
+      <div><strong>PDF elem:</strong> ${f.pdf_idx}</div>
+      <div><strong>PDF középpont:</strong> ${f.cx.toFixed(6)}, ${f.cy.toFixed(6)}</div>
+      <div><strong>Térképi koordináta:</strong> ${f.center[0].toFixed(6)}, ${f.center[1].toFixed(6)}</div>
+      <div><strong>Poligonpontok:</strong> ${f.pointCount}</div>
+      ${labels}
+    </div>
+  `;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function renderLabels(features) {
