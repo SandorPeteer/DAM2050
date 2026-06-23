@@ -62,6 +62,7 @@ html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Ari
     <a class="btn" href="index.html">FŐOLDAL</a>
     <button class="btn active" id="satBtn" type="button">MŰHOLD</button>
     <button class="btn" id="mapBtn" type="button">TÉRKÉP</button>
+    <button class="btn active" id="pdfBtn" type="button">PDF RÉTEG</button>
     <a class="btn subtle" href="dam_pdf_kalibracio.html">SZERKESZTÉS</a>
     <button class="btn" id="hideBtn" type="button">UI KI</button>
   </div>
@@ -86,7 +87,8 @@ html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Ari
   Ez a végleges nézet: a színes keretek a kézzel illesztett PDF-rétegből jönnek. Kattints bármelyik épületre a PDF-ből kinyert adatokhoz.
 </div>
 
-<script src="google_maps_key.js"></script>
+
+<script src="google_maps_key_public.js"></script>
 <script>
 window.gm_authFailure = function() {
   document.getElementById('subtitle').textContent = 'Google API hiba: kulcs vagy referrer tiltás.';
@@ -102,6 +104,7 @@ const CAT = {
 let map;
 let bounds;
 let pdfPolygons = [];
+let pdfVisible = true;
 
 function loadGoogle() {
   if (!window.GOOGLE_MAPS_API_KEY || window.GOOGLE_MAPS_API_KEY.includes('PASTE_')) {
@@ -136,6 +139,11 @@ window.initMap = function() {
 function wireUi() {
   document.getElementById('satBtn').addEventListener('click', () => setBase('satellite'));
   document.getElementById('mapBtn').addEventListener('click', () => setBase('roadmap'));
+  document.getElementById('pdfBtn').addEventListener('click', () => {
+    pdfVisible = !pdfVisible;
+    document.getElementById('pdfBtn').classList.toggle('active', pdfVisible);
+    pdfPolygons.forEach(p => p.setMap(pdfVisible ? map : null));
+  });
   document.getElementById('hideBtn').addEventListener('click', () => {
     document.getElementById('top').style.display = 'none';
     document.getElementById('legend').style.display = 'none';
@@ -234,11 +242,11 @@ function renderPdf(features) {
     const path = f.coords.map(c => ({ lat:c[0], lng:c[1] }));
     path.forEach(p => bounds.extend(p));
     const halo = new google.maps.Polygon({
-      paths:path, strokeColor:'#fff', strokeOpacity:.96, strokeWeight:9, fillOpacity:0, map, zIndex:2
+      paths:path, strokeColor:'#fff', strokeOpacity:.96, strokeWeight:9, fillOpacity:0, map:pdfVisible ? map : null, zIndex:2
     });
     const poly = new google.maps.Polygon({
       paths:path, strokeColor:cfg.fill, strokeOpacity:1, strokeWeight:4,
-      fillColor:cfg.fill, fillOpacity:.42, map, zIndex:3
+      fillColor:cfg.fill, fillOpacity:.42, map:pdfVisible ? map : null, zIndex:3
     });
     const info = new google.maps.InfoWindow({
       content:infoHtml(f, cfg)
