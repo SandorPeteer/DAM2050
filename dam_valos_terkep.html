@@ -18,6 +18,10 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
 }
 #title { font-size:26px; font-weight:900; letter-spacing:.08em; line-height:1.05; }
 #subtitle { margin-top:6px; font-size:13px; font-weight:800; color:#475569; letter-spacing:.03em; }
+#overlay-status {
+  display:inline-block; margin-top:8px; padding:5px 9px; border-radius:5px;
+  background:#0f172a; color:#fff; font-size:12px; font-weight:900; letter-spacing:.06em;
+}
 #actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
 .btn {
   appearance:none; border:2px solid #1e293b; border-radius:6px; background:#fff; color:#0f172a;
@@ -72,6 +76,10 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
   width:18px; height:18px; border-radius:50%; background:#0f172a; border:4px solid #facc15;
   box-shadow:0 0 0 4px rgba(250,204,21,.28), 0 0 18px rgba(15,23,42,.5);
 }
+.pdf-label {
+  padding:3px 7px; border-radius:4px; background:rgba(15,23,42,.88); color:#fff;
+  font-size:11px; font-weight:900; white-space:nowrap; box-shadow:0 2px 8px rgba(15,23,42,.35);
+}
 
 @media (max-width:900px) {
   #topbar { flex-direction:column; align-items:flex-start; }
@@ -88,12 +96,14 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
   <div>
     <div id="title">DAM · VALÓS TÉRKÉPI ILLESZTÉS</div>
     <div id="subtitle">OpenStreetMap/Leaflet alaptérkép + PDF/drónos épületkataszter kalibrált rávetítése</div>
+    <div id="overlay-status">PDF RÉTEG BETÖLTÉS...</div>
   </div>
   <div id="actions">
     <a class="btn" href="index.html">FŐOLDAL</a>
     <button class="btn blue active" id="osmBtn" type="button">OSM / LEAFLET</button>
     <button class="btn blue" id="satBtn" type="button">MŰHOLD</button>
     <button class="btn" id="fitBtn" type="button">DAM-RA IGAZÍT</button>
+    <button class="btn" id="pdfBtn" type="button">PDF RÉTEG</button>
     <button class="btn" id="calBtn" type="button">KALIBRÁCIÓ</button>
     <button class="btn" id="focusBtn" type="button">PREZENTÁCIÓ</button>
   </div>
@@ -148,6 +158,13 @@ const map = L.map('map', {
   zoom:15
 });
 L.control.zoom({ position:'bottomright' }).addTo(map);
+map.createPane('pdfHaloPane');
+map.getPane('pdfHaloPane').style.zIndex = 420;
+map.getPane('pdfHaloPane').style.pointerEvents = 'none';
+map.createPane('pdfPane');
+map.getPane('pdfPane').style.zIndex = 430;
+map.createPane('pdfLabelPane');
+map.getPane('pdfLabelPane').style.zIndex = 650;
 
 const esri = L.tileLayer(
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -216,11 +233,12 @@ function normToLatLng(x, y) {
 function styleFor(cat) {
   const cfg = CAT[cat] || CAT.egyeb;
   return {
-    color:cfg.color,
+    pane:'pdfPane',
+    color:'#0f172a',
     fillColor:cfg.fill,
-    fillOpacity:0.58,
-    opacity:0.96,
-    weight:2.2
+    fillOpacity:0.76,
+    opacity:1,
+    weight:3.2
   };
 }
 
@@ -234,31 +252,52 @@ function renderBuildings() {
   buildingLayer.clearLayers();
   anchorLayer.clearLayers();
   const nextBounds = L.latLngBounds([]);
+  const counts = {};
+  let rendered = 0;
   sourceBuildings.buildings.forEach(b => {
     if (!b.pts || b.pts.length < 3) return;
     const cfg = CAT[b.cat] || CAT.egyeb;
     const coords = b.pts.map(p => normToLatLng(p[0], p[1]));
     const isCoolingTower = b.name === 'Hűtőtornyok';
+    counts[b.cat] = (counts[b.cat] || 0) + 1;
+    rendered++;
+    L.polygon(coords, {
+      pane:'pdfHaloPane',
+      color:'#ffffff',
+      opacity:0.95,
+      weight:isCoolingTower ? 9 : 7,
+      fill:false,
+      interactive:false
+    }).addTo(buildingLayer);
     const polygon = L.polygon(coords, {
       ...styleFor(b.cat),
-      weight:isCoolingTower ? 4.5 : 2.2,
-      fillOpacity:isCoolingTower ? 0.82 : 0.58
+      weight:isCoolingTower ? 5 : 3.2,
+      fillOpacity:isCoolingTower ? 0.88 : 0.76
     }).bindPopup(popupFor(b, cfg));
-    polygon.on('mouseover', () => polygon.setStyle({ weight:isCoolingTower ? 5.5 : 4, fillOpacity:0.78 }));
+    polygon.on('mouseover', () => polygon.setStyle({ weight:isCoolingTower ? 6.5 : 5, fillOpacity:0.92 }));
     polygon.on('mouseout', () => polygon.setStyle({
       ...styleFor(b.cat),
-      weight:isCoolingTower ? 4.5 : 2.2,
-      fillOpacity:isCoolingTower ? 0.82 : 0.58
+      weight:isCoolingTower ? 5 : 3.2,
+      fillOpacity:isCoolingTower ? 0.88 : 0.76
     }));
     polygon.addTo(buildingLayer);
+    if (b.name && ['Hűtőtornyok', 'Keleti Erőmű', 'Középhengermű', 'I. Hivatalház', 'Vasgyári fürdő'].includes(b.name)) {
+      L.marker(normToLatLng(b.cx, b.cy), {
+        pane:'pdfLabelPane',
+        icon:L.divIcon({ className:'', html:`<div class="pdf-label">${b.name}</div>`, iconSize:null, iconAnchor:[0,0] })
+      }).addTo(anchorLayer);
+    }
     if (isCoolingTower) {
       L.marker(normToLatLng(b.cx, b.cy), {
+        pane:'pdfLabelPane',
         icon:L.divIcon({ className:'', html:'<div class="cooling-anchor"></div>', iconSize:[18,18], iconAnchor:[9,9] })
       }).bindTooltip('Hűtőtorony kontrollpont', { direction:'top' }).addTo(anchorLayer);
     }
     coords.forEach(p => nextBounds.extend(p));
   });
   currentBounds = nextBounds;
+  document.getElementById('overlay-status').textContent =
+    `PDF RÉTEG AKTÍV: ${rendered} poligon · bontandó ${counts.bontando || 0} · védett ${counts['védett'] || 0} · hasznosítható ${(counts['hasznosításra_javasolt'] || 0) + (counts['hasznosítandó'] || 0)}`;
   updateCalValues();
 }
 
@@ -281,6 +320,11 @@ const osmBtn = document.getElementById('osmBtn');
 satBtn.addEventListener('click', () => setBase('sat'));
 osmBtn.addEventListener('click', () => setBase('osm'));
 document.getElementById('fitBtn').addEventListener('click', fitDam);
+document.getElementById('pdfBtn').addEventListener('click', () => {
+  if (!map.hasLayer(buildingLayer)) buildingLayer.addTo(map);
+  if (!map.hasLayer(anchorLayer)) anchorLayer.addTo(map);
+  fitDam();
+});
 document.getElementById('focusBtn').addEventListener('click', () => {
   document.getElementById('topbar').style.display = 'none';
   document.getElementById('note').style.display = 'none';
