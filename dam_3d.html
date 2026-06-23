@@ -511,7 +511,7 @@ function setP(p) { document.getElementById('loading-fill').style.width = p + '%'
 
 Promise.all([
   fetch('dam_buildings2.json').then(r => r.json()),
-  fetch('dam_infrastructure.json').then(r => r.json()),
+  fetch('dam_infrastructure_v2.json').then(r => r.json()),
 ]).then(([bData, infra]) => {
   setP(30);
   addInfrastructure(infra);
