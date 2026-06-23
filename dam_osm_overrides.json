@@ -1,0 +1,4 @@
+{
+  "note": "Manual corrections for OSM way IDs. Add entries like \"123456789\": {\"cat\":\"bontando\", \"name\":\"...\", \"comment\":\"...\"}.",
+  "overrides": {}
+}

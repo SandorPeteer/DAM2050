@@ -11,28 +11,28 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
 #map { position:fixed; inset:0; z-index:1; background:#dbe4ea; }
 
 #topbar {
-  position:fixed; top:18px; left:18px; right:18px; z-index:500;
-  min-height:76px; display:flex; justify-content:space-between; align-items:center; gap:18px;
+  position:fixed; top:12px; left:12px; right:12px; z-index:500;
+  min-height:58px; display:flex; justify-content:space-between; align-items:center; gap:12px;
   background:rgba(255,255,255,.94); border:2px solid rgba(15,23,42,.12); border-radius:8px;
-  box-shadow:0 8px 32px rgba(15,23,42,.18); padding:14px 18px;
+  box-shadow:0 8px 32px rgba(15,23,42,.18); padding:10px 14px;
 }
-#title { font-size:26px; font-weight:900; letter-spacing:.08em; line-height:1.05; }
-#subtitle { margin-top:6px; font-size:13px; font-weight:800; color:#475569; letter-spacing:.03em; }
+#title { font-size:20px; font-weight:900; letter-spacing:.08em; line-height:1.05; }
+#subtitle { display:none; }
 #overlay-status {
   display:inline-block; margin-top:8px; padding:5px 9px; border-radius:5px;
   background:#0f172a; color:#fff; font-size:12px; font-weight:900; letter-spacing:.06em;
 }
-#actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+#actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
 .btn {
   appearance:none; border:2px solid #1e293b; border-radius:6px; background:#fff; color:#0f172a;
-  padding:10px 14px; font-size:13px; font-weight:900; letter-spacing:.06em; cursor:pointer;
+  padding:8px 11px; font-size:12px; font-weight:900; letter-spacing:.06em; cursor:pointer;
 }
 .btn.active, .btn:hover { background:#1e293b; color:#fff; }
 .btn.blue { border-color:#2563eb; color:#1d4ed8; }
 .btn.blue.active, .btn.blue:hover { background:#2563eb; color:#fff; }
 
 #legend {
-  position:fixed; left:18px; bottom:24px; z-index:500; width:330px;
+  position:fixed; left:12px; bottom:12px; z-index:500; width:300px;
   background:rgba(255,255,255,.95); border:2px solid rgba(15,23,42,.14); border-radius:8px;
   box-shadow:0 8px 30px rgba(15,23,42,.18); padding:16px 18px;
 }
@@ -47,14 +47,14 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
 #stats span { color:#475569; font-weight:800; }
 
 #note {
-  position:fixed; right:18px; bottom:24px; z-index:500; max-width:430px;
+  position:fixed; right:12px; bottom:12px; z-index:500; max-width:380px;
   background:rgba(15,23,42,.88); color:#fff; border-radius:8px; padding:14px 16px;
   box-shadow:0 8px 30px rgba(15,23,42,.24); font-size:13px; line-height:1.45; font-weight:700;
 }
 #note strong { color:#bfdbfe; }
 
 #calibration {
-  position:fixed; right:18px; top:112px; z-index:520; width:330px; display:none;
+  position:fixed; left:12px; top:84px; bottom:12px; z-index:520; width:360px; display:none; overflow:auto;
   background:rgba(255,255,255,.96); border:2px solid rgba(15,23,42,.16); border-radius:8px;
   box-shadow:0 8px 30px rgba(15,23,42,.20); padding:14px 16px;
 }
@@ -116,6 +116,7 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
     <button class="btn" id="fitBtn" type="button">DAM-RA IGAZÍT</button>
     <button class="btn" id="pdfBtn" type="button">PDF RÉTEG</button>
     <button class="btn" id="calBtn" type="button">KALIBRÁCIÓ</button>
+    <button class="btn" id="hideUiBtn" type="button">UI KI</button>
     <button class="btn" id="focusBtn" type="button">PREZENTÁCIÓ</button>
   </div>
 </div>
@@ -351,27 +352,31 @@ function popupForOsmFeature(f, cfg) {
     `<div class="pop-note">OSM geometria + PDF kategória. ${d}</div>`;
 }
 
-function renderOsmMatches(data) {
+function renderOsmMatches(data, overrideData) {
+  const overrides = (overrideData && overrideData.overrides) || {};
   osmMatchLayer.clearLayers();
   const b = L.latLngBounds([]);
   const counts = {};
   data.features.forEach(function(f) {
-    if (!f.match.matched || f.match.distance_m > 35) return;
-    const cfg = CAT[f.match.cat] || CAT.egyeb;
+    const override = overrides[String(f.id)];
+    const effective = override ? { ...f.match, ...override, matched:true, distance_m:0 } : f.match;
+    if (!effective.matched || effective.distance_m > 35) return;
+    const cfg = CAT[effective.cat] || CAT.egyeb;
     counts[f.match.cat] = (counts[f.match.cat] || 0) + 1;
     const polygon = L.polygon(f.coords, {
-      color:f.match.matched ? '#0f172a' : '#475569',
-      weight:f.match.matched ? 3 : 1.5,
-      opacity:f.match.matched ? 1 : 0.55,
+      color:override ? '#7c2d12' : '#0f172a',
+      weight:override ? 5 : 3,
+      opacity:1,
       fillColor:cfg.fill,
-      fillOpacity:f.match.matched ? 0.72 : 0.10
-    }).bindPopup(popupForOsmFeature(f, cfg));
+      fillOpacity:override ? 0.88 : 0.72
+    }).bindPopup(popupForOsmFeature({ ...f, match:effective }, cfg));
     polygon.addTo(osmMatchLayer);
     f.coords.forEach(function(c) { b.extend(c); });
   });
   if (b.isValid()) currentBounds = b;
   const visible = data.features.filter(f => f.match.matched && f.match.distance_m <= 35).length;
-  status(`OSM ÉPÜLETFORMÁK AKTÍVAK: ${visible} biztos PDF-egyezés`);
+  const manual = Object.keys(overrides).length;
+  status(`OSM ÉPÜLETFORMÁK AKTÍVAK: ${visible} biztos PDF-egyezés · kézi javítás ${manual}`);
 }
 
 function renderBuildings() {
@@ -513,12 +518,12 @@ function init() {
 
   pdfLayer = L.layerGroup();
   osmMatchLayer = L.layerGroup().addTo(map);
-  anchorLayer = L.layerGroup().addTo(map);
+  anchorLayer = L.layerGroup();
 
   L.control.layers(
     { 'OSM / Leaflet térkép':osm, 'Műholdkép':esri },
     { 'OSM épületek PDF kategóriával':osmMatchLayer, 'Torz PDF overlay / kalibráció':pdfLayer, 'Hűtőtornyok kontrollpontok':anchorLayer },
-    { position:'topright', collapsed:false }
+    { position:'bottomright', collapsed:true }
   ).addTo(map);
 
   document.getElementById('osmBtn').addEventListener('click', function() { setBase('osm'); });
@@ -533,7 +538,13 @@ function init() {
     document.getElementById('topbar').style.display = 'none';
     document.getElementById('note').style.display = 'none';
     document.getElementById('calibration').style.display = 'none';
+    document.getElementById('legend').style.display = 'none';
     fitDam();
+  });
+  document.getElementById('hideUiBtn').addEventListener('click', function() {
+    document.getElementById('legend').style.display = 'none';
+    document.getElementById('note').style.display = 'none';
+    document.getElementById('calibration').style.display = 'none';
   });
   document.getElementById('calBtn').addEventListener('click', function() {
     const panel = document.getElementById('calibration');
@@ -599,13 +610,12 @@ function init() {
   });
 
   status('OSM ÉPÜLETFORMÁK BETÖLTÉSE...');
-  fetch('osm_dam_buildings_matched.json?cb=' + Date.now())
-    .then(function(r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .then(function(data) {
-      renderOsmMatches(data);
+  Promise.all([
+    fetch('osm_dam_buildings_matched.json?cb=' + Date.now()).then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+    fetch('dam_osm_overrides.json?cb=' + Date.now()).then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  ])
+    .then(function(results) {
+      renderOsmMatches(results[0], results[1]);
       fitDam();
     })
     .catch(function(err) {
