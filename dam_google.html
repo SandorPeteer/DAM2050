@@ -228,9 +228,11 @@ function loadOverlay() {
   status('OSM/PDF RÉTEG BETÖLTÉS...');
   Promise.all([
     fetch('dam_full_osm_buildings.json?cb=' + Date.now()).then(r => r.json()),
-    fetch('dam_pdf_aligned_buildings.json?cb=' + Date.now()).then(r => r.json()),
+    fetch('dam_buildings2.json?cb=' + Date.now()).then(r => r.json()),
+    fetch('dam_pdf_corner_calibration.json?cb=' + Date.now()).then(r => r.json()),
     fetch('dam_osm_overrides.json?cb=' + Date.now()).then(r => r.json()).catch(() => ({ overrides:{} }))
-  ]).then(([osmData, pdfData, overrideData]) => {
+  ]).then(([osmData, pdfSource, calibrationData, overrideData]) => {
+    const pdfData = { features:buildPdfFeatures(pdfSource.buildings, calibrationData.calibration) };
     renderOverlay(osmData, pdfData, overrideData && overrideData.overrides ? overrideData.overrides : {});
   }).catch(err => {
     console.error(err);
@@ -302,6 +304,39 @@ function renderOsmContours(features) {
     poly.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
     osmPolygons.push(poly);
   });
+}
+
+function buildPdfFeatures(buildings, calibration) {
+  return buildings
+    .filter(b => Array.isArray(b.pts) && b.pts.length >= 3)
+    .map((b, i) => {
+      const coords = b.pts.map(p => warpPoint(p[0], p[1], calibration));
+      return {
+        id:`pdf_${i}`,
+        pdf_idx:i,
+        cat:b.cat,
+        name:b.name || '',
+        coords,
+        center:center(coords)
+      };
+    });
+}
+
+function warpPoint(x, y, calibration) {
+  const topLat = lerp(calibration.tl.lat, calibration.tr.lat, x);
+  const topLng = lerp(calibration.tl.lng, calibration.tr.lng, x);
+  const bottomLat = lerp(calibration.bl.lat, calibration.br.lat, x);
+  const bottomLng = lerp(calibration.bl.lng, calibration.br.lng, x);
+  return [lerp(topLat, bottomLat, y), lerp(topLng, bottomLng, y)];
+}
+
+function center(coords) {
+  const sum = coords.reduce((acc, p) => [acc[0] + p[0], acc[1] + p[1]], [0, 0]);
+  return [sum[0] / coords.length, sum[1] / coords.length];
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
 }
 
 function fitDam() {

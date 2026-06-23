@@ -110,7 +110,7 @@ let map;
 let sourceBuildings = [];
 let polygons = [];
 let markers = {};
-let calibration = loadSaved() || DEFAULT_CORNERS;
+let calibration = structuredClone(DEFAULT_CORNERS);
 let pdfVisible = true;
 let layerOpacity = 0.38;
 
@@ -144,8 +144,10 @@ window.initMap = function() {
     gestureHandling:'greedy'
   });
   wireUi();
-  createCornerMarkers();
-  loadPdfBuildings();
+  loadCalibrationReference().then(() => {
+    createCornerMarkers();
+    loadPdfBuildings();
+  });
 };
 
 function wireUi() {
@@ -291,7 +293,7 @@ function fitToCorners() {
 
 function saveCalibration() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ calibration, savedAt:new Date().toISOString() }));
-  setStatus('MENTVE A BÖNGÉSZŐBE · ' + new Date().toLocaleTimeString('hu-HU'));
+  setStatus('MENTVE A BÖNGÉSZŐBE · exportáld JSON-ba, ha ez legyen a projekt referencia');
   renderCoords();
 }
 
@@ -317,6 +319,28 @@ function loadSaved() {
   } catch {
     return null;
   }
+}
+
+function loadCalibrationReference() {
+  return fetch('dam_pdf_corner_calibration.json?cb=' + Date.now())
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (data && data.calibration) {
+        calibration = data.calibration;
+        if (typeof data.opacity === 'number') {
+          layerOpacity = data.opacity;
+          document.getElementById('opacity').value = String(data.opacity);
+        }
+        setStatus('KALIBRÁCIÓ BETÖLTVE: dam_pdf_corner_calibration.json');
+        return;
+      }
+      const saved = loadSaved();
+      calibration = saved || structuredClone(DEFAULT_CORNERS);
+    })
+    .catch(() => {
+      const saved = loadSaved();
+      calibration = saved || structuredClone(DEFAULT_CORNERS);
+    });
 }
 
 function renderCoords() {

@@ -172,20 +172,55 @@ function setBase(type) {
 
 function loadLayers() {
   Promise.all([
-    fetch('dam_pdf_aligned_buildings.json?cb=' + Date.now()).then(r => r.json()),
+    fetch('dam_buildings2.json?cb=' + Date.now()).then(r => r.json()),
+    fetch('dam_pdf_corner_calibration.json?cb=' + Date.now()).then(r => r.json()),
     fetch('dam_full_osm_buildings.json?cb=' + Date.now()).then(r => r.json())
-  ]).then(([pdf, osm]) => {
-    renderPdf(pdf.features);
+  ]).then(([pdfSource, calibrationData, osm]) => {
+    const pdfFeatures = buildPdfFeatures(pdfSource.buildings, calibrationData.calibration);
+    renderPdf(pdfFeatures);
     renderOsm(osm.features);
-    renderLabels(pdf.features);
-    const named = pdf.features.filter(f => f.name).length;
-    document.getElementById('totalStat').textContent = `${pdf.features.length} PDF elem`;
+    renderLabels(pdfFeatures);
+    const named = pdfFeatures.filter(f => f.name).length;
+    document.getElementById('totalStat').textContent = `${pdfFeatures.length} PDF elem`;
     document.getElementById('nameStat').textContent = `${named} név`;
     document.getElementById('osmStat').textContent = `${osm.features.length} OSM kontúr`;
     map.fitBounds(bounds, 90);
   }).catch(err => {
     document.getElementById('subtitle').textContent = 'Réteg betöltési hiba: ' + err.message;
   });
+}
+
+function buildPdfFeatures(buildings, calibration) {
+  return buildings
+    .filter(b => Array.isArray(b.pts) && b.pts.length >= 3)
+    .map((b, i) => {
+      const coords = b.pts.map(p => warpPoint(p[0], p[1], calibration));
+      return {
+        id:`pdf_${i}`,
+        pdf_idx:i,
+        cat:b.cat,
+        name:b.name || '',
+        coords,
+        center:center(coords)
+      };
+    });
+}
+
+function warpPoint(x, y, calibration) {
+  const topLat = lerp(calibration.tl.lat, calibration.tr.lat, x);
+  const topLng = lerp(calibration.tl.lng, calibration.tr.lng, x);
+  const bottomLat = lerp(calibration.bl.lat, calibration.br.lat, x);
+  const bottomLng = lerp(calibration.bl.lng, calibration.br.lng, x);
+  return [lerp(topLat, bottomLat, y), lerp(topLng, bottomLng, y)];
+}
+
+function center(coords) {
+  const sum = coords.reduce((acc, p) => [acc[0] + p[0], acc[1] + p[1]], [0, 0]);
+  return [sum[0] / coords.length, sum[1] / coords.length];
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
 }
 
 function renderPdf(features) {
