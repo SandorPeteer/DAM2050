@@ -1,8 +1,5 @@
-# DAM2050
-A Miskolci DAM területét életre kelteni! 
-
-# Cím: Digitális Acélváros 2050
-## Jelmondat: Technológia az emberek szolgálatában
+# Digitális Acélváros 2050
+## Technológia az emberek szolgálatában
 
 ---
 
