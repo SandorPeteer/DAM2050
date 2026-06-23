@@ -276,8 +276,8 @@ function addBuilding(b) {
   for (const pt of b.pts) {
     const [lat, lng] = warpPoint(pt[0], pt[1], _cal);
     const [sx, sz] = ll2s(lat, lng);
-    if (first) { shape.moveTo(sx, sz); first = false; }
-    else shape.lineTo(sx, sz);
+    if (first) { shape.moveTo(sx, -sz); first = false; }
+    else shape.lineTo(sx, -sz);
   }
   shape.closePath();
 
