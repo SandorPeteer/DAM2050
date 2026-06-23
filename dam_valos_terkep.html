@@ -356,6 +356,7 @@ function renderOsmMatches(data) {
   const b = L.latLngBounds([]);
   const counts = {};
   data.features.forEach(function(f) {
+    if (!f.match.matched || f.match.distance_m > 35) return;
     const cfg = CAT[f.match.cat] || CAT.egyeb;
     counts[f.match.cat] = (counts[f.match.cat] || 0) + 1;
     const polygon = L.polygon(f.coords, {
@@ -369,7 +370,8 @@ function renderOsmMatches(data) {
     f.coords.forEach(function(c) { b.extend(c); });
   });
   if (b.isValid()) currentBounds = b;
-  status(`OSM ÉPÜLETFORMÁK AKTÍVAK: ${data.features.length} objektum · PDF egyezés ${(data.features.filter(f => f.match.matched)).length}`);
+  const visible = data.features.filter(f => f.match.matched && f.match.distance_m <= 35).length;
+  status(`OSM ÉPÜLETFORMÁK AKTÍVAK: ${visible} biztos PDF-egyezés`);
 }
 
 function renderBuildings() {
