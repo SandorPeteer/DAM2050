@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAM · Diósgyőri Acélmű · Revitalizáció</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; background:#060c18; overflow:hidden;
+  font-family:'Courier New', monospace; color:#cce; }
+
+/* Animated grid bg */
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(0,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,255,0.025) 1px, transparent 1px);
+  background-size:60px 60px;
+  animation:gridmove 20s linear infinite;
+}
+@keyframes gridmove { from{background-position:0 0} to{background-position:60px 60px} }
+
+/* Scanline */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+}
+
+#wrap {
+  position:relative; z-index:1;
+  width:100%; height:100%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:0;
+}
+
+/* Logo / Title */
+#logo-area { text-align:center; margin-bottom:48px; }
+
+#logo-hex {
+  font-size:52px; color:#00ffff;
+  text-shadow:0 0 30px #00ffff, 0 0 60px #0088ff;
+  animation:hexspin 8s ease-in-out infinite;
+  display:block; line-height:1;
+}
+@keyframes hexspin {
+  0%,100%{ text-shadow:0 0 30px #00ffff, 0 0 60px #0088ff; }
+  50%{ text-shadow:0 0 50px #00ffff, 0 0 100px #0055ff, 0 0 140px #0022aa; }
+}
+
+#logo-title {
+  font-size:28px; font-weight:900; letter-spacing:10px;
+  color:#00ffff; margin-top:12px;
+  text-shadow:0 0 20px #00ffff88;
+}
+#logo-sub {
+  font-size:10px; letter-spacing:5px; color:#1a3a50; margin-top:6px;
+}
+#logo-place {
+  font-size:11px; letter-spacing:4px; color:#0a2030; margin-top:3px;
+}
+
+/* Horizontal divider */
+.hdiv {
+  width:320px; height:1px;
+  background:linear-gradient(90deg, transparent, #00ffff44, transparent);
+  margin:0 auto 40px;
+}
+
+/* Cards */
+#cards { display:flex; gap:20px; align-items:stretch; }
+
+.card {
+  width:230px; background:rgba(4,12,28,0.9);
+  border:1px solid #00ffff22; border-radius:12px;
+  padding:28px 22px 24px;
+  display:flex; flex-direction:column; align-items:center; gap:16px;
+  cursor:pointer; text-decoration:none; color:inherit;
+  transition:border-color .3s, box-shadow .3s, transform .25s;
+  position:relative; overflow:hidden;
+}
+.card::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 0%, rgba(0,255,255,0.06), transparent 70%);
+  opacity:0; transition:opacity .3s;
+}
+.card:hover { border-color:#00ffff66; box-shadow:0 0 30px #00ffff18, 0 8px 32px #00000088;
+  transform:translateY(-4px); }
+.card:hover::before { opacity:1; }
+
+.card-icon { font-size:36px; line-height:1; filter:drop-shadow(0 0 8px currentColor); }
+.card-year { font-size:26px; font-weight:900; letter-spacing:4px; }
+.card-title { font-size:10px; letter-spacing:3px; color:#445566; text-align:center; line-height:1.6; }
+.card-desc { font-size:9px; color:#2a3a48; text-align:center; line-height:1.7; }
+.card-btn {
+  margin-top:4px; padding:7px 20px;
+  border:1px solid; border-radius:6px; font-size:9px; font-weight:900;
+  letter-spacing:2px; font-family:inherit;
+  background:transparent; cursor:pointer;
+  transition:background .2s, color .2s;
+}
+
+/* Card accent colors */
+.card.map .card-icon { color:#44aaff; }
+.card.map .card-year { color:#44aaff; text-shadow:0 0 12px #44aaff66; }
+.card.map .card-btn { color:#44aaff; border-color:#44aaff44; }
+.card.map:hover .card-btn { background:#44aaff22; }
+
+.card.d3 .card-icon { color:#00ffcc; }
+.card.d3 .card-year { color:#00ffcc; text-shadow:0 0 12px #00ffcc66; }
+.card.d3 .card-btn { color:#00ffcc; border-color:#00ffcc44; }
+.card.d3:hover .card-btn { background:#00ffcc22; }
+
+.card.future .card-icon { color:#cc88ff; }
+.card.future .card-year { color:#cc88ff; text-shadow:0 0 12px #cc88ff66; }
+.card.future .card-btn { color:#cc88ff; border-color:#cc88ff44; }
+.card.future:hover .card-btn { background:#cc88ff22; }
+
+/* Stats bar */
+#stats {
+  margin-top:44px; display:flex; gap:32px; align-items:center;
+}
+.stt { text-align:center; }
+.stt-v { font-size:18px; font-weight:900; color:#00ffff88; }
+.stt-l { font-size:8px; letter-spacing:2px; color:#1a2a38; margin-top:1px; }
+.sdiv { width:1px; height:28px; background:#00ffff1a; }
+
+/* Version */
+#ver { position:fixed; bottom:14px; right:18px; font-size:8px;
+  color:#0a1a26; letter-spacing:2px; z-index:2; }
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <div id="logo-area">
+    <span id="logo-hex">⬡</span>
+    <div id="logo-title">DAM</div>
+    <div id="logo-sub">DIÓSGYŐRI ACÉLMŰ · REVITALIZÁCIÓ</div>
+    <div id="logo-place">MISKOLC · MAGYARORSZÁG</div>
+  </div>
+
+  <div class="hdiv"></div>
+
+  <div id="cards">
+
+    <a href="dam_valos_terkep.html" class="card map">
+      <div class="card-icon">🗺</div>
+      <div class="card-year">2026</div>
+      <div class="card-title">VALÓS ALAPTÉRKÉP<br>PDF-KATASZTER ILLESZTÉS</div>
+      <div class="card-desc">Műhold / OSM alaptérkép.<br>GPS-re illesztett épületek.<br>Utak és vasutak külön rétegen.</div>
+      <button class="card-btn">MEGNYITÁS →</button>
+    </a>
+
+    <a href="dam_3d.html" class="card d3">
+      <div class="card-icon">🏗</div>
+      <div class="card-year">3D</div>
+      <div class="card-title">TÉRBELI MAKETT<br>JELENLEGI ÉPÜLETEK</div>
+      <div class="card-desc">Forgatható 3D modell.<br>Valódi épület-footprintök.<br>Magasságok kategória szerint.</div>
+      <button class="card-btn">MEGNYITÁS →</button>
+    </a>
+
+    <a href="dam_2050.html" class="card future">
+      <div class="card-icon">🔮</div>
+      <div class="card-year">2050</div>
+      <div class="card-title">JÖVŐBELI VÁROSMAG<br>REVITALIZÁCIÓS TERV</div>
+      <div class="card-desc">Bontandók eltűnnek.<br>Új épületek felépülnek.<br>Smart city vizualizáció.</div>
+      <button class="card-btn">MEGNYITÁS →</button>
+    </a>
+
+  </div>
+
+  <div id="stats">
+    <div class="stt"><div class="stt-v">130 ha</div><div class="stt-l">TERÜLET</div></div>
+    <div class="sdiv"></div>
+    <div class="stt"><div class="stt-v" style="color:#c8143a">65</div><div class="stt-l">BONTANDÓ</div></div>
+    <div class="sdiv"></div>
+    <div class="stt"><div class="stt-v" style="color:#44dd66">218</div><div class="stt-l">HASZNOSÍTHATÓ</div></div>
+    <div class="sdiv"></div>
+    <div class="stt"><div class="stt-v" style="color:#1f6380">56</div><div class="stt-l">VÉDETT ÖRÖKSÉG</div></div>
+    <div class="sdiv"></div>
+    <div class="stt"><div class="stt-v">453</div><div class="stt-l">ÉPÜLET ÖSSZESEN</div></div>
+  </div>
+
+</div>
+
+<div id="ver">DAM REVITALIZÁCIÓ · 2024–2050 · MISKOLC</div>
+
+<script>
+// Subtle floating animation on cards
+document.querySelectorAll('.card').forEach((c, i) => {
+  c.style.animationDelay = (i * 0.15) + 's';
+  c.animate([
+    {transform:'translateY(0px)'},
+    {transform:'translateY(-5px)'},
+    {transform:'translateY(0px)'},
+  ], { duration: 4000 + i*600, iterations: Infinity, easing:'ease-in-out', delay: i*400 });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digitális Acélváros 2050 – DAM Miskolc</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a1628; overflow: hidden; font-family: 'Courier New', monospace; }
+  #canvas-container { width: 100vw; height: 100vh; }
+  canvas { display: block; }
+
+  /* HUD overlay */
+  #hud {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 10;
+  }
+
+  /* Title */
+  #title {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    text-align: center; pointer-events: none;
+  }
+  #title h1 {
+    font-size: 22px; font-weight: 900; letter-spacing: 6px;
+    color: #00ffff; text-shadow: 0 0 20px #00ffff, 0 0 40px #00aaff;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  #title p {
+    font-size: 11px; color: #0088aa; letter-spacing: 4px; margin-top: 4px;
+    text-shadow: 0 0 10px #006688;
+  }
+  @keyframes pulse {
+    0%,100% { text-shadow: 0 0 20px #00ffff, 0 0 40px #00aaff; }
+    50% { text-shadow: 0 0 30px #00ffff, 0 0 60px #00aaff, 0 0 80px #0055ff; }
+  }
+
+  /* Legend */
+  #legend {
+    position: fixed; top: 100px; left: 20px;
+    background: rgba(5,15,35,0.88); border: 1px solid #00ffff88;
+    border-radius: 8px; padding: 14px 18px;
+    backdrop-filter: blur(8px); pointer-events: none;
+  }
+  #legend h3 { color: #00ffff; font-size: 10px; letter-spacing: 3px; margin-bottom: 10px; }
+  .legend-item { display: flex; align-items: center; margin-bottom: 7px; }
+  .legend-color { width: 14px; height: 14px; border-radius: 3px; margin-right: 10px; flex-shrink: 0; }
+  .legend-label { color: #ddeeff; font-size: 10px; letter-spacing: 1px; }
+
+  /* Controls */
+  #controls {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 12px; pointer-events: all;
+  }
+  .ctrl-btn {
+    background: rgba(5,25,55,0.92); border: 1px solid #00ffff99;
+    color: #00ddff; padding: 8px 18px; border-radius: 20px;
+    font-family: 'Courier New', monospace; font-size: 11px;
+    letter-spacing: 2px; cursor: pointer; transition: all 0.2s;
+    backdrop-filter: blur(6px);
+  }
+  .ctrl-btn:hover { border-color: #00ffff; color: #fff; background: rgba(0,80,120,0.6); box-shadow: 0 0 15px #00ffff44; }
+  .ctrl-btn.active { border-color: #00ffff; background: rgba(0,100,160,0.7); box-shadow: 0 0 20px #00ffff66; }
+
+  /* Info panel */
+  #info-panel {
+    position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
+    width: 300px; background: rgba(5,15,40,0.97);
+    border: 1px solid #00ffff66; border-radius: 12px;
+    padding: 24px; display: none; pointer-events: all;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 40px #00ffff22, inset 0 0 20px #00002244;
+  }
+  #info-panel.visible { display: block; animation: slideIn 0.3s ease; }
+  @keyframes slideIn { from { opacity:0; transform: translateY(-50%) translateX(20px); } to { opacity:1; transform: translateY(-50%) translateX(0); } }
+  #info-close {
+    position: absolute; top: 12px; right: 16px;
+    color: #00ffff; cursor: pointer; font-size: 18px; font-weight: bold;
+    background: none; border: none;
+  }
+  #info-close:hover { color: #fff; text-shadow: 0 0 10px #00ffff; }
+  #info-zone-tag {
+    font-size: 9px; letter-spacing: 3px; padding: 3px 8px;
+    border-radius: 10px; display: inline-block; margin-bottom: 12px;
+    font-weight: bold;
+  }
+  #info-title { color: #ffffff; font-size: 16px; font-weight: 900; letter-spacing: 2px; margin-bottom: 8px; }
+  #info-subtitle { color: #00aacc; font-size: 10px; letter-spacing: 2px; margin-bottom: 16px; }
+  #info-desc { color: #cce8f4; font-size: 12px; line-height: 1.7; margin-bottom: 16px; }
+  #info-features h4 { color: #00ffff; font-size: 10px; letter-spacing: 2px; margin-bottom: 8px; }
+  .feature-tag {
+    display: inline-block; background: rgba(0,80,120,0.5);
+    border: 1px solid #00ffff33; color: #aaddff;
+    font-size: 9px; padding: 3px 8px; border-radius: 10px;
+    margin: 2px; letter-spacing: 1px;
+  }
+  #info-status {
+    margin-top: 16px; padding-top: 12px; border-top: 1px solid #00ffff22;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; animation: blink 1.5s infinite; }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  #info-status span { color: #88bbcc; font-size: 10px; letter-spacing: 1px; }
+
+  /* Stats bar */
+  #stats-bar {
+    position: fixed; top: 20px; right: 20px;
+    display: flex; flex-direction: column; gap: 6px;
+    pointer-events: none;
+  }
+  .stat-item {
+    background: rgba(0,0,0,0.6); border: 1px solid #00ffff33;
+    border-radius: 6px; padding: 6px 12px;
+    display: flex; align-items: center; gap: 8px;
+    backdrop-filter: blur(4px);
+  }
+  .stat-label { color: #006688; font-size: 9px; letter-spacing: 2px; }
+  .stat-value { color: #00ffff; font-size: 13px; font-weight: bold; }
+
+  /* Scan line effect */
+  #scanlines {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none; z-index: 5;
+  }
+
+  /* Loading */
+  #loading {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #050d1e; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; z-index: 100;
+    transition: opacity 0.8s;
+  }
+  #loading h2 { color: #00ffff; font-size: 18px; letter-spacing: 6px; margin-bottom: 20px; }
+  #loading-bar-outer { width: 300px; height: 3px; background: #001122; border-radius: 2px; }
+  #loading-bar { width: 0%; height: 100%; background: #00ffff; border-radius: 2px; transition: width 0.1s; box-shadow: 0 0 10px #00ffff; }
+  #loading p { color: #005566; font-size: 10px; letter-spacing: 3px; margin-top: 12px; }
+
+  /* Tooltip */
+  #tooltip {
+    position: fixed; pointer-events: none; z-index: 20;
+    background: rgba(0,10,30,0.9); border: 1px solid #00ffff66;
+    color: #00ffff; font-size: 11px; padding: 6px 12px;
+    border-radius: 6px; letter-spacing: 1px; display: none;
+    backdrop-filter: blur(4px);
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <h2>DIGITÁLIS ACÉLVÁROS 2050</h2>
+  <div id="loading-bar-outer"><div id="loading-bar"></div></div>
+  <p id="loading-text">INITIALIZING CITY CORE...</p>
+</div>
+
+<div id="canvas-container"></div>
+<div id="scanlines"></div>
+
+<div id="hud">
+  <div id="title">
+    <h1>⬡ DIGITÁLIS ACÉLVÁROS 2050 ⬡</h1>
+    <p>MISKOLC · DIÓSGYŐRI ACÉLMŰ REVITALIZÁCIÓ · TECHNOLÓGIA AZ EMBEREK SZOLGÁLATÁBAN</p>
+  </div>
+
+  <div id="legend">
+    <h3>ZÓNA TÉRKÉP</h3>
+    <div class="legend-item"><div class="legend-color" style="background:#00ff88;box-shadow:0 0 6px #00ff88"></div><div class="legend-label">ZÖLD / PARK</div></div>
+    <div class="legend-item"><div class="legend-color" style="background:#00aaff;box-shadow:0 0 6px #00aaff"></div><div class="legend-label">TECHNOLÓGIAI PARK</div></div>
+    <div class="legend-item"><div class="legend-color" style="background:#aa00ff;box-shadow:0 0 6px #aa00ff"></div><div class="legend-label">KULTÚRA / MAKERS</div></div>
+    <div class="legend-item"><div class="legend-color" style="background:#ffaa00;box-shadow:0 0 6px #ffaa00"></div><div class="legend-label">KERESKEDELEM</div></div>
+    <div class="legend-item"><div class="legend-color" style="background:#ff4444;box-shadow:0 0 6px #ff4444"></div><div class="legend-label">IPARI PARK (DÉL)</div></div>
+    <div class="legend-item"><div class="legend-color" style="background:#ffff00;box-shadow:0 0 6px #ffff00"></div><div class="legend-label">VÉDETT ÖRÖKSÉG</div></div>
+    <div class="legend-item"><div class="legend-color" style="background:#00ffff;box-shadow:0 0 6px #00ffff"></div><div class="legend-label">SMART INFRA</div></div>
+    <div class="legend-item"><div class="legend-color" style="background:#ff6600;box-shadow:0 0 6px #ff6600"></div><div class="legend-label">REKREÁCIÓ</div></div>
+  </div>
+
+  <div id="stats-bar">
+    <div class="stat-item"><span class="stat-label">TERÜLET</span><span class="stat-value">130 ha</span></div>
+    <div class="stat-item"><span class="stat-label">ZÓNÁK</span><span class="stat-value" id="stat-zones">8</span></div>
+    <div class="stat-item"><span class="stat-label">ÉV</span><span class="stat-value">2050</span></div>
+    <div class="stat-item"><span class="stat-label">AKTÍV POD</span><span class="stat-value" id="stat-pods">0</span></div>
+  </div>
+</div>
+
+<div id="controls">
+  <button class="ctrl-btn active" id="btn-overview" onclick="setView('overview')">TELJES NÉZET</button>
+  <button class="ctrl-btn" id="btn-north" onclick="setView('north')">ÉSZAK</button>
+  <button class="ctrl-btn" id="btn-south" onclick="setView('south')">DÉL</button>
+  <button class="ctrl-btn" id="btn-makers" onclick="setView('makers')">MAKERS</button>
+  <button class="ctrl-btn" id="btn-train" onclick="setView('train')">VONAT</button>
+  <button class="ctrl-btn" id="btn-night" onclick="toggleNight()">EJJEL</button>
+</div>
+
+<div id="info-panel">
+  <button id="info-close" onclick="closeInfo()">✕</button>
+  <div id="info-zone-tag">ZÓNA</div>
+  <div id="info-title">ÉPÜLET</div>
+  <div id="info-subtitle">FUNKCIÓ</div>
+  <div id="info-desc">Leírás...</div>
+  <div id="info-features">
+    <h4>⟡ SMART FUNKCIÓK</h4>
+    <div id="info-tags"></div>
+  </div>
+  <div id="info-status">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">AKTÍV</span>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script src="three.min.js"></script>
+<script>
+// ============================================================
+// DAM DIGITÁLIS ACÉLVÁROS 2050 – Interaktív 3D Szimuláció
+// ============================================================
+
+let scene, camera, renderer, clock;
+let raycaster, mouse;
+let clickableObjects = [];
+let animatedObjects = [];
+let people = [], vehicles = [], trainParts = [];
+let isNight = false;
+let currentCamTarget = { x: 0, y: 0, z: 0 };
+let targetCamPos = { x: 0, y: 60, z: 90 };
+let currentCamPos = { x: 0, y: 60, z: 90 };
+let podCount = 0;
+let loadProgress = 0;
+
+// Zone database
+const ZONES = {
+  tech_park: {
+    name: "KÖZÉPHENGERMŰ – TECHNOLÓGIAI PARK",
+    subtitle: "INNOVÁCIÓS INKUBÁTOR HUB",
+    zone: "TECHNOLÓGIAI PARK",
+    zoneColor: "#00aaff",
+    desc: "A volt Középhengermű épülete Miskolc legfontosabb innovációs centrumává alakul. A Miskolci Egyetemmel közösen működtetett startup hub, ahol KFI laborok, bérelhető gyártócellák és digitális prototípus-terek találhatók. Az épület helyi védettséget élvez – teljesen felújítva, de az ipari karaktert megőrizve.",
+    features: ["AI LABOR", "3D NYOMTATÁS", "FABLAB", "STARTUP HUB", "KFI LABOR", "HOLOGRAM TÁRGYALÓ"],
+    status: "TERVEZETT – 2027",
+    statusColor: "#ffaa00"
+  },
+  makers: {
+    name: "MAKERS DISTRICT",
+    subtitle: "KULTÚRA ÉS KREATÍVIPAR",
+    zone: "KULTÚRA / MAKERS",
+    zoneColor: "#aa00ff",
+    desc: "A DAM nyugati kapuja: az 1. bejárat és az Ógyár tér körül kialakult kreatív negyed. Sörfőzde, kávépörkölő, kerékpárszerviz, design műhelyek, galéria és interaktív ipartörténeti kiállítás. A Konzumsor felújított épületeiben street food, pop-up üzletek és közösségi terek.",
+    features: ["IPARTÖRTÉNETI MÚZEUM", "SÖRFŐZDE", "KÖZÖSSÉGI TÉR", "GALÉRIA", "FABLAB", "STREET FOOD"],
+    status: "AKTÍV FEJLESZTÉS",
+    statusColor: "#00ff88"
+  },
+  green_park: {
+    name: "DAM SÉTÁNY – ZÖLD TENGELY",
+    subtitle: "OKOS ZÖLDINFRASTRUKTÚRA",
+    zone: "ZÖLD / PARK",
+    zoneColor: "#00ff88",
+    desc: "A DAM szívén átfutó kelet-nyugati zöld tengely. Biofal épületrendszer: az épületek falában beépített automata öntözőrendszerrel és vertikális kertekkel, ahol gyümölcsök, zöldségek, oxigéntermelő fák nőnek – a lakók és dolgozók közvetlenül fogyaszthatnak belőle. Smart pad-ek, napelemes töltők, esőgyűjtők.",
+    features: ["VERTIKÁLIS KERTEK", "BIOFALAK", "SMART ÖNTÖZÉS", "NAPELEMES PADOK", "ESŐVÍZ-GYŰJTÉS", "LEVEGŐTISZTÍTÁS"],
+    status: "1. ÜTEM – 2026",
+    statusColor: "#ffaa00"
+  },
+  industrial_south: {
+    name: "DÉLI IPARI PARK",
+    subtitle: "ZÉRÓ EMISSZIÓS GYÁRTÁSI ZÓNA",
+    zone: "IPARI PARK (DÉL)",
+    zoneColor: "#ff4444",
+    desc: "A DAM déli részén 30+ hektáros összefüggő, modern ipari terület. Dróngyártás, villamos-alkatrész előállítás, energetikai ipar (napelemek, hőszivattyúk, szélturbinák). A termelési folyamatokat AI koordinálja, a hulladék automatikusan szeparálódik és a föld alatti pneumatikus rendszeren át a vonat-logisztikai központba kerül.",
+    features: ["DRÓNGYÁRTÁS", "AI TERMELÉSIRÁNYÍTÁS", "VASÚTI KAPCSOLAT", "ROBOTIZÁLT HULLADÉK", "ZÉRÓ EMISSZIÓ", "SMART GRID"],
+    status: "TERVEZETT – 2028",
+    statusColor: "#ffaa00"
+  },
+  heritage_keleti: {
+    name: "VOLT KELETI ERŐMŰ",
+    subtitle: "IPARI ÖRÖKSÉG – HELYI VÉDETT",
+    zone: "VÉDETT ÖRÖKSÉG",
+    zoneColor: "#ffff00",
+    desc: "1940-ben épített, helyi védettség alatt álló erőmű épület. A ground floor raktározásra és egyedi alkatrészgyártásra (CNC, lézervágó) alkalmas. Felső szinteken: irodák, tárgyalók, coworking. Az épület téglahomlokzata és ipari karaktere megmarad, belül teljesen modern smart office.",
+    features: ["CNC GYÁRTÁS", "COWORKING", "LÉZERVÁGÓ", "SMART OFFICE", "ÖRÖKSÉG MEGŐRZÉS"],
+    status: "FELÚJÍTÁSRA VÁR",
+    statusColor: "#ff4444"
+  },
+  heritage_kozep: {
+    name: "VOLT KÖZÉPHENGERMŰ",
+    subtitle: "IPARI ÖRÖKSÉG – HELYI VÉDETT",
+    zone: "VÉDETT ÖRÖKSÉG",
+    zoneColor: "#ffff00",
+    desc: "A DAM legnagyobb és legértékesebb védett épülete. Az 1955-ben épített hengermű csarnoka gyártósorok befogadására alkalmas méretű. A Technológiai Park szívévé válik – az épület ipari nagysága és karaktere a jövő innovációjának otthona lesz.",
+    features: ["TECHNOLÓGIAI PARK", "GYÁRTÓCELLÁK", "INKUBÁTOR", "DEMO TEREM", "KFI LABOROK"],
+    status: "PRIORITÁS – 2026",
+    statusColor: "#00ffff"
+  },
+  infra_hub: {
+    name: "SMART INFRA HUB",
+    subtitle: "OKOS VÁROSÜZEMELTETÉS",
+    zone: "SMART INFRA",
+    zoneColor: "#00ffff",
+    desc: "A hűtőtornyok és a Vízmű C-telep átgondolt újrahasznosítása. Naperőmű farm, esővíz-tározó, okos energiagazdálkodási központ. Az egész DAM területének smart grid vezérlője innen működik. IoT szenzor-hálózat, valós idejű adatplatform, biogáz potenciál. A hűtőtornyok ikonikus látványelemmé és energetikai műtárgyakká válnak.",
+    features: ["NAPERŐMŰ", "SMART GRID", "IOT CENTRAL", "BIOGÁZ", "HŰTŐTORONY ÖRÖKSÉG", "VÍZTISZTÍTÁS"],
+    status: "AKTÍV – ISD POWER UTÓD",
+    statusColor: "#00ff88"
+  },
+  recreation: {
+    name: "REKREÁCIÓS ZÓNA",
+    subtitle: "SPORT ÉS KÖZÖSSÉGI CENTRUM",
+    zone: "REKREÁCIÓ",
+    zoneColor: "#ff6600",
+    desc: "Az északi területen, a Kiss Ernő utca és a DAM Sétány között. 1000 férőhelyes konferenciaközpont, multifunkciós sportlétesítmény, P+R parkoló. A Szinva-patak zöldfolyosójához csatlakozik. A Miskolci Tiszai Pályaudvar direkt kapcsolatán át a levitációs vonat végállomása is itt lesz.",
+    features: ["KONFERENCIA 1000 fő", "SPORT CENTRUM", "P+R PARKOLÓ", "LEVITÁCIÓS ÁLLOMÁS", "SZINVA ZÖLDFOLYOSÓ"],
+    status: "TERVEZETT – 2030",
+    statusColor: "#ffaa00"
+  },
+  trade: {
+    name: "KERESKEDELMI-SZOLGÁLTATÓ SÁV",
+    subtitle: "KISS ERNŐ UTCA MENTE",
+    zone: "KERESKEDELEM",
+    zoneColor: "#ffaa00",
+    desc: "A Kiss Ernő utca mentén kialakított multifunkciós kereskedelmi zóna. Smart üzletek ahol arcfelismerő technológia azonosítja a vásárlókat, automatikus fizetéssel. Éttermek, irodaházak, autókereskedések, szervizek. Az épületek bio-integrált homlokzattal és zöldtetővel épülnek.",
+    features: ["ARCFELISMERŐS BOLT", "AUTO-FIZETÉS", "SMART ÉTTEREM", "ZÖLDTETŐ", "COWORKING"],
+    status: "TERVEZETT – 2028",
+    statusColor: "#ffaa00"
+  },
+  train_station: {
+    name: "VASÚTI LOGISZTIKAI KÖZPONT + LEVITÁCIÓ",
+    subtitle: "MULTIMODÁLIS KÖZLEKEDÉSI HUB",
+    zone: "SMART INFRA",
+    zoneColor: "#00ffff",
+    desc: "A Miskolci Tiszai Pályaudvarhoz közvetlenül csatlakozó vasúti rendszer teljes megújítása. A déli ipari park hulladéktömörítő automatája innen szállítja el robotikusan a presselt hulladékkockákat. Emellett: mágneses levitációs (maglev) városi ingajárat – Miskolc belváros ↔ DAM ↔ Tiszai Pályaudvar. Automatikus, karbonmentes, 200 km/h-s.",
+    features: ["MAGLEV VONAT", "HULLADÉK-LOGISZTIKA", "CARGO ROBOT", "TISZAI PÁ KAPCSOLAT", "KARBONMENTES", "AUTO VEZETŐ"],
+    status: "VÍZIÓ – 2040",
+    statusColor: "#aa00ff"
+  },
+  waste_system: {
+    name: "PNEUMATIKUS HULLADÉKRENDSZER",
+    subtitle: "ROBOTIZÁLT SZELEKTÍV GYŰJTÉS",
+    zone: "SMART INFRA",
+    zoneColor: "#00ffff",
+    desc: "A DAM területén föld alatti pneumatikus csőhálózat fut. Az épületekben elhelyezett szelektív dobókba kerül a hulladék (műanyag, fém, papír, organikus) – automatikusan szeparálva. Szenzor érzékeli a teltséget, robot összegyűjti, tömöríti, darabolja, majd a vonat-logisztikai rendszerbe juttatja. Nulla kézi munkával.",
+    features: ["PNEUMATIKUS CSŐHÁLÓZAT", "ROBOT SZORTÍROZÁS", "AUTO TÖMÖRÍTÉS", "SZENZOR HÁLÓZAT", "VONAT KAPCSOLAT"],
+    status: "TERVEZETT – 2032",
+    statusColor: "#ffaa00"
+  },
+  transit_hub: {
+    name: "OKOS TÖMEGKÖZLEKEDÉS",
+    subtitle: "ARCFELISMERŐS AUTONÓM BUSZOK",
+    zone: "SMART INFRA",
+    zoneColor: "#00ffff",
+    desc: "Hidrogén hajtású, teljesen önvezető elektromos buszok. A megállókban arcfelismerő kamera azonosítja az utast – a digitális városi azonosítóhoz kötve automatikusan levonódik a viteldíj, nincs jegy, nincs pénztárca. A buszok valós idejű AI forgalomirányítással közlekednek, sosem állnak sorban. Az útvonalak dinamikusan változnak a kereslet alapján.",
+    features: ["ARCFELISMERÉS", "AUTO-FIZETÉS", "ÖNVEZETŐ BUS", "AI FORGALOM", "HIDROGÉN HAJTÁS", "DINAMIKUS ÚTVONAL"],
+    status: "PILOT – 2028",
+    statusColor: "#00ffff"
+  }
+};
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a1628);
+  scene.fog = new THREE.FogExp2(0x0a1628, 0.006);
+
+  camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 60, 90);
+  camera.lookAt(0, 0, 0);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+  clock = new THREE.Clock();
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
+  buildScene();
+  setupLights();
+  addPeople();
+  addVehicles();
+  addLevitationTrain();
+  setupEvents();
+  simulateLoad();
+}
+
+// ============================================================
+// LOADING
+// ============================================================
+function simulateLoad() {
+  const steps = [
+    [10, "CITY CORE INITIALIZED..."],
+    [25, "LOADING ZONE DATA..."],
+    [40, "BUILDING 3D MESH..."],
+    [60, "SPAWNING CITIZENS..."],
+    [75, "ACTIVATING SMART GRID..."],
+    [88, "SYNCING AI SYSTEMS..."],
+    [100, "READY"]
+  ];
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i >= steps.length) { clearInterval(interval); hideLoding(); return; }
+    document.getElementById('loading-bar').style.width = steps[i][0] + '%';
+    document.getElementById('loading-text').textContent = steps[i][1];
+    i++;
+  }, 200);
+}
+function hideLoding() {
+  setTimeout(() => {
+    const el = document.getElementById('loading');
+    el.style.opacity = '0';
+    setTimeout(() => el.style.display = 'none', 800);
+  }, 300);
+}
+
+// ============================================================
+// SCENE BUILDING
+// ============================================================
+function buildScene() {
+  addGround();
+  addGrid();
+  addRoads();
+  addRailTrack();
+  addZones();
+  addBuildings();
+  addHeatTowers();
+  addSolarFarm();
+  addWaterTower();
+  addDAMSétány();
+  addTrees();
+  addStreetLights();
+  addParticles();
+}
+
+function addGround() {
+  const geo = new THREE.PlaneGeometry(200, 200);
+  const mat = new THREE.MeshLambertMaterial({ color: 0x1a2a1a });
+  const ground = new THREE.Mesh(geo, mat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+}
+
+function addGrid() {
+  const grid = new THREE.GridHelper(200, 40, 0x1a3a2a, 0x0d2018);
+  grid.position.y = 0.01;
+  scene.add(grid);
+}
+
+function addRoads() {
+  const roadMat = new THREE.MeshLambertMaterial({ color: 0x2a3545 });
+  // Main E-W collector road
+  addBox(0, 0.05, 0, 160, 0.1, 6, roadMat);
+  // N-S collector
+  addBox(0, 0.05, 0, 6, 0.1, 160, roadMat);
+  // Kiss Ernő utca (north)
+  addBox(0, 0.05, -65, 160, 0.1, 5, roadMat);
+  // Southern road
+  addBox(0, 0.05, 65, 160, 0.1, 4, roadMat);
+
+  // Road markings (dashed center line)
+  const lineMat = new THREE.MeshBasicMaterial({ color: 0xaabbcc });
+  for (let x = -75; x < 75; x += 6) {
+    addBox(x, 0.12, 0, 3, 0.05, 0.15, lineMat);
+  }
+}
+
+function addRailTrack() {
+  // Railway track from S to Tiszai station direction
+  const railMat = new THREE.MeshLambertMaterial({ color: 0x553300 });
+  const railMetalMat = new THREE.MeshLambertMaterial({ color: 0x888888 });
+
+  // Sleepers
+  for (let z = -70; z < 70; z += 2) {
+    addBox(55, 0.1, z, 6, 0.15, 0.4, railMat);
+  }
+  // Rails
+  addBox(53.5, 0.25, 0, 0.2, 0.2, 145, railMetalMat);
+  addBox(56.5, 0.25, 0, 0.2, 0.2, 145, railMetalMat);
+}
+
+function addZones() {
+  const zoneDefs = [
+    // [x, z, w, d, color, label]
+    [-55, -45, 35, 30, 0x1a2255, "MAKERS / KULTÚRA"],   // NW – Makers District
+    [-20, -50, 30, 20, 0x0a1f55, "TECHNOLÓGIAI PARK"],   // N-center – Tech Park
+    [20, -50, 30, 20, 0x0f3322, "ZÖLD TENGELY"],         // N-center-E – Green
+    [50, -40, 28, 22, 0x332800, "KERESKEDELEM"],         // NE – Trade
+    [-60, 10, 30, 50, 0x331111, "IPARI DÉL"],            // W-S – Industrial
+    [10, 20, 60, 50, 0x331111, "IPARI DÉL"],             // S – Industrial
+    [-20, -25, 25, 18, 0x0a2222, "SMART INFRA"],         // C – Infra
+    [60, -10, 20, 40, 0x2a0033, "REKREÁCIÓ"],            // E – Recreation
+  ];
+  zoneDefs.forEach(([x, z, w, d, col, label]) => {
+    const geo = new THREE.PlaneGeometry(w, d);
+    const mat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.85 });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.set(x, 0.02, z);
+    scene.add(mesh);
+
+    // Zone border
+    const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(w, 0.01, d));
+    const edgeMat = new THREE.LineBasicMaterial({ color: new THREE.Color(col).multiplyScalar(4), transparent: true, opacity: 0.4 });
+    const edgeMesh = new THREE.LineSegments(edges, edgeMat);
+    edgeMesh.position.set(x, 0.03, z);
+    scene.add(edgeMesh);
+  });
+}
+
+function addBuildings() {
+  // === NORTH-WEST: MAKERS DISTRICT ===
+  addBuilding(-65, -42, 10, 8, 4, 0xaa00ff, 'makers', "MAKERS DISTRICT", true);
+  addBuilding(-50, -48, 8, 6, 3, 0x880088, 'makers', "KONZUMSOR", true);
+  addBuilding(-58, -55, 6, 5, 2, 0x660066, 'makers', "ÓGYÁR TÉR", false);
+
+  // === NORTH CENTER: TECH PARK ===
+  addBuilding(-18, -52, 14, 10, 8, 0x0055ff, 'heritage_kozep', "KÖZÉPHENGERMŰ", true);
+  addBuilding(-5, -46, 6, 5, 5, 0x003399, 'tech_park', "TECH PARK A", true);
+  addBuilding(5, -46, 6, 5, 6, 0x004488, 'tech_park', "TECH PARK B", true);
+
+  // === NORTH-EAST: TRADE ===
+  addBuilding(40, -50, 10, 7, 5, 0xff8800, 'trade', "KERESKEDELEM", true);
+  addBuilding(55, -48, 8, 6, 4, 0xcc6600, 'trade', "IRODAHÁZ", true);
+
+  // === CENTER: INFRA HUB ===
+  addBuilding(-18, -28, 8, 6, 3, 0x006666, 'infra_hub', "SMART INFRA", true);
+  addBuilding(-8, -22, 5, 5, 4, 0x005555, 'transit_hub', "KÖZLEKEDÉSI HUB", true);
+
+  // === EAST: RECREATION ===
+  addBuilding(65, -20, 12, 10, 6, 0xff5500, 'recreation', "REKREÁCIÓ / KONF.", true);
+  addBuilding(72, -5, 8, 6, 4, 0xcc4400, 'recreation', "SPORT CENTRUM", true);
+
+  // === SOUTH: INDUSTRIAL PARK ===
+  addBuilding(-55, 20, 16, 10, 5, 0xff2222, 'industrial_south', "IPARI CSARNOK A", true);
+  addBuilding(-35, 30, 14, 12, 4, 0xcc1111, 'industrial_south', "IPARI CSARNOK B", true);
+  addBuilding(-10, 35, 18, 10, 5, 0xff2222, 'industrial_south', "IPARI CSARNOK C", true);
+  addBuilding(15, 40, 12, 10, 4, 0xaa0000, 'industrial_south', "DRÓN GYÁR", true);
+
+  // === HERITAGE BUILDINGS ===
+  addBuilding(25, -30, 10, 8, 6, 0xffdd00, 'heritage_keleti', "KELETI ERŐMŰ", true);
+  addBuilding(40, -30, 7, 6, 3, 0xddbb00, 'heritage_keleti', "I. HIVATALHÁZ", true);
+
+  // === TRAIN STATION ===
+  addBuilding(55, 55, 18, 10, 4, 0x00aaff, 'train_station', "VONAT LOGISZTIKA", true);
+
+  // === WASTE SYSTEM nodes ===
+  addWasteNode(-40, 5);
+  addWasteNode(10, 10);
+  addWasteNode(-15, 50);
+
+  // === DAM SÉTÁNY buildings ===
+  addBuilding(-30, -2, 6, 4, 5, 0x004422, 'green_park', "BIOÉPÜLET", true);
+  addBuilding(15, -3, 6, 4, 4, 0x006633, 'green_park', "ZÖLD TÉR", true);
+}
+
+function addBuilding(x, z, w, d, h, color, zoneKey, name, clickable) {
+  const mat = new THREE.MeshLambertMaterial({ color: color });
+  const geo = new THREE.BoxGeometry(w, h, d);
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, h / 2, z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+
+  // Glow edges
+  const edges = new THREE.EdgesGeometry(geo);
+  const edgeMat = new THREE.LineBasicMaterial({
+    color: new THREE.Color(color).multiplyScalar(2),
+    transparent: true, opacity: 0.6
+  });
+  const edgeMesh = new THREE.LineSegments(edges, edgeMat);
+  edgeMesh.position.copy(mesh.position);
+  scene.add(edgeMesh);
+
+  // Roof glow plane
+  const roofGeo = new THREE.PlaneGeometry(w * 0.9, d * 0.9);
+  const roofMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(color),
+    transparent: true, opacity: 0.3, side: THREE.DoubleSide
+  });
+  const roofMesh = new THREE.Mesh(roofGeo, roofMat);
+  roofMesh.rotation.x = -Math.PI / 2;
+  roofMesh.position.set(x, h + 0.05, z);
+  scene.add(roofMesh);
+
+  if (clickable && zoneKey && ZONES[zoneKey]) {
+    mesh.userData = { zoneKey, name, h, x, z };
+    clickableObjects.push(mesh);
+    podCount++;
+    document.getElementById('stat-pods').textContent = podCount;
+  }
+
+  // Window lights
+  if (h > 3) {
+    const winMat = new THREE.MeshBasicMaterial({ color: 0xffffaa, transparent: true, opacity: 0.6 });
+    for (let floor = 1; floor < h - 0.5; floor += 2) {
+      for (let wx = -w / 2 + 1; wx < w / 2 - 0.5; wx += 2) {
+        const winGeo = new THREE.PlaneGeometry(0.8, 0.6);
+        const win = new THREE.Mesh(winGeo, winMat);
+        win.position.set(x + wx, floor, z - d / 2 - 0.01);
+        scene.add(win);
+        animatedObjects.push({ mesh: win, type: 'window', baseOpacity: 0.6, phase: Math.random() * Math.PI * 2 });
+      }
+    }
+  }
+
+  return mesh;
+}
+
+function addWasteNode(x, z) {
+  const mat = new THREE.MeshLambertMaterial({ color: 0x00ffaa });
+  const geo = new THREE.CylinderGeometry(1.2, 1.5, 1.5, 8);
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, 0.75, z);
+  scene.add(mesh);
+
+  const edges = new THREE.EdgesGeometry(geo);
+  const edgeMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.8 });
+  const em = new THREE.LineSegments(edges, edgeMat);
+  em.position.copy(mesh.position);
+  scene.add(em);
+
+  mesh.userData = { zoneKey: 'waste_system', name: 'PNEUMATIKUS HULLADÉK HUB' };
+  clickableObjects.push(mesh);
+
+  // Pulsing ring
+  const ringGeo = new THREE.RingGeometry(1.8, 2.2, 16);
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffaa, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.set(x, 0.1, z);
+  scene.add(ring);
+  animatedObjects.push({ mesh: ring, type: 'ring', phase: Math.random() * Math.PI * 2 });
+}
+
+function addHeatTowers() {
+  const positions = [[-30, -38], [-38, -38]];
+  positions.forEach(([x, z]) => {
+    const mat = new THREE.MeshLambertMaterial({ color: 0x00ffff });
+    const towerGeo = new THREE.CylinderGeometry(1.8, 2.5, 18, 12);
+    const tower = new THREE.Mesh(towerGeo, mat);
+    tower.position.set(x, 9, z);
+    tower.castShadow = true;
+    scene.add(tower);
+
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.7 });
+    const em = new THREE.LineSegments(new THREE.EdgesGeometry(towerGeo), edgeMat);
+    em.position.copy(tower.position);
+    scene.add(em);
+
+    tower.userData = { zoneKey: 'infra_hub', name: 'HŰTŐTORONY – SMART ENERGIA' };
+    clickableObjects.push(tower);
+
+    // Steam particle
+    for (let i = 0; i < 5; i++) {
+      const sGeo = new THREE.SphereGeometry(0.3 + Math.random() * 0.3, 6, 6);
+      const sMat = new THREE.MeshBasicMaterial({ color: 0x88ccff, transparent: true, opacity: 0.3 });
+      const steam = new THREE.Mesh(sGeo, sMat);
+      steam.position.set(x + (Math.random() - 0.5), 18 + i * 1.5, z + (Math.random() - 0.5));
+      scene.add(steam);
+      animatedObjects.push({ mesh: steam, type: 'steam', baseY: steam.position.y, phase: i * 0.8 });
+    }
+  });
+}
+
+function addSolarFarm() {
+  const panelMat = new THREE.MeshLambertMaterial({ color: 0x001155, side: THREE.DoubleSide });
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 4; j++) {
+      const pGeo = new THREE.PlaneGeometry(2.5, 1.5);
+      const panel = new THREE.Mesh(pGeo, panelMat);
+      panel.rotation.x = -Math.PI / 4;
+      panel.position.set(-75 + i * 4, 1.5, 35 + j * 4);
+      scene.add(panel);
+      // Shimmer
+      const shimGeo = new THREE.PlaneGeometry(2.5, 1.5);
+      const shimMat = new THREE.MeshBasicMaterial({ color: 0x0033ff, transparent: true, opacity: 0.2, side: THREE.DoubleSide });
+      const shim = new THREE.Mesh(shimGeo, shimMat);
+      shim.rotation.x = -Math.PI / 4;
+      shim.position.set(-75 + i * 4, 1.52, 35 + j * 4);
+      scene.add(shim);
+      animatedObjects.push({ mesh: shim, type: 'solar', phase: (i + j) * 0.5 });
+    }
+  }
+}
+
+function addWaterTower() {
+  const mat = new THREE.MeshLambertMaterial({ color: 0x0088cc });
+  const geo = new THREE.CylinderGeometry(3, 2.5, 12, 10);
+  const tower = new THREE.Mesh(geo, mat);
+  tower.position.set(-85, 6, -55);
+  scene.add(tower);
+  tower.userData = { zoneKey: 'infra_hub', name: 'VÍZMŰ C-TELEP' };
+  clickableObjects.push(tower);
+}
+
+function addDAMSétány() {
+  // Green corridor along main E-W road
+  const parkMat = new THREE.MeshLambertMaterial({ color: 0x1a6633 });
+  // Left strip
+  addBox(0, 0.08, -5, 150, 0.1, 3, parkMat);
+  addBox(0, 0.08, 5, 150, 0.1, 3, parkMat);
+  // Cycle path markings
+  const cycleMat = new THREE.MeshBasicMaterial({ color: 0x004422 });
+  addBox(0, 0.12, -4.5, 148, 0.05, 0.3, cycleMat);
+  addBox(0, 0.12, 4.5, 148, 0.05, 0.3, cycleMat);
+}
+
+function addTrees() {
+  const trunkMat = new THREE.MeshLambertMaterial({ color: 0x3a2010 });
+  const leafMat = new THREE.MeshLambertMaterial({ color: 0x228833 });
+  const bioMat = new THREE.MeshLambertMaterial({ color: 0x00aa44 }); // biowall trees
+
+  const treePositions = [];
+  // Along sétány
+  for (let x = -70; x < 70; x += 10) { treePositions.push([x, -6, false]); treePositions.push([x, 6, false]); }
+  // Scattered in parks
+  for (let i = 0; i < 20; i++) { treePositions.push([(Math.random() - 0.5) * 100 - 30, 25 + Math.random() * 30, false]); }
+  // Bio wall trees (on buildings)
+  for (let i = 0; i < 8; i++) { treePositions.push([-15 + i * 6, -2, true]); }
+
+  treePositions.forEach(([x, z, isBio]) => {
+    const h = isBio ? (0.5 + Math.random() * 1) : (1.5 + Math.random() * 1.5);
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, h, 5), trunkMat);
+    trunk.position.set(x, h / 2, z);
+    scene.add(trunk);
+    const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.6 + Math.random() * 0.5, 7, 7), isBio ? bioMat : leafMat);
+    leaf.position.set(x, h + 0.4, z);
+    scene.add(leaf);
+    animatedObjects.push({ mesh: leaf, type: 'tree', baseY: leaf.position.y, phase: Math.random() * Math.PI * 2 });
+  });
+}
+
+function addStreetLights() {
+  const poleMat = new THREE.MeshLambertMaterial({ color: 0x334455 });
+  const lightMat = new THREE.MeshBasicMaterial({ color: 0x88ddff });
+  for (let x = -70; x < 70; x += 14) {
+    [[-10, 1], [10, -1]].forEach(([z, offset]) => {
+      addBox(x + offset, 2, z, 0.15, 4, 0.15, poleMat);
+      const lGeo = new THREE.SphereGeometry(0.4, 6, 6);
+      const lMesh = new THREE.Mesh(lGeo, lightMat);
+      lMesh.position.set(x + offset, 4.5, z);
+      scene.add(lMesh);
+      // Light glow
+      const gGeo = new THREE.PlaneGeometry(3, 3);
+      const gMat = new THREE.MeshBasicMaterial({ color: 0x88ddff, transparent: true, opacity: 0.04, side: THREE.DoubleSide });
+      const gMesh = new THREE.Mesh(gGeo, gMat);
+      gMesh.rotation.x = -Math.PI / 2;
+      gMesh.position.set(x + offset, 0.5, z);
+      scene.add(gMesh);
+    });
+  }
+}
+
+function addParticles() {
+  // Floating data particles
+  const geo = new THREE.BufferGeometry();
+  const count = 300;
+  const positions = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * 180;
+    positions[i * 3 + 1] = 0.5 + Math.random() * 25;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 180;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const mat = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.15, transparent: true, opacity: 0.4 });
+  const particles = new THREE.Points(geo, mat);
+  scene.add(particles);
+  animatedObjects.push({ mesh: particles, type: 'particles', positions });
+}
+
+// ============================================================
+// LIGHTS
+// ============================================================
+function setupLights() {
+  const ambient = new THREE.AmbientLight(0x8899cc, 1.8);
+  scene.add(ambient);
+
+  const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+  sunLight.position.set(-60, 120, -40);
+  scene.add(sunLight);
+
+  const dirLight = new THREE.DirectionalLight(0x88ccff, 1.4);
+  dirLight.position.set(50, 80, 50);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 2048;
+  dirLight.shadow.mapSize.height = 2048;
+  dirLight.shadow.camera.near = 0.5;
+  dirLight.shadow.camera.far = 300;
+  dirLight.shadow.camera.left = -100;
+  dirLight.shadow.camera.right = 100;
+  dirLight.shadow.camera.top = 100;
+  dirLight.shadow.camera.bottom = -100;
+  scene.add(dirLight);
+
+  // Neon zone lights
+  const zoneLights = [
+    [0x00aaff, -18, -52], [0xaa00ff, -55, -42], [0xff4444, -10, 35],
+    [0x00ff88, 0, -8], [0xffaa00, 40, -50], [0x00ffff, -35, -35]
+  ];
+  zoneLights.forEach(([col, x, z]) => {
+    const pl = new THREE.PointLight(col, 2.5, 60);
+    pl.position.set(x, 8, z);
+    scene.add(pl);
+    animatedObjects.push({ mesh: pl, type: 'pointlight', base: 0.6, phase: Math.random() * Math.PI * 2 });
+  });
+}
+
+// ============================================================
+// PEOPLE (animated walkers)
+// ============================================================
+function addPeople() {
+  const paths = [
+    { points: [[-70, 0], [70, 0]], z: -7, speed: 0.08 },
+    { points: [[-70, 0], [70, 0]], z: 7, speed: -0.06 },
+    { points: [[-70, 0], [70, 0]], z: -8.5, speed: 0.05 },
+    { points: [[-50, 0], [50, 0]], z: -50, speed: 0.04 },
+    { points: [[-50, 0], [50, 0]], z: -30, speed: -0.07 },
+    { points: [[0, -65], [0, 65]], x: -3, speed: 0.06, vertical: true },
+    { points: [[0, -65], [0, 65]], x: 3, speed: -0.05, vertical: true },
+  ];
+
+  const bodyMat = new THREE.MeshLambertMaterial({ color: 0xaabbcc });
+  const headMat = new THREE.MeshLambertMaterial({ color: 0xffddbb });
+
+  for (let p = 0; p < 40; p++) {
+    const path = paths[p % paths.length];
+    const group = new THREE.Group();
+
+    // Body
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 0.7, 6), new THREE.MeshLambertMaterial({ color: new THREE.Color(Math.random() * 0.3 + 0.2, Math.random() * 0.3 + 0.3, Math.random() * 0.4 + 0.4) }));
+    body.position.y = 0.6;
+    group.add(body);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 7, 7), headMat);
+    head.position.y = 1.15;
+    group.add(head);
+
+    if (path.vertical) {
+      group.position.set(path.x || 0, 0, (Math.random() - 0.5) * 120);
+    } else {
+      group.position.set((Math.random() - 0.5) * 120, 0, path.z);
+    }
+    scene.add(group);
+    people.push({ group, path, t: Math.random(), speed: path.speed, bobPhase: Math.random() * Math.PI * 2 });
+  }
+}
+
+// ============================================================
+// VEHICLES
+// ============================================================
+function addVehicles() {
+  // Smart buses
+  const busMat = new THREE.MeshLambertMaterial({ color: 0x004488 });
+  const busGlowMat = new THREE.MeshBasicMaterial({ color: 0x00aaff, transparent: true, opacity: 0.5 });
+  for (let i = 0; i < 4; i++) {
+    const bus = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(6, 1.8, 2), busMat);
+    body.position.y = 0.9;
+    bus.add(body);
+    const glow = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.1, 2.2), busGlowMat);
+    glow.position.y = 0.1;
+    bus.add(glow);
+    // Windows
+    const winMat = new THREE.MeshBasicMaterial({ color: 0x88ddff, transparent: true, opacity: 0.7 });
+    for (let w = -2; w <= 2; w += 1.2) {
+      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.8), winMat);
+      win.position.set(w, 1.1, -1.01);
+      bus.add(win);
+    }
+    const routes = [
+      { axis: 'x', z: -50, startX: -70, range: 140 },
+      { axis: 'x', z: -65, startX: -70, range: 140 },
+      { axis: 'z', x: -3, startZ: -70, range: 140 },
+      { axis: 'z', x: 3, startZ: -70, range: 140 },
+    ];
+    const route = routes[i % routes.length];
+    if (route.axis === 'x') {
+      bus.position.set(route.startX + Math.random() * route.range, 0, route.z);
+    } else {
+      bus.position.set(route.x, 0, route.startZ + Math.random() * route.range);
+      bus.rotation.y = Math.PI / 2;
+    }
+    scene.add(bus);
+    vehicles.push({ mesh: bus, route, t: Math.random(), speed: 0.12 + Math.random() * 0.06 });
+  }
+}
+
+// ============================================================
+// LEVITATION TRAIN (MAGLEV)
+// ============================================================
+function addLevitationTrain() {
+  const trainMat = new THREE.MeshLambertMaterial({ color: 0x00eeee });
+  const glowMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.6 });
+
+  const trainGroup = new THREE.Group();
+
+  // Main body – sleek futuristic shape
+  const bodyGeo = new THREE.BoxGeometry(20, 1.6, 3);
+  const body = new THREE.Mesh(bodyGeo, trainMat);
+  trainGroup.add(body);
+
+  // Nose (front)
+  const noseGeo = new THREE.ConeGeometry(1.5, 5, 6);
+  noseGeo.applyMatrix4(new THREE.Matrix4().makeRotationZ(-Math.PI / 2));
+  const nose = new THREE.Mesh(noseGeo, trainMat);
+  nose.position.set(12.5, 0, 0);
+  trainGroup.add(nose);
+
+  // Glow bottom
+  const glowGeo = new THREE.PlaneGeometry(20, 3);
+  const glowMesh = new THREE.Mesh(glowGeo, glowMat);
+  glowMesh.rotation.x = -Math.PI / 2;
+  glowMesh.position.y = -0.85;
+  trainGroup.add(glowMesh);
+
+  // Windows
+  const winMat = new THREE.MeshBasicMaterial({ color: 0xaaffff, transparent: true, opacity: 0.8 });
+  for (let w = -8; w <= 8; w += 2.5) {
+    const win = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.8), winMat);
+    win.position.set(w, 0.3, -1.51);
+    trainGroup.add(win);
+  }
+
+  // Magnetic levitation glow rail effect
+  const railGlowGeo = new THREE.PlaneGeometry(200, 0.3);
+  const railGlowMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+  const railGlow = new THREE.Mesh(railGlowGeo, railGlowMat);
+  railGlow.rotation.x = -Math.PI / 2;
+  railGlow.position.set(0, 3.2, -67);
+  scene.add(railGlow);
+  animatedObjects.push({ mesh: railGlow, type: 'railglow', phase: 0 });
+
+  // Position train above the maglev rail
+  trainGroup.position.set(-80, 4.0, -67);
+  trainGroup.rotation.y = 0;
+  scene.add(trainGroup);
+
+  trainParts.push({ group: trainGroup, t: 0, speed: 0.35, levitationPhase: 0 });
+}
+
+// ============================================================
+// SETUP EVENTS
+// ============================================================
+function setupEvents() {
+  window.addEventListener('resize', onResize);
+  renderer.domElement.addEventListener('click', onClick);
+  renderer.domElement.addEventListener('mousemove', onMouseMove);
+
+  // Drag rotation
+  let isDragging = false, prevX = 0, prevY = 0;
+  let phi = 0.8, theta = 0, radius = 100;
+
+  renderer.domElement.addEventListener('mousedown', (e) => { isDragging = true; prevX = e.clientX; prevY = e.clientY; });
+  renderer.domElement.addEventListener('mouseup', () => isDragging = false);
+  renderer.domElement.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - prevX, dy = e.clientY - prevY;
+    theta -= dx * 0.005;
+    phi = Math.max(0.15, Math.min(1.4, phi - dy * 0.005));
+    prevX = e.clientX; prevY = e.clientY;
+    targetCamPos.x = radius * Math.sin(phi) * Math.sin(theta) + currentCamTarget.x;
+    targetCamPos.y = radius * Math.cos(phi) + 5;
+    targetCamPos.z = radius * Math.sin(phi) * Math.cos(theta) + currentCamTarget.z;
+  });
+  renderer.domElement.addEventListener('wheel', (e) => {
+    radius = Math.max(20, Math.min(200, radius + e.deltaY * 0.1));
+    targetCamPos.x = radius * Math.sin(phi) * Math.sin(theta) + currentCamTarget.x;
+    targetCamPos.y = radius * Math.cos(phi) + 5;
+    targetCamPos.z = radius * Math.sin(phi) * Math.cos(theta) + currentCamTarget.z;
+  });
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function onClick(e) {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(clickableObjects);
+  if (intersects.length > 0) {
+    const obj = intersects[0].object;
+    if (obj.userData.zoneKey) showInfo(obj.userData.zoneKey, obj.userData.name);
+  }
+}
+
+function onMouseMove(e) {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(clickableObjects);
+  const tooltip = document.getElementById('tooltip');
+  if (intersects.length > 0 && intersects[0].object.userData.name) {
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY - 10) + 'px';
+    tooltip.textContent = '▸ ' + intersects[0].object.userData.name;
+    renderer.domElement.style.cursor = 'pointer';
+  } else {
+    tooltip.style.display = 'none';
+    renderer.domElement.style.cursor = 'default';
+  }
+}
+
+// ============================================================
+// INFO PANEL
+// ============================================================
+function showInfo(zoneKey, buildingName) {
+  const data = ZONES[zoneKey];
+  if (!data) return;
+  document.getElementById('info-zone-tag').textContent = data.zone;
+  document.getElementById('info-zone-tag').style.background = data.zoneColor + '33';
+  document.getElementById('info-zone-tag').style.color = data.zoneColor;
+  document.getElementById('info-zone-tag').style.borderColor = data.zoneColor + '66';
+  document.getElementById('info-zone-tag').style.border = '1px solid ' + data.zoneColor + '66';
+  document.getElementById('info-title').textContent = buildingName || data.name;
+  document.getElementById('info-subtitle').textContent = data.subtitle;
+  document.getElementById('info-desc').textContent = data.desc;
+  document.getElementById('info-tags').innerHTML = data.features.map(f => `<span class="feature-tag">${f}</span>`).join('');
+  document.getElementById('status-dot').style.background = data.statusColor;
+  document.getElementById('status-dot').style.boxShadow = '0 0 8px ' + data.statusColor;
+  document.getElementById('status-text').textContent = data.status;
+  document.getElementById('info-panel').classList.add('visible');
+}
+
+function closeInfo() {
+  document.getElementById('info-panel').classList.remove('visible');
+}
+
+// ============================================================
+// CAMERA VIEWS
+// ============================================================
+function setView(view) {
+  document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
+  var btnEl = document.getElementById('btn-' + view); if (btnEl) btnEl.classList.add('active');
+  const views = {
+    overview: { pos: [0, 80, 100], target: [0, 0, 0] },
+    north:    { pos: [-20, 45, -20], target: [-20, 0, -45] },
+    south:    { pos: [0, 45, 80], target: [0, 0, 40] },
+    makers:   { pos: [-60, 35, 10], target: [-55, 0, -42] },
+    train:    { pos: [20, 25, -55], target: [0, 3, -67] },
+  };
+  const v = views[view];
+  if (!v) return;
+  targetCamPos = { x: v.pos[0], y: v.pos[1], z: v.pos[2] };
+  currentCamTarget = { x: v.target[0], y: v.target[1], z: v.target[2] };
+}
+
+function toggleNight() {
+  isNight = !isNight;
+  const btn = document.getElementById('btn-night');
+  if (isNight) {
+    scene.background = new THREE.Color(0x000510);
+    scene.fog = new THREE.FogExp2(0x000510, 0.008);
+    btn.classList.add('active');
+    btn.textContent = '☀ NAPPAL';
+  } else {
+    scene.background = new THREE.Color(0x000511);
+    scene.fog = new THREE.FogExp2(0x000511, 0.012);
+    btn.classList.remove('active');
+    btn.textContent = '🌙 ÉJJEL';
+  }
+}
+
+// ============================================================
+// HELPER
+// ============================================================
+function addBox(x, y, z, w, h, d, mat) {
+  const geo = new THREE.BoxGeometry(w, h, d);
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set(x, y, z);
+  scene.add(mesh);
+  return mesh;
+}
+
+// ============================================================
+// ANIMATION LOOP
+// ============================================================
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // Camera smooth follow
+  currentCamPos.x += (targetCamPos.x - currentCamPos.x) * 0.04;
+  currentCamPos.y += (targetCamPos.y - currentCamPos.y) * 0.04;
+  currentCamPos.z += (targetCamPos.z - currentCamPos.z) * 0.04;
+  camera.position.set(currentCamPos.x, currentCamPos.y, currentCamPos.z);
+  camera.lookAt(currentCamTarget.x, currentCamTarget.y, currentCamTarget.z);
+
+  // Animated objects
+  animatedObjects.forEach(obj => {
+    const { mesh, type, phase = 0 } = obj;
+    switch (type) {
+      case 'window':
+        mesh.material.opacity = obj.baseOpacity * (0.7 + 0.3 * Math.sin(t * 0.3 + phase));
+        break;
+      case 'ring':
+        mesh.scale.setScalar(0.9 + 0.3 * Math.sin(t * 2 + phase));
+        mesh.material.opacity = 0.5 + 0.3 * Math.sin(t * 2 + phase);
+        break;
+      case 'steam':
+        mesh.position.y = obj.baseY + Math.sin(t * 0.8 + phase) * 0.5 + (t * 0.3) % 4;
+        mesh.material.opacity = 0.3 - ((t * 0.3) % 4) * 0.07;
+        break;
+      case 'solar':
+        mesh.material.opacity = 0.1 + 0.2 * Math.abs(Math.sin(t * 0.5 + phase));
+        break;
+      case 'tree':
+        mesh.position.y = obj.baseY + Math.sin(t * 0.7 + phase) * 0.05;
+        mesh.rotation.z = Math.sin(t * 0.4 + phase) * 0.03;
+        break;
+      case 'pointlight':
+        mesh.intensity = obj.base * (0.9 + 0.1 * Math.sin(t * 0.5 + phase));
+        break;
+      case 'particles':
+        const pos = obj.positions;
+        for (let i = 0; i < pos.length / 3; i++) {
+          pos[i * 3 + 1] = (pos[i * 3 + 1] - 0.5 + t * 0.01) % 25 + 0.5;
+        }
+        mesh.geometry.attributes.position.needsUpdate = true;
+        break;
+      case 'railglow':
+        mesh.material.opacity = 0.2 + 0.3 * Math.abs(Math.sin(t * 2));
+        break;
+    }
+  });
+
+  // People walking
+  people.forEach(p => {
+    p.t += p.speed * 0.005;
+    if (p.t > 1) p.t -= 1;
+    if (p.t < 0) p.t += 1;
+    const pos = (p.t - 0.5) * 140;
+    p.bobPhase += 0.12;
+    if (p.path.vertical) {
+      p.group.position.x = p.path.x || 0;
+      p.group.position.z = pos;
+      p.group.rotation.y = p.speed > 0 ? Math.PI : 0;
+    } else {
+      p.group.position.x = pos;
+      p.group.position.z = p.path.z;
+      p.group.rotation.y = p.speed > 0 ? Math.PI / 2 : -Math.PI / 2;
+    }
+    p.group.position.y = Math.abs(Math.sin(p.bobPhase)) * 0.08;
+    // Legs swing
+    if (p.group.children[0]) p.group.children[0].rotation.z = Math.sin(p.bobPhase) * 0.1;
+  });
+
+  // Vehicles
+  vehicles.forEach(v => {
+    v.t += v.speed * 0.003;
+    if (v.t > 1) v.t = 0;
+    const pos = (v.t - 0.5) * 150;
+    if (v.route.axis === 'x') {
+      v.mesh.position.x = pos;
+      v.mesh.rotation.y = v.speed > 0 ? Math.PI / 2 : -Math.PI / 2;
+    } else {
+      v.mesh.position.z = pos;
+    }
+  });
+
+  // Levitation train
+  trainParts.forEach(train => {
+    train.t += train.speed * 0.002;
+    if (train.t > 1) train.t = 0;
+    const x = (train.t - 0.5) * 200;
+    train.group.position.x = x;
+    train.levitationPhase += 0.03;
+    // Smooth levitation bob
+    train.group.position.y = 4.0 + Math.sin(train.levitationPhase) * 0.15;
+    // Speed glow: trailing neon
+    const speed = Math.abs(train.speed);
+    train.group.children.forEach((c, i) => {
+      if (c.material && c.material.transparent && i < 2) {
+        c.material.opacity = 0.3 + 0.2 * Math.sin(train.levitationPhase * 3 + i);
+      }
+    });
+  });
+
+  renderer.render(scene, camera);
+}
+
+// ============================================================
+// START
+// ============================================================
+init();
+animate();
+</script>
+</body>
+</html>

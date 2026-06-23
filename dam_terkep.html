@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAM – Diósgyőri Acélmű · 2024 ↔ 2050</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; background:#0a0f1a; overflow:hidden; font-family:'Courier New',monospace; }
+
+#topbar {
+  position:fixed; top:0; left:0; right:0; height:50px; z-index:100;
+  background:rgba(6,10,20,0.96); border-bottom:1px solid #00ffff33;
+  display:flex; align-items:center; justify-content:space-between; padding:0 20px;
+  backdrop-filter:blur(8px);
+}
+#topbar-title { color:#00ffff; font-size:12px; letter-spacing:4px; font-weight:900; text-shadow:0 0 18px #00ffff66; }
+#topbar-sub { color:#2a4050; font-size:9px; letter-spacing:2px; margin-top:2px; }
+
+#viewport {
+  position:fixed; top:50px; left:0; right:0; bottom:44px;
+  overflow:hidden; cursor:grab; background:#0a0f1a;
+}
+#viewport:active { cursor:grabbing; }
+
+#stage {
+  position:absolute; top:0; left:0;
+  transform-origin:0 0;
+  will-change:transform;
+}
+
+#map-img {
+  display:block;
+  user-select:none; -webkit-user-drag:none;
+  /* future mode: sötétítjük CSS filter-rel */
+  transition: filter 1.2s ease;
+}
+
+#map-svg {
+  position:absolute; top:0; left:0;
+  overflow:visible; pointer-events:none;
+}
+#buildings-layer path { pointer-events:all; cursor:pointer; }
+
+/* Toggle */
+#toggle-wrap {
+  position:fixed; right:18px; top:50%; transform:translateY(-50%);
+  z-index:200; display:flex; flex-direction:column; align-items:center; gap:8px;
+}
+#toggle-track {
+  width:50px; height:106px; background:rgba(4,12,28,0.96);
+  border:1px solid #00ffff44; border-radius:28px; position:relative; cursor:pointer;
+  display:flex; flex-direction:column; justify-content:space-between; align-items:center;
+  padding:7px 0; box-shadow:0 0 20px #00ffff18; transition:box-shadow .4s;
+}
+#toggle-track:hover { box-shadow:0 0 28px #00ffff55; }
+#toggle-thumb {
+  width:34px; height:34px; border-radius:50%; position:absolute; left:7px; top:7px;
+  background:radial-gradient(circle at 40% 35%, #55ffff, #0055cc);
+  box-shadow:0 0 12px #00ffff, 0 0 24px #0066dd;
+  transition:top .45s cubic-bezier(.4,0,.2,1);
+}
+#toggle-track.future #toggle-thumb { top:calc(100% - 41px); }
+.tl { font-size:8px; letter-spacing:1px; z-index:1; pointer-events:none; }
+.tl.now { color:#ff9944; } .tl.fut { color:#00ffff; }
+#mode-year { font-size:20px; font-weight:900; }
+#mode-label { font-size:8px; color:#445566; letter-spacing:2px; }
+#mode-badge { text-align:center; line-height:1.5; }
+#mode-badge.now #mode-year { color:#ff9944; text-shadow:0 0 12px #ff440066; }
+#mode-badge.fut #mode-year { color:#00ffff; text-shadow:0 0 12px #00ffff66; }
+
+/* Legend */
+#legend {
+  position:fixed; bottom:54px; left:16px; z-index:200;
+  background:rgba(4,10,22,0.95); border:1px solid #00ffff22; border-radius:8px;
+  padding:12px 14px; backdrop-filter:blur(6px);
+}
+#legend h4 { color:#00ffff88; font-size:8px; letter-spacing:3px; margin-bottom:9px; }
+.li { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+.li-dot { width:11px; height:11px; border-radius:2px; flex-shrink:0; }
+.li-txt { color:#8899aa; font-size:9px; letter-spacing:1px; }
+
+/* Tooltip */
+#tt {
+  position:fixed; z-index:300; pointer-events:none;
+  background:rgba(3,8,20,0.98); border:1px solid #00ffff66;
+  border-radius:8px; padding:12px 16px; display:none;
+  backdrop-filter:blur(8px); box-shadow:0 4px 24px #00000099;
+  max-width:290px;
+}
+#tt-cat { font-size:8px; letter-spacing:2px; padding:2px 8px; border-radius:6px;
+  display:inline-block; margin-bottom:8px; }
+#tt-name { color:#eef4ff; font-size:14px; font-weight:900; margin-bottom:6px; }
+#tt-now  { color:#6688aa; font-size:10px; line-height:1.6; }
+#tt-future { color:#00ddcc; font-size:10px; line-height:1.6; margin-top:8px;
+  border-top:1px solid #00ffff22; padding-top:8px; display:none; }
+#tt-tags { margin-top:6px; }
+.tt-tag { display:inline-block; background:rgba(0,60,100,0.5); border:1px solid #00ffff33;
+  color:#66ccff; font-size:8px; padding:2px 6px; border-radius:5px; margin:2px 2px 0 0; }
+
+/* Fit / zoom hint */
+#hint { position:fixed; bottom:54px; right:80px; z-index:200;
+  color:#1a3040; font-size:8px; letter-spacing:1px; text-align:right; line-height:1.9; }
+
+/* Flash & progress */
+#flash { position:fixed; inset:0; background:#00ccff; opacity:0; pointer-events:none;
+  z-index:500; transition:opacity .12s; }
+#pbar { position:fixed; top:50px; left:0; height:2px; background:#00ffff;
+  width:0; z-index:400; box-shadow:0 0 6px #00ffff; display:none; }
+
+/* Bottombar */
+#bottombar {
+  position:fixed; bottom:0; left:0; right:0; height:44px; z-index:100;
+  background:rgba(4,10,22,0.96); border-top:1px solid #00ffff1a;
+  display:flex; align-items:center; justify-content:center; gap:28px;
+  backdrop-filter:blur(6px);
+}
+.st { text-align:center; }
+.st-v { color:#00ffff; font-size:13px; font-weight:900; }
+.st-l { color:#2a3a48; font-size:7px; letter-spacing:1px; }
+
+/* Particles */
+#ptc { position:fixed; inset:0; pointer-events:none; z-index:5; opacity:0; transition:opacity 1.2s; }
+#ptc.on { opacity:1; }
+
+/* Loading */
+#loading { position:fixed; inset:0; z-index:900; background:#0a0f1a;
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; }
+#loading-txt { color:#00ffff; font-size:12px; letter-spacing:4px; }
+#loading-bar { width:200px; height:2px; background:#112233; border-radius:2px; overflow:hidden; }
+#loading-fill { height:100%; background:#00ffff; width:0; transition:width .3s; box-shadow:0 0 8px #00ffff; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div id="loading-txt">DAM · BETÖLTÉS...</div>
+  <div id="loading-bar"><div id="loading-fill"></div></div>
+</div>
+
+<div id="topbar">
+  <div>
+    <div id="topbar-title">⬡ DAM · DIÓSGYŐRI ACÉLMŰ · MISKOLC</div>
+    <div id="topbar-sub">INTERAKTÍV KATASZTERTÉRKÉP · DAM REVITALIZÁCIÓS TANULMÁNY 2024 · SCROLL: ZOOM · DRAG: PAN · SPACE: VÁLTÁS</div>
+  </div>
+  <div style="color:#1a2a38;font-size:9px;letter-spacing:1px;text-align:right">
+    F = TELJES NÉZET<br>HOVER: ÉPÜLET INFO
+  </div>
+</div>
+
+<div id="viewport">
+  <div id="stage">
+    <img id="map-img" src="dam_terkep_alap.jpg" draggable="false">
+    <svg id="map-svg">
+      <defs>
+        <filter id="gr" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="3" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="gg" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="2.5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="gc" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="gp" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="3" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <g id="buildings-layer"></g>
+      <g id="zone-layer"></g>
+    </svg>
+  </div>
+</div>
+
+<div id="toggle-wrap">
+  <div id="toggle-track" onclick="toggleMode()">
+    <span class="tl now">MA</span>
+    <div id="toggle-thumb"></div>
+    <span class="tl fut">2050</span>
+  </div>
+  <div id="mode-badge" class="now">
+    <div id="mode-year">2024</div>
+    <div id="mode-label">JELENLEGI</div>
+  </div>
+</div>
+
+<div id="legend">
+  <h4>JELMAGYARÁZAT</h4>
+  <div id="now-legend">
+    <div class="li"><div class="li-dot" style="background:#c8143a;border:1px solid #c8143a44"></div><div class="li-txt">BONTANDÓ</div></div>
+    <div class="li"><div class="li-dot" style="background:#ff7080;border:1px solid #ff708044"></div><div class="li-txt">BONTÁSRA JAVASOLT</div></div>
+    <div class="li"><div class="li-dot" style="background:#44dd66;border:1px solid #44dd6644"></div><div class="li-txt">HASZNOSÍTÁSRA JAVASOLT</div></div>
+    <div class="li"><div class="li-dot" style="background:#1e8c59;border:1px solid #1e8c5944"></div><div class="li-txt">HASZNOSÍTANDÓ</div></div>
+    <div class="li"><div class="li-dot" style="background:#1f6380;border:1px solid #1f638044"></div><div class="li-txt">VÉDETT ÖRÖKSÉG</div></div>
+  </div>
+  <div id="future-legend" style="display:none;border-top:1px solid #00ffff1a;margin-top:8px;padding-top:8px;">
+    <div class="li"><div class="li-dot" style="background:#00ff88"></div><div class="li-txt">HASZNOSÍTÁSRA JAVASOLT</div></div>
+    <div class="li"><div class="li-dot" style="background:#00cc66"></div><div class="li-txt">HASZNOSÍTANDÓ</div></div>
+    <div class="li"><div class="li-dot" style="background:#cc66ff"></div><div class="li-txt">VÉDETT ÖRÖKSÉG</div></div>
+    <div class="li" style="opacity:0.35"><div class="li-dot" style="background:#333"></div><div class="li-txt">BONTANDÓ / ELTÁVOLÍTOTT</div></div>
+  </div>
+</div>
+
+<div id="tt">
+  <div id="tt-cat"></div>
+  <div id="tt-name"></div>
+  <div id="tt-now"></div>
+  <div id="tt-future"></div>
+  <div id="tt-tags"></div>
+</div>
+
+<div id="hint">F = TELJES NÉZET<br>SCROLL = ZOOM<br>SPACE = VÁLTÁS</div>
+<div id="flash"></div>
+<div id="pbar"></div>
+
+<div id="bottombar">
+  <div class="st"><div class="st-v">130 ha</div><div class="st-l">TERÜLET</div></div>
+  <div class="st"><div class="st-v" style="color:#c8143a">65</div><div class="st-l">BONTANDÓ</div></div>
+  <div class="st"><div class="st-v" style="color:#ff7080">51</div><div class="st-l">BONTÁSRA JAVASOLT</div></div>
+  <div class="st"><div class="st-v" style="color:#44dd66">218</div><div class="st-l">HASZNOSÍTÁSRA JAVASOLT</div></div>
+  <div class="st"><div class="st-v" style="color:#1e8c59">63</div><div class="st-l">HASZNOSÍTANDÓ</div></div>
+  <div class="st"><div class="st-v" style="color:#1f6380">56</div><div class="st-l">VÉDETT ÖRÖKSÉG</div></div>
+  <div class="st"><div class="st-v">2050</div><div class="st-l">CÉLÉV</div></div>
+</div>
+
+<canvas id="ptc"></canvas>
+
+<script>
+// ─── ÉPÜLET ADATBÁZIS ────────────────────────────────────────────────────────
+const KB = {
+  'Középhengermű':    { now:'Helyi védett csarnok (1955). Üresen áll, erősen leromlott. Pinceszintű raktár, iparvágány-kapcsolat megvan.', future:'TECH PARK SZÍVE – Miskolci Egyetem KFI laborok, startup inkubátor, bérelhető gyártócellák, hologram tárgyalók, AI kutatóközpont.', tags:['KFI LABOR','STARTUP HUB','AI CENTER'], fc:'#00ffcc' },
+  'Keleti Erőmű':     { now:'Helyi védett, 1940-ben épült erőmű. Üresen áll, jelzálogjog terheli.', future:'CNC & SMART OFFICE – Lézervágó, CNC műhely. Smart coworking, biofalas homlokzat.', tags:['CNC','COWORKING','BIOFAL'], fc:'#00ffcc' },
+  'I. Hivatalház':    { now:'Helyi védett, 1890-es évek, háromszintes téglaépület. Kifosztott, üresen áll.', future:'DAM MÚZEUM – Ipartörténeti látogatóközpont, VR acélmű-élmény, közösségi iroda.', tags:['MÚZEUM','VR ÉLMÉNY','ÖRÖKSÉG'], fc:'#ff8800' },
+  'II. Hivatalház':   { now:'1960-as évekbeli irodaépület. Üresen áll, rongált.', future:'SMART OFFICE – Biofalak, vertikális kert, okos épületirányítás.', tags:['SMART OFFICE','BIOFAL'], fc:'#00ccff' },
+  'Csavargyár':       { now:'Helyi védett (1935). Üresen áll.', future:'DESIGN DISTRICT – Kreatív ipar, design stúdiók, galéria.', tags:['DESIGN','GALÉRIA'], fc:'#aa44ff' },
+  'Vasúti Felépítménygyártó Műhely': { now:'Helyi védett ipari műhely. Üresen áll.', future:'VASÚTI ÖRÖKSÉG + MAGLEV HUB – Maglev-bemutatóvonal, ipartörténeti kiállítás.', tags:['MAGLEV','VASÚTI MÚZEUM'], fc:'#00ffcc' },
+  'Konzumsor':        { now:'Részben működő kereskedelmi-szolgáltató sor az Ógyár tér mentén.', future:'MAKERS DISTRICT KAPU – Street food, pop-up üzletek, kézműves műhelyek.', tags:['STREET FOOD','MAKERS','GALÉRIA'], fc:'#aa44ff' },
+  'Nagykovácsműhely': { now:'Helyi védett, a Hámor Zrt. jelenleg is üzemeltet. Aktív ipari funkció.', future:'IPARI ÖRÖKSÉG + LÁTVÁNYGYÁRTÁS – Megtartott működés, örökségtúrák.', tags:['AKTÍV IPARI','ÖRÖKSÉGTÚRA'], fc:'#ff4444' },
+  'Mozdonyszín':      { now:'Helyi védett mozdonyjavító műhely. Üresen áll.', future:'MAGLEV MÚZEUM – Levitációs jármű örökségmúzeum, maglev terminus.', tags:['MAGLEV MÚZEUM','VASÚTI ÖRÖKSÉG'], fc:'#00ffcc' },
+  'Tűzállótéglagyár (É)': { now:'Helyi védett, nagy belmagasságú csarnok. Leromlott.', future:'RENDEZVÉNYCSARNOK – Kulturális programok, koncertek.', tags:['RENDEZVÉNY','KULTÚRA'], fc:'#ff8800' },
+  'Tűzállótéglagyár (D)': { now:'Helyi védett csarnokos téglaépület. Leromlott.', future:'FABLAB & INKUBÁTOR – 3D nyomtató, prototípus-gyártás.', tags:['FABLAB','3D NYOMTATÓ'], fc:'#aa44ff' },
+  'Vasgyári vasútállomás': { now:'MÁV-tulajdon, bezárt. Erősen leromlott. 8+8 vágány. Közvetlen Tiszai pályaudvar-kapcsolat.', future:'MULTIMODÁLIS SMART HUB – Maglev végállomás, autonóm e-buszok, arcfelismerős smart-jegy, dróntaxi pad.', tags:['MAGLEV','AUTONÓM E-BUS','SMART JEGY','DRÓNTAXI'], fc:'#00ffcc' },
+  'Hűtőtornyok':      { now:'Ikonikus ipari látványelem, helyi védett. Nem üzemel, állaguk megfelelő.', future:'ENERGETIKAI IKON – Geotermális hőcserélő, energiatárolás, kilátóterasz.', tags:['GEOTERMÁLIS','ENERGIATÁROLÁS','KILÁTÓ'], fc:'#00ffcc' },
+  'Bugacsiszoló':     { now:'Gyártócsarnok, részben használatban. Jó műszaki állapot.', future:'TECH PARK II – KFI laborok, bérelhető gyártóterek, startup program.', tags:['TECH PARK','KFI','STARTUP'], fc:'#00ffcc' },
+  'Hengereszterga műhely': { now:'Ipari műhely, részben működő gépészeti funkciókkal.', future:'PRECÍZIÓS GYÁRTÁS – High-tech CNC, robotizált gyártósor.', tags:['CNC','ROBOT'], fc:'#ff4444' },
+  'Vasszerk. Üzem':   { now:'Vasszerkezeti üzem, részben aktív.', future:'MAKERS SPACE – Közösségi műhelyek, kis gyártócellák.', tags:['MAKERS SPACE','KÖZÖSSÉGI'], fc:'#aa44ff' },
+  'Egyedi Gépgyár':   { now:'Helyi védett, speciális gépgyártás. Üresen áll.', future:'ADVANCED MFG – Robotizált gyártósor, IoT, 5G okosgyár.', tags:['ROBOT','IoT','5G OKOSGYÁR'], fc:'#ff4444' },
+  'Vasgyári fürdő':   { now:'Helyi védett, 1897-ben nyitott fürdő. Üresen áll.', future:'KÖZÖSSÉGI WELLNESS – Felújított fürdő és közösségi centrum.', tags:['WELLNESS','FÜRDŐ'], fc:'#ff8800' },
+  'Menza':            { now:'Egykori gyári étkezde. Részben használt.', future:'KÖZÖSSÉGI ÉTTEREM – Étkezde, kávézó, rendezvénytér.', tags:['ÉTTEREM','KÁVÉZÓ'], fc:'#ff8800' },
+  'Vízlágyító':       { now:'Működő vízkezelő. Aktív üzem.', future:'SMART WATER HUB – Vízvisszaforgatás, csapadékvíz-gyűjtés.', tags:['SMART WATER'], fc:'#00ffcc' },
+  'Húzó-hőkezelő':    { now:'Ipari hőkezelő. Bontásra ítélt.', future:'PARK – Zöld közterület és sétány épül a helyén.', tags:['BONTANDÓ','ZÖLD PARK'], fc:'#00ff66' },
+  'Vízmű C-telep':    { now:'Működő Vízmű telep. Aktív infrastruktúra.', future:'INF ZÓNA – Biogáz, naperőmű, okos hálózat.', tags:['BIOGÁZ','NAPERŐMŰ'], fc:'#00ffcc' },
+  'Turbókompresszor gépház': { now:'Helyi védett kompresszorgépház. Üresen áll.', future:'ENERGIATÁROLÁS – Sűrített levegős energiatárolás (CAES).', tags:['CAES','ENERGIATÁROLÁS'], fc:'#00ffcc' },
+  'Forgattyús tengely üzem': { now:'Ipari forgattyús tengely gyártó. Részben aktív.', future:'PRECÍZIÓS ALKATRÉSZ – Robotizált CNC-cella.', tags:['CNC','ROBOT'], fc:'#ff4444' },
+};
+
+const CAT_LABEL = {
+  bontando:                 'BONTANDÓ',
+  bontasra_javasolt:        'BONTÁSRA JAVASOLT',
+  'hasznosításra_javasolt': 'HASZNOSÍTÁSRA JAVASOLT',
+  'hasznosítandó':          'HASZNOSÍTANDÓ',
+  'védett':                 '⬟ VÉDETT ÖRÖKSÉG',
+  egyeb:                    'EGYÉB',
+};
+const CAT_COLOR = {
+  bontando:                 '#c8143a',
+  bontasra_javasolt:        '#ff7080',
+  'hasznosításra_javasolt': '#44dd66',
+  'hasznosítandó':          '#1e8c59',
+  'védett':                 '#1f6380',
+  egyeb:                    '#556677',
+};
+const CAT_DEF = {
+  bontando:                 { now:'Lebontásra ítélt épület. A PDF térkép sötét bordóval jelöli.', fut:'Zöld közterületté, parkká, vagy zöld sétánnyá alakul.' },
+  bontasra_javasolt:        { now:'Bontásra javasolt épület. Fejlesztés esetén az új funkciónak helyet adhat.', fut:'Alapozási terület új beruházáshoz, vagy park.' },
+  'hasznosításra_javasolt': { now:'Hasznosításra javasolt épület. Felújítható, új funkció adható neki.', fut:'Irodaként, műhelyként, közösségi térként vagy kereskedelemként funkcionál.' },
+  'hasznosítandó':          { now:'Hasznosítandó épület. Jelenleg is funkciót tölt be, de fejlesztésre szorul.', fut:'Megmarad és korszerűsítve, kibővített kapacitással tovább üzemel.' },
+  'védett':                 { now:'Miskolc MJV 44/2017. rendelete védi – BONTANI TILOS. Ipartörténeti örökség.', fut:'Felújítva kulturális, technológiai vagy közösségi funkciót kap. Örökségturisztikai látványosság.' },
+  egyeb:                    { now:'Egyéb területelem (út, vasút, infrastruktúra).', fut:'Smart city elvek szerint megújul.' },
+};
+
+// NOW stílusok – PDF-hű színek
+const NS = {
+  bontando:                 { f:'rgba(135,15,53,0.30)',   s:'#c8143a', sw:1.5, fl:'url(#gr)' },
+  bontasra_javasolt:        { f:'rgba(255,128,128,0.28)', s:'#ff7080', sw:1.2, fl:null },
+  'hasznosításra_javasolt': { f:'rgba(80,220,120,0.20)',  s:'#44dd66', sw:1.1, fl:'url(#gg)' },
+  'hasznosítandó':          { f:'rgba(31,124,89,0.28)',   s:'#1e8c59', sw:1.2, fl:null },
+  'védett':                 { f:'rgba(31,99,125,0.30)',   s:'#1f6380', sw:1.8, fl:'url(#gp)' },
+  egyeb:                    { f:'rgba(50,70,90,0.08)',    s:'#445566', sw:0.6, fl:null },
+};
+// FUTURE stílusok
+const FS = {
+  bontando:                 { f:'rgba(5,5,5,0.03)',      s:'rgba(30,20,20,0.25)', sw:0.4, fl:null },
+  bontasra_javasolt:        { f:'rgba(8,5,5,0.04)',      s:'rgba(35,25,25,0.25)', sw:0.4, fl:null },
+  'hasznosításra_javasolt': { f:'rgba(0,40,25,0.55)',    s:'#00ff88', sw:1.8, fl:'url(#gg)' },
+  'hasznosítandó':          { f:'rgba(0,30,18,0.55)',    s:'#00cc66', sw:1.5, fl:null },
+  'védett':                 { f:'rgba(20,5,35,0.58)',    s:'#cc66ff', sw:2.2, fl:'url(#gp)' },
+  egyeb:                    { f:'rgba(8,15,22,0.06)',    s:'#334455', sw:0.4, fl:null },
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let isFuture = false;
+let pathEls = [];
+let svgW, svgH;
+let scale = 1, tx = 0, ty = 0;
+let isPanning = false, panStart = null;
+let hoverPath = null;
+
+// PDF koordináta → SVG pixel: direkt szorzás (JPG = teljes PDF oldal)
+// x_px = pdf_x * svgW,  y_px = (1 - pdf_y) * svgH
+function toX(nx) { return nx * svgW; }
+function toY(ny) { return (1 - ny) * svgH; }
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+const mapImg = document.getElementById('map-img');
+
+function start(data) {
+  svgW = mapImg.naturalWidth;
+  svgH = mapImg.naturalHeight;
+  mapImg.style.width  = svgW + 'px';
+  mapImg.style.height = svgH + 'px';
+  const svg = document.getElementById('map-svg');
+  svg.style.width  = svgW + 'px';
+  svg.style.height = svgH + 'px';
+  svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
+
+  buildPolygons(data);
+  buildZoneLabels();
+  fitView();
+
+  document.getElementById('loading-fill').style.width = '100%';
+  setTimeout(() => document.getElementById('loading').style.display = 'none', 300);
+}
+
+function buildPolygons(data) {
+  const layer = document.getElementById('buildings-layer');
+  data.buildings.forEach(b => {
+    if (!b.pts || b.pts.length < 3) return;
+    let d = '';
+    b.pts.forEach((p, i) => {
+      d += (i ? 'L' : 'M') + toX(p[0]).toFixed(1) + ' ' + toY(p[1]).toFixed(1) + ' ';
+    });
+    d += 'Z';
+    const ns = NS[b.cat] || NS.egyeb;
+    const fs_base = FS[b.cat] || FS.egyeb;
+    const kb = b.name ? KB[b.name] : null;
+    const fs = { ...fs_base };
+    if (kb && b.cat !== 'bontando') fs.s = kb.fc || fs.s;
+
+    const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d', d);
+    p.setAttribute('fill', ns.f);
+    p.setAttribute('stroke', ns.s);
+    p.setAttribute('stroke-width', ns.sw);
+    if (ns.fl) p.setAttribute('filter', ns.fl);
+    p.style.transition = 'fill 0.4s, stroke 0.4s, opacity 0.4s';
+
+    p._cat = b.cat; p._name = b.name || '';
+    p._ns = ns; p._fs = fs;
+
+    p.addEventListener('mouseenter', e => onIn(e, p));
+    p.addEventListener('mouseleave', ()  => onOut(p));
+    p.addEventListener('mousemove',  e => moveTT(e));
+
+    layer.appendChild(p);
+    pathEls.push(p);
+  });
+}
+
+// ─── ZONE LABELS ────────────────────────────────────────────────────────────
+const ZONES = [
+  { t:'TECH PARK · KFI',      x:0.322, y:0.587, c:'#00ffcc' },
+  { t:'MAKERS DISTRICT',      x:0.072, y:0.500, c:'#aa44ff' },
+  { t:'SMART HUB · MAGLEV',  x:0.700, y:0.230, c:'#00ccff' },
+  { t:'DÉLI IPARI PARK',     x:0.220, y:0.360, c:'#ff4444' },
+  { t:'KULTÚRA · ÖRÖKSÉG',   x:0.090, y:0.420, c:'#ff9900' },
+  { t:'DAM SÉTÁNY',           x:0.380, y:0.490, c:'#00ff88' },
+  { t:'HŰTŐTORNYOK · ENERGIA',x:0.416, y:0.700, c:'#00ffcc' },
+];
+
+function buildZoneLabels() {
+  const layer = document.getElementById('zone-layer');
+  const fs = Math.round(svgH * 0.013);
+  ZONES.forEach(z => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('opacity','0');
+    g.style.transition = 'opacity 0.8s ease 0.5s';
+    g.classList.add('zlbl');
+
+    // Glow duplicate
+    [true, false].forEach(isGlow => {
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', toX(z.x));
+      t.setAttribute('y', toY(z.y));
+      t.setAttribute('fill', z.c);
+      t.setAttribute('font-size', fs);
+      t.setAttribute('font-family', 'Courier New,monospace');
+      t.setAttribute('font-weight', '900');
+      t.setAttribute('letter-spacing', '2');
+      t.setAttribute('text-anchor', 'middle');
+      if (isGlow) { t.setAttribute('filter','url(#gc)'); t.setAttribute('opacity','0.5'); }
+      t.textContent = z.t;
+      g.appendChild(t);
+    });
+    layer.appendChild(g);
+  });
+}
+
+// ─── TOOLTIP ─────────────────────────────────────────────────────────────────
+function onIn(e, p) {
+  if (isPanning) return;
+  hoverPath = p;
+  const cat = p._cat, name = p._name;
+  const kb = name ? KB[name] : null;
+  const col = CAT_COLOR[cat] || '#aaa';
+  const def = CAT_DEF[cat] || {};
+
+  document.getElementById('tt-cat').textContent = CAT_LABEL[cat] || cat;
+  document.getElementById('tt-cat').style.cssText = `background:${col}22;color:${col};border:1px solid ${col}44;font-size:8px;letter-spacing:2px;padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:8px;`;
+  document.getElementById('tt-name').textContent = name || CAT_LABEL[cat];
+  document.getElementById('tt-now').textContent  = kb ? kb.now : (def.now || '');
+
+  const ftEl   = document.getElementById('tt-future');
+  const tagsEl = document.getElementById('tt-tags');
+  if (isFuture) {
+    ftEl.style.display = 'block';
+    ftEl.textContent = kb ? kb.future : (def.fut || '');
+    tagsEl.innerHTML = (kb && kb.tags) ? kb.tags.map(t=>`<span class="tt-tag">${t}</span>`).join('') : '';
+  } else {
+    ftEl.style.display = 'none';
+    tagsEl.innerHTML = '';
+  }
+  document.getElementById('tt').style.display = 'block';
+  moveTT(e);
+
+  const sw = parseFloat(p.getAttribute('stroke-width'));
+  p.setAttribute('stroke-width', (sw * 2.5).toFixed(1));
+  p.style.opacity = '0.85';
+}
+
+function onOut(p) {
+  hoverPath = null;
+  document.getElementById('tt').style.display = 'none';
+  if (p) {
+    const s = isFuture ? p._fs : p._ns;
+    p.setAttribute('stroke-width', s.sw);
+    p.style.opacity = '1';
+  }
+}
+
+function moveTT(e) {
+  const tt = document.getElementById('tt');
+  let x = e.clientX + 16, y = e.clientY - 12;
+  if (x + tt.offsetWidth > window.innerWidth - 10) x = e.clientX - tt.offsetWidth - 16;
+  if (y + tt.offsetHeight > window.innerHeight - 54) y = e.clientY - tt.offsetHeight - 12;
+  tt.style.left = x + 'px';
+  tt.style.top  = y + 'px';
+}
+
+// ─── TOGGLE ──────────────────────────────────────────────────────────────────
+function toggleMode() {
+  if (hoverPath) onOut(hoverPath);
+  isFuture = !isFuture;
+
+  document.getElementById('toggle-track').classList.toggle('future', isFuture);
+  const badge = document.getElementById('mode-badge');
+  badge.className = isFuture ? 'fut' : 'now';
+  document.getElementById('mode-year').textContent  = isFuture ? '2050' : '2024';
+  document.getElementById('mode-label').textContent = isFuture ? 'JÖVŐKÉP' : 'JELENLEGI';
+  document.getElementById('future-legend').style.display = isFuture ? 'block' : 'none';
+
+  // Flash
+  const f = document.getElementById('flash');
+  f.style.opacity = '0.5'; setTimeout(() => f.style.opacity = '0', 130);
+
+  // Progress bar
+  const bar = document.getElementById('pbar');
+  bar.style.display = 'block'; bar.style.width = '0%';
+  let prog = 0;
+  const iv = setInterval(() => {
+    prog += 4; bar.style.width = prog + '%';
+    if (prog >= 100) { clearInterval(iv); setTimeout(() => { bar.style.display='none'; bar.style.width='0%'; }, 300); }
+  }, 22);
+
+  // Morph épületek staggerrel
+  pathEls.forEach(p => {
+    setTimeout(() => {
+      const s = isFuture ? p._fs : p._ns;
+      p.setAttribute('fill', s.f);
+      p.setAttribute('stroke', s.s);
+      p.setAttribute('stroke-width', s.sw);
+      if (s.fl) p.setAttribute('filter', s.fl);
+      else p.removeAttribute('filter');
+      const isDemolished = p._cat === 'bontando' || p._cat === 'bontasra_javasolt';
+    p.style.opacity = (isFuture && isDemolished) ? '0.08' : '1';
+    }, Math.random() * 650);
+  });
+
+  // Zone labels
+  document.querySelectorAll('.zlbl').forEach(g => {
+    g.style.opacity = isFuture ? '1' : '0';
+  });
+
+  // Háttér tónus 2050-ben
+  mapImg.style.filter = isFuture
+    ? 'brightness(0.45) saturate(0.25) hue-rotate(175deg)'
+    : 'none';
+
+  document.getElementById('ptc').classList.toggle('on', isFuture);
+}
+
+// ─── PAN & ZOOM ───────────────────────────────────────────────────────────────
+function setT() {
+  document.getElementById('stage').style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+}
+
+function fitView() {
+  const vw = window.innerWidth, vh = window.innerHeight - 94;
+  scale = Math.min(vw / svgW, vh / svgH) * 0.97;
+  tx = (vw - svgW * scale) / 2;
+  ty = (vh - svgH * scale) / 2;
+  setT();
+}
+
+const vp = document.getElementById('viewport');
+
+vp.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  isPanning = true;
+  panStart = { x: e.clientX - tx, y: e.clientY - ty };
+  if (hoverPath) { onOut(hoverPath); document.getElementById('tt').style.display = 'none'; }
+});
+window.addEventListener('mousemove', e => {
+  if (!isPanning) return;
+  tx = e.clientX - panStart.x;
+  ty = e.clientY - panStart.y;
+  setT();
+});
+window.addEventListener('mouseup', () => isPanning = false);
+
+vp.addEventListener('wheel', e => {
+  e.preventDefault();
+  const f = e.deltaY < 0 ? 1.12 : 0.89;
+  const r = vp.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  const ns = Math.min(Math.max(scale * f, 0.2), 12);
+  tx = mx - (mx - tx) * (ns / scale);
+  ty = my - (my - ty) * (ns / scale);
+  scale = ns; setT();
+}, { passive: false });
+
+// Touch
+let tStart = null, tDist = null;
+vp.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) { isPanning=true; tStart={x:e.touches[0].clientX-tx,y:e.touches[0].clientY-ty}; }
+  else if (e.touches.length === 2) { tDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY); }
+},{passive:true});
+vp.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length===1&&isPanning){tx=e.touches[0].clientX-tStart.x;ty=e.touches[0].clientY-tStart.y;setT();}
+  else if(e.touches.length===2&&tDist){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    const cx=(e.touches[0].clientX+e.touches[1].clientX)/2,cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    const ns=Math.min(Math.max(scale*(d/tDist),0.2),12);
+    tx=cx-(cx-tx)*(ns/scale);ty=cy-(cy-ty)*(ns/scale);scale=ns;setT();tDist=d;
+  }
+},{passive:false});
+vp.addEventListener('touchend',()=>{isPanning=false;tDist=null;});
+
+document.addEventListener('keydown', e => {
+  if (e.key===' '||e.key==='Enter'){e.preventDefault();toggleMode();}
+  if (e.key==='f'||e.key==='F') fitView();
+});
+
+// ─── PARTICLES ───────────────────────────────────────────────────────────────
+const ptc = document.getElementById('ptc');
+const pc = ptc.getContext('2d');
+ptc.width = window.innerWidth; ptc.height = window.innerHeight;
+const pts = Array.from({length:80},()=>({x:Math.random()*ptc.width,y:Math.random()*ptc.height,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.3+.3,col:Math.random()>.5?'#00ffcc':'#00ff88',a:Math.random()*.4+.1}));
+(function ap(){
+  pc.clearRect(0,0,ptc.width,ptc.height);
+  pts.forEach(p=>{p.x=(p.x+p.vx+ptc.width)%ptc.width;p.y=(p.y+p.vy+ptc.height)%ptc.height;pc.beginPath();pc.arc(p.x,p.y,p.r,0,Math.PI*2);pc.fillStyle=p.col;pc.globalAlpha=p.a*(0.5+0.5*Math.sin(Date.now()*.0007+p.x*.01));pc.fill();});
+  pc.globalAlpha=.04;pc.strokeStyle='#00ffcc';pc.lineWidth=.4;
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);if(d<80){pc.beginPath();pc.moveTo(pts[i].x,pts[i].y);pc.lineTo(pts[j].x,pts[j].y);pc.stroke();}}
+  pc.globalAlpha=1;requestAnimationFrame(ap);
+})();
+
+// ─── BETÖLTÉS ────────────────────────────────────────────────────────────────
+document.getElementById('loading-fill').style.width = '30%';
+fetch('dam_buildings2.json')
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('loading-fill').style.width = '70%';
+    if (mapImg.complete && mapImg.naturalWidth > 0) start(data);
+    else mapImg.onload = () => start(data);
+  })
+  .catch(() => {
+    document.getElementById('loading-txt').textContent = 'HIBA! Indítsd: Indítás.command';
+  });
+
+window.addEventListener('resize', () => {
+  ptc.width=window.innerWidth; ptc.height=window.innerHeight;
+  if (svgW) fitView();
+});
+</script>
+</body>
+</html>

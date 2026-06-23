@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAM · 3D Makett · 2024</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; background:#e8edf2; overflow:hidden; font-family:'Courier New',monospace; }
+canvas { display:block; }
+
+#topbar {
+  position:fixed; top:0; left:0; right:0; height:54px; z-index:100;
+  background:rgba(248,250,252,0.98); border-bottom:2px solid #1d4ed8;
+  display:flex; align-items:center; justify-content:space-between; padding:0 20px;
+  box-shadow:0 4px 22px rgba(15,23,42,0.12);
+}
+#back-btn { color:#1d4ed8; font-size:12px; letter-spacing:2px; text-decoration:none;
+  border:2px solid #1d4ed8; border-radius:6px; padding:7px 14px; transition:all .2s; white-space:nowrap; background:#ffffff; }
+#back-btn:hover { background:#dbeafe; }
+#title-txt { color:#0f172a; font-size:17px; letter-spacing:4px; font-weight:900; }
+#sub-txt { color:#475569; font-size:10px; letter-spacing:1.5px; margin-top:3px; font-weight:700; }
+.ctrl-btn { background:#ffffff; border:2px solid #94a3b8; border-radius:7px;
+  color:#0f172a; font-size:12px; font-weight:900; letter-spacing:1px; padding:7px 16px;
+  cursor:pointer; font-family:inherit; transition:all .2s; }
+.ctrl-btn:hover { background:#e0f2fe; border-color:#0284c7; }
+.ctrl-btn.active { background:#1d4ed8; border-color:#1d4ed8; color:#ffffff; box-shadow:0 3px 12px rgba(29,78,216,0.28); }
+
+#legend {
+  position:fixed; bottom:58px; left:16px; z-index:100;
+  background:rgba(255,255,255,0.96); border:2px solid #cbd5e1; border-radius:8px;
+  padding:16px 20px; box-shadow:0 8px 30px rgba(15,23,42,0.18);
+}
+#legend h4 { color:#0f172a; font-size:12px; letter-spacing:3px; margin-bottom:12px; }
+.li { display:flex; align-items:center; gap:11px; margin-bottom:8px; }
+.li-dot { width:17px; height:17px; border-radius:4px; flex-shrink:0; border:2px solid rgba(15,23,42,0.18); }
+.li-txt { color:#0f172a; font-size:13px; letter-spacing:.8px; font-weight:900; }
+.li-sep { height:2px; background:#e2e8f0; margin:8px 0; }
+
+#hint {
+  position:fixed; bottom:58px; right:16px; z-index:100;
+  background:rgba(255,255,255,0.92); border:2px solid #cbd5e1; border-radius:8px;
+  padding:12px 16px; text-align:right; color:#334155; font-size:11px; letter-spacing:1px; line-height:2.2;
+  box-shadow:0 8px 30px rgba(15,23,42,0.12);
+}
+#hint strong { color:#1d4ed8; }
+
+#tooltip {
+  position:fixed; z-index:200; pointer-events:none;
+  background:rgba(255,255,255,0.98); border:2px solid #1d4ed8;
+  border-radius:10px; padding:14px 18px; display:none;
+  box-shadow:0 10px 34px rgba(15,23,42,0.28); max-width:330px;
+}
+#tt-cat { font-size:9px; letter-spacing:2px; padding:3px 10px; border-radius:6px;
+  display:inline-block; margin-bottom:9px; font-weight:700; }
+#tt-name { color:#0f172a; font-size:17px; font-weight:900; margin-bottom:7px; letter-spacing:1px; }
+#tt-info { color:#334155; font-size:12px; line-height:1.7; font-weight:700; }
+#tt-floor { color:#047857; font-size:11px; margin-top:8px; font-weight:900; letter-spacing:1px; }
+
+#bottombar {
+  position:fixed; bottom:0; left:0; right:0; height:50px; z-index:100;
+  background:rgba(248,250,252,0.98); border-top:2px solid #cbd5e1;
+  display:flex; align-items:center; justify-content:center; gap:0;
+  box-shadow:0 -4px 22px rgba(15,23,42,0.10);
+}
+.st { text-align:center; padding:0 22px; }
+.st-v { font-size:18px; font-weight:900; }
+.st-l { font-size:9px; letter-spacing:1.5px; color:#334155; margin-top:1px; font-weight:900; }
+.st-sep { width:2px; height:30px; background:#cbd5e1; flex-shrink:0; }
+
+#loading { position:fixed; inset:0; z-index:500; background:#e8edf2;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
+#loading-txt { color:#0f172a; font-size:14px; letter-spacing:5px; font-weight:900; }
+#loading-bar { width:260px; height:4px; background:#cbd5e1; border-radius:2px; overflow:hidden; }
+#loading-fill { height:100%; background:#1d4ed8; width:0; transition:width .2s; }
+</style>
+</head>
+<body>
+<div id="loading">
+  <div id="loading-txt">3D MAKETT BETÖLTÉSE...</div>
+  <div id="loading-bar"><div id="loading-fill"></div></div>
+</div>
+
+<div id="topbar">
+  <div style="display:flex;align-items:center;gap:16px">
+    <a href="index.html" id="back-btn">← FŐOLDAL</a>
+    <div>
+      <div id="title-txt">DAM · 3D MAKETT · 2024</div>
+      <div id="sub-txt">BAL DRAG: FORGAT · SCROLL: ZOOM · SHIFT+DRAG: MOZGAT · R: RESET · F: FELÜLNÉZET</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="ctrl-btn active" id="btn-solid" onclick="setView('solid')">TÖMÖR</button>
+    <button class="ctrl-btn" id="btn-wire" onclick="setView('wire')">DRÓTVÁZ</button>
+    <button class="ctrl-btn" id="btn-top" onclick="topView()">FELÜLNÉZET</button>
+    <button class="ctrl-btn" id="btn-reset" onclick="resetView()">RESET</button>
+  </div>
+</div>
+
+<div id="legend">
+  <h4>JELMAGYARÁZAT</h4>
+  <div class="li"><div class="li-dot" style="background:#dc2626"></div><div class="li-txt">BONTANDÓ</div></div>
+  <div class="li"><div class="li-dot" style="background:#f97316"></div><div class="li-txt">BONTÁSRA JAVASOLT</div></div>
+  <div class="li"><div class="li-dot" style="background:#84cc16"></div><div class="li-txt">HASZNOSÍTÁSRA JAVASOLT</div></div>
+  <div class="li"><div class="li-dot" style="background:#16a34a"></div><div class="li-txt">HASZNOSÍTANDÓ</div></div>
+  <div class="li"><div class="li-dot" style="background:#2563eb"></div><div class="li-txt">VÉDETT ÖRÖKSÉG</div></div>
+  <div class="li-sep"></div>
+  <div class="li"><div class="li-dot" style="background:#111827;border-color:#ef4444"></div><div class="li-txt">VASÚT</div></div>
+  <div class="li"><div class="li-dot" style="background:#94a3b8"></div><div class="li-txt">ÚT / SÉTÁNY</div></div>
+</div>
+
+<div id="hint">
+  <strong>BAL GOMB</strong> → FORGATÁS<br>
+  <strong>SCROLL</strong> → ZOOM<br>
+  <strong>SHIFT+DRAG</strong> → MOZGATÁS<br>
+  <strong>R</strong> → RESET &nbsp; <strong>F</strong> → FELÜLNÉZET
+</div>
+
+<div id="tooltip">
+  <div id="tt-cat"></div>
+  <div id="tt-name"></div>
+  <div id="tt-info"></div>
+  <div id="tt-floor"></div>
+</div>
+
+<div id="bottombar">
+  <div class="st"><div class="st-v" style="color:#dc2626">65</div><div class="st-l">BONTANDÓ</div></div>
+  <div class="st-sep"></div>
+  <div class="st"><div class="st-v" style="color:#f97316">51</div><div class="st-l">BONTÁSRA JAVASOLT</div></div>
+  <div class="st-sep"></div>
+  <div class="st"><div class="st-v" style="color:#65a30d">218</div><div class="st-l">HASZNOSÍTÁSRA JAVASOLT</div></div>
+  <div class="st-sep"></div>
+  <div class="st"><div class="st-v" style="color:#16a34a">63</div><div class="st-l">HASZNOSÍTANDÓ</div></div>
+  <div class="st-sep"></div>
+  <div class="st"><div class="st-v" style="color:#2563eb">56</div><div class="st-l">VÉDETT ÖRÖKSÉG</div></div>
+  <div class="st-sep"></div>
+  <div class="st"><div class="st-v" style="color:#0f172a">453</div><div class="st-l">ÉPÜLET ÖSSZESEN</div></div>
+</div>
+
+<script src="three.min.js"></script>
+<script>
+// ─── KATEGÓRIA CONFIG ─────────────────────────────────────────────────────────
+const CAT = {
+  bontando:                 { col:0xdc2626, emi:0x220000, h:0.014, label:'BONTANDÓ',                css:'#dc2626' },
+  bontasra_javasolt:        { col:0xf97316, emi:0x241000, h:0.010, label:'BONTÁSRA JAVASOLT',       css:'#f97316' },
+  'hasznosításra_javasolt': { col:0x84cc16, emi:0x102000, h:0.022, label:'HASZNOSÍTÁSRA JAVASOLT',  css:'#65a30d' },
+  'hasznosítandó':          { col:0x16a34a, emi:0x00200b, h:0.032, label:'HASZNOSÍTANDÓ',           css:'#16a34a' },
+  'védett':                 { col:0x2563eb, emi:0x000c2c, h:0.048, label:'VÉDETT ÖRÖKSÉG',          css:'#2563eb' },
+  egyeb:                    { col:0x64748b, emi:0x000000, h:0.003, label:'EGYÉB',                   css:'#64748b' },
+};
+const KB = {
+  'Középhengermű':                    { now:'Helyi védett csarnok (1955). Üresen áll.', floors:2 },
+  'Keleti Erőmű':                     { now:'Helyi védett erőmű, 1940. Üresen áll.', floors:3 },
+  'I. Hivatalház':                    { now:'Helyi védett, 1890-es évek, háromszintes épület.', floors:3 },
+  'II. Hivatalház':                   { now:'1960-as évekbeli irodaépület. Üresen áll.', floors:4 },
+  'Csavargyár':                       { now:'Helyi védett (1935). Üresen áll.', floors:2 },
+  'Vasúti Felépítménygyártó Műhely':  { now:'Helyi védett ipari műhely.', floors:1 },
+  'Konzumsor':                        { now:'Részben működő kereskedelmi sor.', floors:2 },
+  'Nagykovácsműhely':                 { now:'Helyi védett, aktív ipari funkció.', floors:1 },
+  'Mozdonyszín':                      { now:'Helyi védett mozdonyjavító műhely.', floors:1 },
+  'Tűzállótéglagyár (É)':            { now:'Helyi védett, nagy belmagasságú csarnok.', floors:1 },
+  'Tűzállótéglagyár (D)':            { now:'Helyi védett csarnok.', floors:1 },
+  'Vasgyári vasútállomás':            { now:'MÁV-tulajdon, bezárt. 8+8 vágány.', floors:2 },
+  'Hűtőtornyok':                      { now:'Ikonikus ipari látványelem, helyi védett.', floors:6 },
+  'Bugacsiszoló':                     { now:'Gyártócsarnok, részben használatban.', floors:1 },
+  'Hengereszterga műhely':            { now:'Ipari műhely, részben működő.', floors:1 },
+  'Vasszerk. Üzem':                   { now:'Vasszerkezeti üzem, részben aktív.', floors:2 },
+  'Egyedi Gépgyár':                   { now:'Helyi védett, speciális gépgyártás.', floors:2 },
+  'Vasgyári fürdő':                   { now:'Helyi védett, 1897-es fürdő. Üresen áll.', floors:2 },
+  'Menza':                            { now:'Egykori gyári étkezde.', floors:2 },
+  'Vízlágyító':                       { now:'Működő vízkezelő üzem.', floors:1 },
+  'Húzó-hőkezelő':                    { now:'Ipari hőkezelő. Bontásra ítélt.', floors:1 },
+  'Vízmű C-telep':                    { now:'Működő Vízmű telep.', floors:1 },
+  'Turbókompresszor gépház':          { now:'Helyi védett kompresszorgépház.', floors:2 },
+  'Forgattyús tengely üzem':          { now:'Ipari forgattyús tengely gyártó.', floors:1 },
+};
+
+// ─── KOORDINÁTA RENDSZER – ORIGÓ KÖZÉPRE ────────────────────────────────────
+// PDF bbox: X 0.028–0.752  Y 0.192–0.976
+const PDF_CX = (0.028 + 0.752) / 2;  // 0.390
+const PDF_CY = (0.192 + 0.976) / 2;  // 0.584
+const SS = 0.90;
+
+function p2s(px, py) {
+  // Centrált: origó = DAM közepe
+  return [ (px - PDF_CX) * SS, (PDF_CY - py) * SS ];
+}
+
+function polyArea(pts) {
+  let a = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const j = (i+1) % pts.length;
+    a += pts[i][0]*pts[j][1] - pts[j][0]*pts[i][1];
+  }
+  return Math.abs(a) / 2;
+}
+
+// ─── RENDERER ────────────────────────────────────────────────────────────────
+let VW = window.innerWidth, VH = window.innerHeight;
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(VW, VH);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setClearColor(0xe8edf2);
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xe8edf2, 3.0, 7.5);
+
+const camera = new THREE.PerspectiveCamera(42, VW/VH, 0.001, 30);
+
+// ─── FÉNYEK ───────────────────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xffffff, 0.78));
+
+const sun = new THREE.DirectionalLight(0xffffff, 1.25);
+sun.position.set(0.5, 1.8, 0.8);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 0.01; sun.shadow.camera.far = 10;
+[-1.2, 1.2].forEach(v => { sun.shadow.camera.left = sun.shadow.camera.bottom = v; sun.shadow.camera.right = sun.shadow.camera.top = -v; });
+sun.shadow.camera.left = -1.2; sun.shadow.camera.right = 1.2;
+sun.shadow.camera.top = 1.2;   sun.shadow.camera.bottom = -1.2;
+scene.add(sun);
+
+const fill = new THREE.DirectionalLight(0xffffff, 0.55);
+fill.position.set(-1, 0.6, -0.5);
+scene.add(fill);
+
+// ─── ALAP TERÜLET ─────────────────────────────────────────────────────────────
+// Világos prezentációs talaj: projektoron is olvasható kontrasztot ad.
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(2.5, 2.5),
+  new THREE.MeshLambertMaterial({ color: 0xd8e0e7 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const grid = new THREE.GridHelper(2.5, 25, 0xa8b4c0, 0xcbd5df);
+grid.position.y = 0.001;
+scene.add(grid);
+
+// ─── ÉPÜLETEK ─────────────────────────────────────────────────────────────────
+const buildingMeshes = [];
+
+function addBuilding(b) {
+  const cfg = CAT[b.cat] || CAT.egyeb;
+  const kb  = b.name ? KB[b.name] : null;
+  const area = polyArea(b.pts);
+  const aF = Math.min(Math.sqrt(area / 0.00015), 2.5);
+  const h = cfg.h * (0.65 + 0.35 * aF);
+
+  const shape = new THREE.Shape();
+  let first = true;
+  for (const pt of b.pts) {
+    const [sx, sz] = p2s(pt[0], pt[1]);
+    if (first) { shape.moveTo(sx, sz); first = false; }
+    else shape.lineTo(sx, sz);
+  }
+  shape.closePath();
+
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: h, bevelEnabled: false });
+  geo.rotateX(-Math.PI / 2);
+
+  const mat = new THREE.MeshLambertMaterial({ color: cfg.col, emissive: cfg.emi });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+
+  mesh._cat = b.cat;
+  mesh._name = b.name || '';
+  mesh._kb = kb;
+  mesh._cfg = cfg;
+  mesh._solidMat = mat;
+  mesh._floors = (kb && kb.floors) ? kb.floors : (cfg.h > 0.03 ? 3 : cfg.h > 0.02 ? 2 : 1);
+
+  scene.add(mesh);
+  buildingMeshes.push(mesh);
+}
+
+// ─── INFRASTRUKTÚRA (vasút + utak) ───────────────────────────────────────────
+function addSegmentBand(segments, opts) {
+  const verts = [];
+  const indices = [];
+  const width = opts.width;
+  const y = opts.y;
+
+  for (const s of segments) {
+    const [x0, z0] = p2s(s.x0, s.y0);
+    const [x1, z1] = p2s(s.x1, s.y1);
+    const dx = x1 - x0;
+    const dz = z1 - z0;
+    const len = Math.hypot(dx, dz);
+    if (len < 0.00001) continue;
+
+    const localWidth = width * (0.7 + Math.min(Math.max(s.lw || 1, 0.4), 2.6) * 0.16);
+    const nx = -dz / len * localWidth * 0.5;
+    const nz = dx / len * localWidth * 0.5;
+    const i = verts.length / 3;
+
+    verts.push(
+      x0 - nx, y, z0 - nz,
+      x0 + nx, y, z0 + nz,
+      x1 + nx, y, z1 + nz,
+      x1 - nx, y, z1 - nz
+    );
+    indices.push(i, i + 1, i + 2, i, i + 2, i + 3);
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+  const mat = new THREE.MeshBasicMaterial({
+    color: opts.color,
+    transparent: true,
+    opacity: opts.opacity,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.renderOrder = opts.renderOrder || 1;
+  scene.add(mesh);
+  return mesh;
+}
+
+function addInfrastructure(data) {
+  // Út / sétány: valódi sáv, nem böngészőfüggő WebGL-vonal.
+  if (data.roads && data.roads.length > 0) {
+    addSegmentBand(data.roads, {
+      color: 0x7c8794,
+      opacity: 0.62,
+      width: 0.0021,
+      y: 0.003,
+      renderOrder: 1
+    });
+  }
+
+  // Vasút: fekete fő sáv + piros középvonal, hogy felülnézetből is elkülönüljön.
+  if (data.railways && data.railways.length > 0) {
+    addSegmentBand(data.railways, {
+      color: 0x111827,
+      opacity: 0.92,
+      width: 0.0032,
+      y: 0.006,
+      renderOrder: 2
+    });
+    addSegmentBand(data.railways, {
+      color: 0xef4444,
+      opacity: 0.90,
+      width: 0.00115,
+      y: 0.007,
+      renderOrder: 3
+    });
+  }
+}
+
+// ─── KAMERA ───────────────────────────────────────────────────────────────────
+let theta = -0.5, phi = 1.05, radius = 0.90;
+const target = new THREE.Vector3(0, 0, 0);
+
+function syncCam() {
+  camera.position.set(
+    target.x + radius * Math.sin(phi) * Math.sin(theta),
+    target.y + radius * Math.cos(phi),
+    target.z + radius * Math.sin(phi) * Math.cos(theta)
+  );
+  camera.lookAt(target);
+}
+syncCam();
+
+let camAnim = null;
+function animCamTo(nt, np, nr, ntg, dur = 700) {
+  const s = performance.now(), ft = theta, fp = phi, fr = radius, ftg = target.clone();
+  camAnim = { update(now) {
+    const t = Math.min((now-s)/dur, 1), e = 1-(1-t)*(1-t);
+    theta = ft+(nt-ft)*e; phi = fp+(np-fp)*e; radius = fr+(nr-fr)*e;
+    if (ntg) target.lerpVectors(ftg, ntg, e);
+    syncCam(); return t < 1;
+  }};
+}
+
+let isDrag = false, isPan = false, lastX = 0, lastY = 0;
+const cv = renderer.domElement;
+
+cv.addEventListener('mousedown', e => {
+  isDrag = true; isPan = e.shiftKey || e.button === 1 || e.button === 2;
+  lastX = e.clientX; lastY = e.clientY;
+});
+cv.addEventListener('contextmenu', e => e.preventDefault());
+window.addEventListener('mouseup', () => isDrag = false);
+window.addEventListener('mousemove', e => {
+  if (!isDrag) { doHover(e); return; }
+  camAnim = null;
+  const dx = e.clientX - lastX, dy = e.clientY - lastY;
+  lastX = e.clientX; lastY = e.clientY;
+  if (isPan || e.shiftKey) {
+    const r = new THREE.Vector3(), fwd = new THREE.Vector3();
+    camera.getWorldDirection(fwd);
+    r.crossVectors(fwd, new THREE.Vector3(0,1,0)).normalize();
+    const sp = 0.0012 * radius;
+    target.addScaledVector(r, -dx * sp);
+    target.y += dy * sp * 0.5;
+  } else {
+    theta -= dx * 0.007;
+    phi = Math.max(0.06, Math.min(Math.PI/2.05, phi + dy * 0.007));
+  }
+  syncCam();
+});
+cv.addEventListener('wheel', e => {
+  e.preventDefault(); camAnim = null;
+  radius = Math.max(0.07, Math.min(4.0, radius * (e.deltaY > 0 ? 1.11 : 0.90)));
+  syncCam();
+}, { passive: false });
+
+// Touch
+let tPinch = null;
+cv.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) { isDrag=true; lastX=e.touches[0].clientX; lastY=e.touches[0].clientY; }
+  else if (e.touches.length === 2) tPinch = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+}, { passive: true });
+cv.addEventListener('touchmove', e => {
+  e.preventDefault(); camAnim = null;
+  if (e.touches.length === 1 && isDrag) {
+    const dx = e.touches[0].clientX - lastX, dy = e.touches[0].clientY - lastY;
+    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+    theta -= dx * 0.009; phi = Math.max(0.06, Math.min(Math.PI/2.05, phi+dy*0.009)); syncCam();
+  } else if (e.touches.length === 2 && tPinch) {
+    const d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+    radius = Math.max(0.07, Math.min(4.0, radius*(tPinch/d))); tPinch = d; syncCam();
+  }
+}, { passive: false });
+cv.addEventListener('touchend', () => { isDrag=false; tPinch=null; });
+
+document.addEventListener('keydown', e => {
+  if (e.key==='r'||e.key==='R') resetView();
+  if (e.key==='f'||e.key==='F') topView();
+});
+function resetView() { animCamTo(-0.5, 1.05, 0.90, new THREE.Vector3(0,0,0)); }
+function topView()   { animCamTo(theta, 0.06, 0.90, new THREE.Vector3(0,0,0)); }
+window.resetView = resetView; window.topView = topView;
+
+// ─── VIEW MODE ────────────────────────────────────────────────────────────────
+let viewMode = 'solid';
+function setView(mode) {
+  viewMode = mode;
+  document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-'+mode).classList.add('active');
+  buildingMeshes.forEach(m => {
+    if (mode === 'wire') {
+      if (!m._wireMat) m._wireMat = new THREE.MeshBasicMaterial({ color: m._cfg.col, wireframe: true, transparent: true, opacity: 0.55 });
+      m.material = m._wireMat;
+    } else {
+      m.material = m._solidMat;
+    }
+  });
+}
+window.setView = setView;
+
+// ─── TOOLTIP ─────────────────────────────────────────────────────────────────
+const ray = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let hovMesh = null;
+
+function doHover(e) {
+  mouse.x = (e.clientX / VW) * 2 - 1;
+  mouse.y = -((e.clientY - 54) / (VH - 104)) * 2 + 1;
+  ray.setFromCamera(mouse, camera);
+  const hits = ray.intersectObjects(buildingMeshes);
+  if (hits.length > 0) {
+    const m = hits[0].object;
+    if (m !== hovMesh) {
+      if (hovMesh) hovMesh._solidMat.emissive.setHex(hovMesh._cfg.emi);
+      hovMesh = m;
+      m._solidMat.emissive.setHex(0x3a5566);
+      showTT(e, m);
+    } else moveTT(e);
+    cv.style.cursor = 'pointer';
+  } else {
+    if (hovMesh) { hovMesh._solidMat.emissive.setHex(hovMesh._cfg.emi); hovMesh = null; }
+    document.getElementById('tooltip').style.display = 'none';
+    cv.style.cursor = 'grab';
+  }
+}
+function showTT(e, m) {
+  const cfg = m._cfg;
+  document.getElementById('tt-cat').textContent = cfg.label;
+  document.getElementById('tt-cat').style.cssText = `background:${cfg.css}33;color:${cfg.css};border:1px solid ${cfg.css}66;font-size:9px;letter-spacing:2px;padding:3px 10px;border-radius:6px;display:inline-block;margin-bottom:9px;font-weight:700;`;
+  document.getElementById('tt-name').textContent = m._name || cfg.label;
+  document.getElementById('tt-info').textContent = (m._kb && m._kb.now) || '';
+  document.getElementById('tt-floor').textContent = m._floors > 0 ? `↑ BECSÜLT SZINTSZÁM: ${m._floors}` : '';
+  document.getElementById('tooltip').style.display = 'block';
+  moveTT(e);
+}
+function moveTT(e) {
+  const tt = document.getElementById('tooltip');
+  let x = e.clientX + 18, y = e.clientY - 8;
+  if (x + tt.offsetWidth > VW - 10) x = e.clientX - tt.offsetWidth - 18;
+  if (y + tt.offsetHeight > VH - 58) y = e.clientY - tt.offsetHeight - 8;
+  tt.style.left = x + 'px'; tt.style.top = y + 'px';
+}
+
+// ─── RENDER LOOP ─────────────────────────────────────────────────────────────
+function animate(ts) {
+  requestAnimationFrame(animate);
+  if (camAnim && !camAnim.update(ts)) camAnim = null;
+  renderer.render(scene, camera);
+}
+
+// ─── BETÖLTÉS ─────────────────────────────────────────────────────────────────
+function setP(p) { document.getElementById('loading-fill').style.width = p + '%'; }
+
+Promise.all([
+  fetch('dam_buildings2.json').then(r => r.json()),
+  fetch('dam_infrastructure.json').then(r => r.json()),
+]).then(([bData, infra]) => {
+  setP(30);
+  addInfrastructure(infra);
+  setP(40);
+  const bs = bData.buildings;
+  let i = 0;
+  function batch() {
+    const end = Math.min(i + 25, bs.length);
+    for (; i < end; i++) if (bs[i].pts && bs[i].pts.length >= 3) addBuilding(bs[i]);
+    setP(40 + Math.round(i / bs.length * 55));
+    if (i < bs.length) requestAnimationFrame(batch);
+    else {
+      setP(100);
+      setTimeout(() => {
+        document.getElementById('loading').style.display = 'none';
+        requestAnimationFrame(animate);
+      }, 200);
+    }
+  }
+  batch();
+}).catch(() => {
+  document.getElementById('loading-txt').textContent = 'HIBA! Indítsd: Indítás.command';
+});
+
+window.addEventListener('resize', () => {
+  VW = window.innerWidth; VH = window.innerHeight;
+  camera.aspect = VW / VH; camera.updateProjectionMatrix();
+  renderer.setSize(VW, VH);
+});
+</script>
+</body>
+</html>

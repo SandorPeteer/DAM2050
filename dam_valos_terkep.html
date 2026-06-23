@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAM · Valós Térképi Illesztés</title>
+<link rel="stylesheet" href="leaflet.css">
+<style>
+* { box-sizing:border-box; }
+html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sans-serif; background:#f8fafc; color:#0f172a; overflow:hidden; }
+#map { position:fixed; inset:0; z-index:1; background:#dbe4ea; }
+
+#topbar {
+  position:fixed; top:18px; left:18px; right:18px; z-index:500;
+  min-height:76px; display:flex; justify-content:space-between; align-items:center; gap:18px;
+  background:rgba(255,255,255,.94); border:2px solid rgba(15,23,42,.12); border-radius:8px;
+  box-shadow:0 8px 32px rgba(15,23,42,.18); padding:14px 18px;
+}
+#title { font-size:26px; font-weight:900; letter-spacing:.08em; line-height:1.05; }
+#subtitle { margin-top:6px; font-size:13px; font-weight:800; color:#475569; letter-spacing:.03em; }
+#actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.btn {
+  appearance:none; border:2px solid #1e293b; border-radius:6px; background:#fff; color:#0f172a;
+  padding:10px 14px; font-size:13px; font-weight:900; letter-spacing:.06em; cursor:pointer;
+}
+.btn.active, .btn:hover { background:#1e293b; color:#fff; }
+.btn.blue { border-color:#2563eb; color:#1d4ed8; }
+.btn.blue.active, .btn.blue:hover { background:#2563eb; color:#fff; }
+
+#legend {
+  position:fixed; left:18px; bottom:24px; z-index:500; width:330px;
+  background:rgba(255,255,255,.95); border:2px solid rgba(15,23,42,.14); border-radius:8px;
+  box-shadow:0 8px 30px rgba(15,23,42,.18); padding:16px 18px;
+}
+#legend h2 { margin:0 0 12px; font-size:16px; letter-spacing:.12em; }
+.row { display:flex; align-items:center; gap:11px; margin:8px 0; font-size:14px; font-weight:900; }
+.sw { width:22px; height:16px; border-radius:3px; border:2px solid rgba(15,23,42,.22); flex:0 0 auto; }
+.line-sw { height:6px; border-radius:6px; }
+#stats {
+  margin-top:14px; padding-top:12px; border-top:2px solid #e2e8f0;
+  display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; font-size:13px; font-weight:900;
+}
+#stats span { color:#475569; font-weight:800; }
+
+#note {
+  position:fixed; right:18px; bottom:24px; z-index:500; max-width:430px;
+  background:rgba(15,23,42,.88); color:#fff; border-radius:8px; padding:14px 16px;
+  box-shadow:0 8px 30px rgba(15,23,42,.24); font-size:13px; line-height:1.45; font-weight:700;
+}
+#note strong { color:#bfdbfe; }
+
+.leaflet-control-layers, .leaflet-control-zoom {
+  border:2px solid rgba(15,23,42,.18) !important;
+  box-shadow:0 5px 20px rgba(15,23,42,.16) !important;
+}
+.leaflet-control-layers { font-size:14px; font-weight:800; }
+.leaflet-popup-content-wrapper { border-radius:8px; box-shadow:0 10px 34px rgba(15,23,42,.28); }
+.pop-title { font-size:16px; font-weight:900; color:#0f172a; margin-bottom:6px; }
+.pop-cat { display:inline-block; padding:3px 8px; border-radius:5px; color:#fff; font-weight:900; font-size:12px; margin-bottom:8px; }
+.pop-note { color:#475569; font-weight:700; }
+
+@media (max-width:900px) {
+  #topbar { flex-direction:column; align-items:flex-start; }
+  #title { font-size:20px; }
+  #legend, #note { max-width:calc(100vw - 36px); width:auto; }
+  #note { display:none; }
+}
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div id="topbar">
+  <div>
+    <div id="title">DAM · VALÓS TÉRKÉPI ILLESZTÉS</div>
+    <div id="subtitle">Műholdkép / OSM alaptérkép + PDF-ből georeferált épületkataszter és infrastruktúra</div>
+  </div>
+  <div id="actions">
+    <a class="btn" href="index.html">FŐOLDAL</a>
+    <button class="btn blue active" id="satBtn" type="button">MŰHOLD</button>
+    <button class="btn blue" id="osmBtn" type="button">TÉRKÉP</button>
+    <button class="btn" id="fitBtn" type="button">DAM-RA IGAZÍT</button>
+    <button class="btn" id="focusBtn" type="button">PREZENTÁCIÓ</button>
+  </div>
+</div>
+
+<div id="legend">
+  <h2>JELMAGYARÁZAT</h2>
+  <div class="row"><span class="sw" style="background:#dc2626"></span>Bontandó</div>
+  <div class="row"><span class="sw" style="background:#f97316"></span>Bontásra javasolt</div>
+  <div class="row"><span class="sw" style="background:#84cc16"></span>Hasznosításra javasolt</div>
+  <div class="row"><span class="sw" style="background:#16a34a"></span>Hasznosítandó</div>
+  <div class="row"><span class="sw" style="background:#2563eb"></span>Védett örökség</div>
+  <div class="row"><span class="sw line-sw" style="background:#111827"></span>Vasút</div>
+  <div class="row"><span class="sw line-sw" style="background:#64748b"></span>Út / feltárt nyomvonal</div>
+  <div id="stats">
+    <div>491 <span>PDF-poligon</span></div>
+    <div>130 ha <span>terület</span></div>
+    <div>209 <span>vasúti szakasz</span></div>
+    <div>2850 <span>út/sétány szakasz</span></div>
+  </div>
+</div>
+
+<div id="note">
+  <strong>Megjegyzés:</strong> ez nem Google Maps tile-hack. A műholdas alaptérkép Esri World Imagery,
+  a térképi alaptérkép OpenStreetMap. A PDF-kataszter georeferált GPS-poligonként kerül rá a valós területre.
+</div>
+
+<script src="leaflet.js"></script>
+<script>
+const CAT = {
+  bontando:                 { label:'BONTANDÓ', color:'#dc2626', fill:'#dc2626' },
+  bontasra_javasolt:        { label:'BONTÁSRA JAVASOLT', color:'#f97316', fill:'#f97316' },
+  'hasznosításra_javasolt': { label:'HASZNOSÍTÁSRA JAVASOLT', color:'#65a30d', fill:'#84cc16' },
+  'hasznosítandó':          { label:'HASZNOSÍTANDÓ', color:'#16a34a', fill:'#16a34a' },
+  'védett':                 { label:'VÉDETT ÖRÖKSÉG', color:'#2563eb', fill:'#2563eb' },
+  egyeb:                    { label:'EGYÉB', color:'#64748b', fill:'#94a3b8' }
+};
+
+const map = L.map('map', {
+  zoomControl:false,
+  preferCanvas:true,
+  center:[48.109, 20.736],
+  zoom:15
+});
+L.control.zoom({ position:'bottomright' }).addTo(map);
+
+const esri = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  { maxZoom:19, attribution:'Tiles &copy; Esri, Maxar, Earthstar Geographics, and the GIS User Community' }
+);
+const osm = L.tileLayer(
+  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  { maxZoom:19, attribution:'&copy; OpenStreetMap contributors' }
+);
+esri.addTo(map);
+
+const buildingLayer = L.layerGroup().addTo(map);
+const railLayer = L.layerGroup().addTo(map);
+const roadLayer = L.layerGroup().addTo(map);
+const bounds = L.latLngBounds([]);
+
+function popupFor(b, cfg) {
+  const name = b.name || 'Névtelen épület';
+  return `<div class="pop-title">${name}</div>
+    <div class="pop-cat" style="background:${cfg.color}">${cfg.label}</div>
+    <div class="pop-note">PDF-kataszterből georeferált épületpoligon.</div>`;
+}
+
+function normToLatLng(x, y) {
+  return [
+    0.0001963488854244133 * x + 0.016152994295623557 * y + 48.099491795729186,
+    0.033234315746344834 * x - 0.016248664530145618 * y + 20.729425893521785
+  ];
+}
+
+function styleFor(cat) {
+  const cfg = CAT[cat] || CAT.egyeb;
+  return {
+    color:cfg.color,
+    fillColor:cfg.fill,
+    fillOpacity:0.58,
+    opacity:0.96,
+    weight:2.2
+  };
+}
+
+function loadBuildings(data) {
+  data.buildings.forEach(b => {
+    if (!b.gps || b.gps.length < 3) return;
+    const cfg = CAT[b.cat] || CAT.egyeb;
+    const polygon = L.polygon(b.gps, styleFor(b.cat)).bindPopup(popupFor(b, cfg));
+    polygon.on('mouseover', () => polygon.setStyle({ weight:4, fillOpacity:0.78 }));
+    polygon.on('mouseout', () => polygon.setStyle(styleFor(b.cat)));
+    polygon.addTo(buildingLayer);
+    b.gps.forEach(p => bounds.extend(p));
+  });
+}
+
+function loadInfrastructure(data) {
+  (data.roads || []).forEach(s => {
+    const a = normToLatLng(s.x0, s.y0);
+    const b = normToLatLng(s.x1, s.y1);
+    L.polyline([a, b], { color:'#64748b', weight:2.4, opacity:0.58, lineCap:'round' }).addTo(roadLayer);
+  });
+  (data.railways || []).forEach(s => {
+    const a = normToLatLng(s.x0, s.y0);
+    const b = normToLatLng(s.x1, s.y1);
+    L.polyline([a, b], { color:'#ffffff', weight:5.5, opacity:0.85, lineCap:'round' }).addTo(railLayer);
+    L.polyline([a, b], { color:'#111827', weight:3.2, opacity:0.95, lineCap:'round' }).addTo(railLayer);
+    L.polyline([a, b], { color:'#ef4444', weight:1.4, opacity:0.95, lineCap:'round' }).addTo(railLayer);
+  });
+}
+
+function fitDam() {
+  if (bounds.isValid()) map.fitBounds(bounds.pad(0.08), { animate:true });
+}
+
+function setBase(layer) {
+  if (layer === 'sat') {
+    map.removeLayer(osm); esri.addTo(map);
+    satBtn.classList.add('active'); osmBtn.classList.remove('active');
+  } else {
+    map.removeLayer(esri); osm.addTo(map);
+    osmBtn.classList.add('active'); satBtn.classList.remove('active');
+  }
+}
+
+const satBtn = document.getElementById('satBtn');
+const osmBtn = document.getElementById('osmBtn');
+satBtn.addEventListener('click', () => setBase('sat'));
+osmBtn.addEventListener('click', () => setBase('osm'));
+document.getElementById('fitBtn').addEventListener('click', fitDam);
+document.getElementById('focusBtn').addEventListener('click', () => {
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('note').style.display = 'none';
+  fitDam();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'f' || e.key === 'F') fitDam();
+  if (e.key === 'p' || e.key === 'P') document.getElementById('focusBtn').click();
+  if (e.key === '1') setBase('sat');
+  if (e.key === '2') setBase('osm');
+});
+
+L.control.layers(
+  { 'Műholdkép':esri, 'OSM térkép':osm },
+  { 'PDF épületkataszter':buildingLayer, 'Vasút':railLayer, 'Út / sétány':roadLayer },
+  { position:'topright', collapsed:false }
+).addTo(map);
+
+Promise.all([
+  fetch('dam_buildings_gps.json').then(r => r.json()),
+  fetch('dam_infrastructure.json').then(r => r.json())
+]).then(([buildings, infra]) => {
+  loadInfrastructure(infra);
+  loadBuildings(buildings);
+  fitDam();
+}).catch(err => {
+  alert('Nem sikerült betölteni a DAM térképi adatokat. Indítsd helyi szerverről: Indítás.command');
+  console.error(err);
+});
+</script>
+</body>
+</html>
