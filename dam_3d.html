@@ -164,15 +164,57 @@ const KB = {
   'Forgattyús tengely üzem':          { now:'Ipari forgattyús tengely gyártó.', floors:1 },
 };
 
-// ─── KOORDINÁTA RENDSZER – ORIGÓ KÖZÉPRE ────────────────────────────────────
-// PDF bbox: X 0.028–0.752  Y 0.192–0.976
-const PDF_CX = (0.028 + 0.752) / 2;  // 0.390
-const PDF_CY = (0.192 + 0.976) / 2;  // 0.584
-const SS = 0.90;
+// ─── KOORDINÁTA RENDSZER ─────────────────────────────────────────────────────
+// PDF [0..1] → 3D scene koordináta. Origót és skálát betöltés után állítjuk be
+// az épületek tényleges bounding boxából.
+let PDF_CX = 0.39, PDF_CY = 0.584, SS = 0.90;
 
 function p2s(px, py) {
-  // Centrált: origó = DAM közepe
   return [ (px - PDF_CX) * SS, (PDF_CY - py) * SS ];
+}
+
+// GPS lat/lng → PDF [0..1] bilineáris inverz (Newton-iteráció)
+function latlng2pdf(lat, lng, cal) {
+  const tl = cal.tl, tr = cal.tr, bl = cal.bl, br = cal.br;
+  let x = 0.5, y = 0.5;
+  for (let n = 0; n < 50; n++) {
+    const topLat = tl.lat + (tr.lat - tl.lat) * x;
+    const topLng = tl.lng + (tr.lng - tl.lng) * x;
+    const botLat = bl.lat + (br.lat - bl.lat) * x;
+    const botLng = bl.lng + (br.lng - bl.lng) * x;
+    const eLat = topLat + (botLat - topLat) * y - lat;
+    const eLng = topLng + (botLng - topLng) * y - lng;
+    const dLdx = (tr.lat - tl.lat) * (1 - y) + (br.lat - bl.lat) * y;
+    const dGdx = (tr.lng - tl.lng) * (1 - y) + (br.lng - bl.lng) * y;
+    const dLdy = botLat - topLat;
+    const dGdy = botLng - topLng;
+    const det = dLdx * dGdy - dGdx * dLdy;
+    if (Math.abs(det) < 1e-20) break;
+    const dx = (eLat * dGdy - eLng * dLdy) / det;
+    const dy = (dLdx * eLng - dGdx * eLat) / det;
+    x -= dx; y -= dy;
+    if (Math.abs(dx) < 1e-9 && Math.abs(dy) < 1e-9) break;
+  }
+  return [x, y];
+}
+
+// GPS útvonal (path: [{lat,lng}...]) → szegmens tömb [{x0,y0,x1,y1,lw}]
+function pathToSegments(path, lw, cal) {
+  const segs = [];
+  for (let i = 0; i < path.length - 1; i++) {
+    const [x0, y0] = latlng2pdf(path[i].lat, path[i].lng, cal);
+    const [x1, y1] = latlng2pdf(path[i+1].lat, path[i+1].lng, cal);
+    segs.push({ x0, y0, x1, y1, lw });
+  }
+  return segs;
+}
+
+function kindToLw(kind) {
+  if (!kind) return 0.8;
+  if (['motorway','trunk','primary'].includes(kind)) return 3.0;
+  if (['secondary','tertiary'].includes(kind)) return 2.0;
+  if (['residential','unclassified','service'].includes(kind)) return 1.0;
+  return 0.7;
 }
 
 function polyArea(pts) {
@@ -317,34 +359,25 @@ function addSegmentBand(segments, opts) {
   return mesh;
 }
 
-function addInfrastructure(data) {
-  // Út / sétány: valódi sáv, nem böngészőfüggő WebGL-vonal.
-  if (data.roads && data.roads.length > 0) {
-    addSegmentBand(data.roads, {
-      color: 0x7c8794,
-      opacity: 0.62,
-      width: 0.0021,
-      y: 0.003,
-      renderOrder: 1
-    });
+function addInfrastructure(prezInfra, cal) {
+  // Konvertáljuk a GPS útvonalakat PDF szegmensekké ugyanazzal a kalibrációval
+  const roads = [];
+  for (const r of (prezInfra.roads || [])) {
+    const segs = pathToSegments(r.path, kindToLw(r.kind), cal);
+    for (const s of segs) roads.push(s);
+  }
+  const railways = [];
+  for (const r of (prezInfra.railways || [])) {
+    const segs = pathToSegments(r.path, 1.0, cal);
+    for (const s of segs) railways.push(s);
   }
 
-  // Vasút: fekete fő sáv + piros középvonal, hogy felülnézetből is elkülönüljön.
-  if (data.railways && data.railways.length > 0) {
-    addSegmentBand(data.railways, {
-      color: 0x111827,
-      opacity: 0.92,
-      width: 0.0032,
-      y: 0.006,
-      renderOrder: 2
-    });
-    addSegmentBand(data.railways, {
-      color: 0xef4444,
-      opacity: 0.90,
-      width: 0.00115,
-      y: 0.007,
-      renderOrder: 3
-    });
+  if (roads.length > 0) {
+    addSegmentBand(roads, { color: 0x7c8794, opacity: 0.62, width: 0.0021, y: 0.003, renderOrder: 1 });
+  }
+  if (railways.length > 0) {
+    addSegmentBand(railways, { color: 0x111827, opacity: 0.92, width: 0.0032, y: 0.006, renderOrder: 2 });
+    addSegmentBand(railways, { color: 0xef4444, opacity: 0.90, width: 0.00115, y: 0.007, renderOrder: 3 });
   }
 }
 
@@ -511,17 +544,34 @@ function setP(p) { document.getElementById('loading-fill').style.width = p + '%'
 
 Promise.all([
   fetch('dam_buildings2.json').then(r => r.json()),
-  fetch('dam_infrastructure_v2.json').then(r => r.json()),
-]).then(([bData, infra]) => {
+  fetch('dam_prez_infrastructure.json').then(r => r.json()),
+  fetch('dam_pdf_corner_calibration.json').then(r => r.json()),
+]).then(([bData, prezInfra, calData]) => {
+  const cal = calData.calibration;
+  setP(20);
+
+  // Origó = az épületek tényleges PDF bounding box közepe
+  const bs = bData.buildings.filter(b => b.pts && b.pts.length >= 3);
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const b of bs) {
+    for (const pt of b.pts) {
+      if (pt[0] < minX) minX = pt[0]; if (pt[0] > maxX) maxX = pt[0];
+      if (pt[1] < minY) minY = pt[1]; if (pt[1] > maxY) maxY = pt[1];
+    }
+  }
+  PDF_CX = (minX + maxX) / 2;
+  PDF_CY = (minY + maxY) / 2;
+  SS = 0.90 / Math.max(maxX - minX, maxY - minY);
+
   setP(30);
-  addInfrastructure(infra);
-  setP(40);
-  const bs = bData.buildings;
+  addInfrastructure(prezInfra, cal);
+  setP(50);
+
   let i = 0;
   function batch() {
     const end = Math.min(i + 25, bs.length);
-    for (; i < end; i++) if (bs[i].pts && bs[i].pts.length >= 3) addBuilding(bs[i]);
-    setP(40 + Math.round(i / bs.length * 55));
+    for (; i < end; i++) addBuilding(bs[i]);
+    setP(50 + Math.round(i / bs.length * 45));
     if (i < bs.length) requestAnimationFrame(batch);
     else {
       setP(100);
@@ -532,8 +582,8 @@ Promise.all([
     }
   }
   batch();
-}).catch(() => {
-  document.getElementById('loading-txt').textContent = 'HIBA! Indítsd: Indítás.command';
+}).catch(e => {
+  document.getElementById('loading-txt').textContent = 'HIBA: ' + e.message;
 });
 
 window.addEventListener('resize', () => {
