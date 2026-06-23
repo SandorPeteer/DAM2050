@@ -199,15 +199,12 @@ function latlng2pdf(lat, lng, cal) {
 }
 
 // GPS útvonal (path: [{lat,lng}...]) → szegmens tömb [{x0,y0,x1,y1,lw}]
-// A latlng2pdf y=0→dél, y=1→észak, de az épületek PDF-jében y=0→dél is —
-// a p2s() (PDF_CY - py) képlete mindkettőt helyesen kezeli, nincs extra flip.
 function pathToSegments(path, lw, cal) {
   const segs = [];
   for (let i = 0; i < path.length - 1; i++) {
     const [x0, y0] = latlng2pdf(path[i].lat, path[i].lng, cal);
     const [x1, y1] = latlng2pdf(path[i+1].lat, path[i+1].lng, cal);
-    // y flip: a GPS y és az épület PDF y ellentétes irányú
-    segs.push({ x0, y0: 1 - y0, x1, y1: 1 - y1, lw });
+    segs.push({ x0, y0, x1, y1, lw });
   }
   return segs;
 }
