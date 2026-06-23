@@ -62,6 +62,17 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
 .cal-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
 .cal-grid .btn { padding:8px 6px; font-size:12px; }
 #cal-values { margin-top:10px; color:#475569; font-size:12px; font-weight:800; line-height:1.45; }
+.control-fit { margin-top:12px; padding-top:12px; border-top:2px solid #e2e8f0; }
+.control-fit label { display:block; margin-bottom:6px; font-size:12px; font-weight:900; color:#334155; }
+.control-fit select {
+  width:100%; margin-bottom:8px; padding:8px; border:2px solid #cbd5e1; border-radius:6px;
+  font-size:12px; font-weight:800; background:#fff; color:#0f172a;
+}
+#control-list { margin-top:8px; font-size:11px; line-height:1.45; color:#334155; font-weight:800; max-height:120px; overflow:auto; }
+.map-pick-marker {
+  width:16px; height:16px; border-radius:50%; background:#facc15; border:4px solid #0f172a;
+  box-shadow:0 0 0 3px rgba(255,255,255,.85);
+}
 
 .leaflet-control-layers, .leaflet-control-zoom {
   border:2px solid rgba(15,23,42,.18) !important;
@@ -139,6 +150,16 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
     <button class="btn" data-cal="rotLeft">FORG -</button><button class="btn" data-cal="towerFit">HŰTŐTORONY</button><button class="btn" data-cal="rotRight">FORG +</button>
   </div>
   <div id="cal-values"></div>
+  <div class="control-fit">
+    <label for="anchorSelect">KONTROLLPONT ILLESZTÉS</label>
+    <select id="anchorSelect"></select>
+    <div class="cal-grid">
+      <button class="btn" id="pickAnchor" type="button">TÉRKÉPEN KIJELÖL</button>
+      <button class="btn" id="applyAnchors" type="button">ILLESZT</button>
+      <button class="btn" id="clearAnchors" type="button">TÖRÖL</button>
+    </div>
+    <div id="control-list">Legalább 3 pont kell. Válassz PDF pontot, majd kattints a megfelelő helyre a Leaflet térképen.</div>
+  </div>
 </div>
 
 <script src="leaflet.js"></script>
@@ -194,22 +215,116 @@ function saveCalibration() {
   localStorage.setItem('damMapCalibration', JSON.stringify(calibration));
 }
 
-const TOWER_AFFINE = {
+const FALLBACK_AFFINE = {
   lat:[0.0036061800049083104, -0.01155643305109244, 48.10309307859829],
   lng:[0.026368368035605272, 0.000992317462766401, 20.72907414780178],
   center:[48.096790544825005, 20.7412467572]
 };
 
-function normToLatLng(x, y) {
-  let lat = TOWER_AFFINE.lat[0] * x + TOWER_AFFINE.lat[1] * y + TOWER_AFFINE.lat[2];
-  let lng = TOWER_AFFINE.lng[0] * x + TOWER_AFFINE.lng[1] * y + TOWER_AFFINE.lng[2];
+const PDF_ANCHORS = [
+  { id:'tower-w', label:'Hűtőtorony nyugat / PDF 425', x:0.409558, y:0.704186 },
+  { id:'tower-nw', label:'Hűtőtorony ÉNY / PDF 429', x:0.422163, y:0.669523 },
+  { id:'tower-c', label:'Hűtőtorony közép / PDF 275', x:0.435734, y:0.673687 },
+  { id:'tower-e', label:'Hűtőtorony kelet / PDF 430', x:0.44884, y:0.672903 },
+  { id:'tower-s1', label:'Hűtőtorony dél 1 / PDF 305', x:0.427383, y:0.707908 },
+  { id:'tower-s2', label:'Hűtőtorony dél 2 / PDF 306', x:0.447325, y:0.711271 },
+  { id:'keleti-eromu', label:'Keleti Erőmű nagy tömb / PDF 244', x:0.462857, y:0.443306 },
+  { id:'kozep-henger', label:'Középhengermű hosszú csarnok / PDF 258', x:0.345881, y:0.618882 },
+  { id:'hivatalhaz', label:'I. Hivatalház / PDF 7', x:0.082034, y:0.491415 },
+  { id:'furdo', label:'Vasgyári fürdő / PDF 0', x:0.163676, y:0.563009 },
+  { id:'mozdony', label:'Mozdonyszín / PDF 104', x:0.154501, y:0.290055 }
+];
 
-  const centerLat = TOWER_AFFINE.center[0] + calibration.dy;
-  const centerLng = TOWER_AFFINE.center[1] + calibration.dx;
+let manualControls = loadManualControls();
+let activeAffine = null;
+let pickingAnchorId = null;
+let pickMarkers = [];
+
+function loadManualControls() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('damControlPoints') || '{}');
+    return saved && typeof saved === 'object' ? saved : {};
+  } catch (err) {
+    return {};
+  }
+}
+
+function saveManualControls() {
+  localStorage.setItem('damControlPoints', JSON.stringify(manualControls));
+}
+
+function solveLinear3(matrix, vector) {
+  const m = matrix.map(row => row.slice());
+  const v = vector.slice();
+  for (let i = 0; i < 3; i++) {
+    let max = i;
+    for (let r = i + 1; r < 3; r++) {
+      if (Math.abs(m[r][i]) > Math.abs(m[max][i])) max = r;
+    }
+    [m[i], m[max]] = [m[max], m[i]];
+    [v[i], v[max]] = [v[max], v[i]];
+    const pivot = m[i][i];
+    if (Math.abs(pivot) < 1e-12) throw new Error('Kontrollpontok túl közel vannak egymáshoz');
+    for (let j = i; j < 3; j++) m[i][j] /= pivot;
+    v[i] /= pivot;
+    for (let r = 0; r < 3; r++) {
+      if (r === i) continue;
+      const f = m[r][i];
+      for (let j = i; j < 3; j++) m[r][j] -= f * m[i][j];
+      v[r] -= f * v[i];
+    }
+  }
+  return v;
+}
+
+function solveAffineAxis(points, targetKey) {
+  const m = [[0,0,0],[0,0,0],[0,0,0]];
+  const v = [0,0,0];
+  points.forEach(p => {
+    const row = [p.x, p.y, 1];
+    const target = p[targetKey];
+    for (let i = 0; i < 3; i++) {
+      v[i] += row[i] * target;
+      for (let j = 0; j < 3; j++) m[i][j] += row[i] * row[j];
+    }
+  });
+  return solveLinear3(m, v);
+}
+
+function computeManualAffine() {
+  const points = PDF_ANCHORS
+    .filter(a => manualControls[a.id])
+    .map(a => ({ x:a.x, y:a.y, lat:manualControls[a.id].lat, lng:manualControls[a.id].lng }));
+  if (points.length < 3) return null;
+  const lat = solveAffineAxis(points, 'lat');
+  const lng = solveAffineAxis(points, 'lng');
+  const center = points.reduce((acc, p) => [acc[0] + p.lat, acc[1] + p.lng], [0,0])
+    .map(v => v / points.length);
+  return { lat, lng, center, count:points.length };
+}
+
+function refreshManualAffine() {
+  try {
+    activeAffine = computeManualAffine();
+    return true;
+  } catch (err) {
+    status('ILLESZTÉSI HIBA: ' + err.message);
+    console.error(err);
+    return false;
+  }
+}
+
+function normToLatLng(x, y) {
+  const affine = activeAffine || FALLBACK_AFFINE;
+  let lat = affine.lat[0] * x + affine.lat[1] * y + affine.lat[2];
+  let lng = affine.lng[0] * x + affine.lng[1] * y + affine.lng[2];
+
+  const centerLat = affine.center[0] + calibration.dy;
+  const centerLng = affine.center[1] + calibration.dx;
   const metersPerLng = 74000;
   const metersPerLat = 111000;
-  let mx = (lng - TOWER_AFFINE.center[1]) * metersPerLng * calibration.scale;
-  let my = (lat - TOWER_AFFINE.center[0]) * metersPerLat * calibration.scale;
+  let mx = (lng - affine.center[1]) * metersPerLng * calibration.scale;
+  let my = (lat - affine.center[0]) * metersPerLat * calibration.scale;
   const a = (calibration.rot || 0) * Math.PI / 180;
   const rx = mx * Math.cos(a) - my * Math.sin(a);
   const ry = mx * Math.sin(a) + my * Math.cos(a);
@@ -296,6 +411,49 @@ function setBase(layer) {
   }
 }
 
+function populateAnchorSelect() {
+  const sel = document.getElementById('anchorSelect');
+  sel.innerHTML = '';
+  PDF_ANCHORS.forEach(anchor => {
+    const opt = document.createElement('option');
+    opt.value = anchor.id;
+    opt.textContent = anchor.label;
+    sel.appendChild(opt);
+  });
+}
+
+function redrawPickMarkers() {
+  pickMarkers.forEach(m => m.remove());
+  pickMarkers = [];
+  PDF_ANCHORS.forEach(anchor => {
+    const p = manualControls[anchor.id];
+    if (!p || !map) return;
+    const marker = L.marker([p.lat, p.lng], {
+      icon:L.divIcon({ className:'', html:'<div class="map-pick-marker"></div>', iconSize:[16,16], iconAnchor:[8,8] })
+    }).bindTooltip(anchor.label, { direction:'top' }).addTo(map);
+    pickMarkers.push(marker);
+  });
+}
+
+function updateControlList() {
+  const el = document.getElementById('control-list');
+  const rows = PDF_ANCHORS.filter(a => manualControls[a.id]).map(a => {
+    const p = manualControls[a.id];
+    return `${a.label}: ${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}`;
+  });
+  const fit = activeAffine ? `<br><strong>Aktív kontrollpontos illesztés: ${activeAffine.count} pont</strong>` : '<br><strong>Fallback hűtőtornyos illesztés aktív</strong>';
+  el.innerHTML = (rows.length ? rows.join('<br>') : 'Nincs rögzített kontrollpont.') + fit;
+  redrawPickMarkers();
+}
+
+function applyManualAnchors() {
+  if (refreshManualAffine()) {
+    renderBuildings();
+    updateControlList();
+    fitDam();
+  }
+}
+
 function init() {
   if (!window.L) {
     status('LEAFLET HIBA: leaflet.js nem töltött be');
@@ -303,6 +461,7 @@ function init() {
   }
 
   calibration = loadCalibration();
+  refreshManualAffine();
   currentBounds = L.latLngBounds([]);
   map = L.map('map', { zoomControl:false, center:[48.094722, 20.740000], zoom:15 });
   L.control.zoom({ position:'bottomright' }).addTo(map);
@@ -343,6 +502,31 @@ function init() {
     const panel = document.getElementById('calibration');
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
     updateCalValues();
+    updateControlList();
+  });
+  populateAnchorSelect();
+  document.getElementById('pickAnchor').addEventListener('click', function() {
+    pickingAnchorId = document.getElementById('anchorSelect').value;
+    const anchor = PDF_ANCHORS.find(a => a.id === pickingAnchorId);
+    status('KATTINTS A TÉRKÉPEN: ' + (anchor ? anchor.label : 'kontrollpont'));
+  });
+  document.getElementById('applyAnchors').addEventListener('click', applyManualAnchors);
+  document.getElementById('clearAnchors').addEventListener('click', function() {
+    manualControls = {};
+    activeAffine = null;
+    saveManualControls();
+    renderBuildings();
+    updateControlList();
+  });
+  map.on('click', function(e) {
+    if (!pickingAnchorId) return;
+    manualControls[pickingAnchorId] = { lat:e.latlng.lat, lng:e.latlng.lng };
+    saveManualControls();
+    pickingAnchorId = null;
+    refreshManualAffine();
+    renderBuildings();
+    updateControlList();
+    status(activeAffine ? 'KONTROLLPONTOS ILLESZTÉS AKTÍV' : 'KONTROLLPONT RÖGZÍTVE - legalább 3 kell');
   });
 
   document.querySelectorAll('[data-cal]').forEach(function(btn) {
@@ -358,11 +542,16 @@ function init() {
       if (action === 'smaller') calibration.scale = Math.max(0.7, calibration.scale - scaleStep);
       if (action === 'rotLeft') calibration.rot = (calibration.rot || 0) - 0.4;
       if (action === 'rotRight') calibration.rot = (calibration.rot || 0) + 0.4;
-      if (action === 'towerFit') calibration = { ...DEFAULT_CAL };
-      if (action === 'reset') calibration = { ...DEFAULT_CAL };
+      if (action === 'towerFit' || action === 'reset') {
+        calibration = { ...DEFAULT_CAL };
+        manualControls = {};
+        activeAffine = null;
+        saveManualControls();
+      }
       if (action === 'save') saveCalibration();
       renderBuildings();
       updateCalValues();
+      updateControlList();
     });
   });
 
@@ -384,6 +573,7 @@ function init() {
     });
 
   updateCalValues();
+  updateControlList();
 }
 
 function updateCalValues() {
