@@ -37,16 +37,10 @@ html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Ari
   margin-top:14px; padding-top:12px; border-top:2px solid #cbd5e1;
   display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:14px; font-weight:950; color:#334155;
 }
-#note {
-  position:fixed; right:18px; bottom:18px; z-index:10; max-width:460px;
-  background:rgba(15,23,42,.9); color:#fff; border-radius:8px; padding:14px 16px;
-  box-shadow:0 10px 34px rgba(0,0,0,.28); font-size:15px; line-height:1.45; font-weight:800;
-}
 @media (max-width: 900px) {
   #top { align-items:flex-start; flex-direction:column; }
   #title { font-size:20px; }
   #legend { width:310px; }
-  #note { display:none; }
 }
 </style>
 </head>
@@ -83,9 +77,6 @@ html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Ari
   </div>
 </div>
 
-<div id="note">
-  Ez a végleges nézet: a színes keretek a kézzel illesztett PDF-rétegből jönnek. Kattints bármelyik épületre a PDF-ből kinyert adatokhoz.
-</div>
 
 
 <script src="google_maps_key_public.js"></script>
