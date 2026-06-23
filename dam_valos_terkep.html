@@ -148,6 +148,7 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
     <span></span><button class="btn" data-cal="south">LE</button><span></span>
     <button class="btn" data-cal="smaller">KISEBB</button><button class="btn" data-cal="save">MENT</button><button class="btn" data-cal="larger">NAGYOBB</button>
     <button class="btn" data-cal="rotLeft">FORG -</button><button class="btn" data-cal="towerFit">HŰTŐTORONY</button><button class="btn" data-cal="rotRight">FORG +</button>
+    <button class="btn" data-cal="flipX">TÜKR X</button><button class="btn" data-cal="flipY">TÜKR Y</button><button class="btn" data-cal="flipBoth">TÜKR XY</button>
   </div>
   <div id="cal-values"></div>
   <div class="control-fit">
@@ -188,11 +189,13 @@ const PDF = {
 };
 
 const DEFAULT_CAL = {
-  version:5,
+  version:6,
   dx:0,
   dy:0,
   scale:1,
-  rot:0
+  rot:0,
+  flipX:false,
+  flipY:false
 };
 
 let map, osm, esri, pdfLayer, anchorLayer, currentBounds, calibration, sourceBuildings;
@@ -315,6 +318,8 @@ function refreshManualAffine() {
 }
 
 function normToLatLng(x, y) {
+  if (calibration.flipX) x = PDF.minX + PDF.maxX - x;
+  if (calibration.flipY) y = PDF.minY + PDF.maxY - y;
   const affine = activeAffine || FALLBACK_AFFINE;
   let lat = affine.lat[0] * x + affine.lat[1] * y + affine.lat[2];
   let lng = affine.lng[0] * x + affine.lng[1] * y + affine.lng[2];
@@ -542,6 +547,12 @@ function init() {
       if (action === 'smaller') calibration.scale = Math.max(0.7, calibration.scale - scaleStep);
       if (action === 'rotLeft') calibration.rot = (calibration.rot || 0) - 0.4;
       if (action === 'rotRight') calibration.rot = (calibration.rot || 0) + 0.4;
+      if (action === 'flipX') calibration.flipX = !calibration.flipX;
+      if (action === 'flipY') calibration.flipY = !calibration.flipY;
+      if (action === 'flipBoth') {
+        calibration.flipX = !calibration.flipX;
+        calibration.flipY = !calibration.flipY;
+      }
       if (action === 'towerFit' || action === 'reset') {
         calibration = { ...DEFAULT_CAL };
         manualControls = {};
@@ -580,7 +591,8 @@ function updateCalValues() {
   const el = document.getElementById('cal-values');
   if (!el || !calibration) return;
   el.innerHTML = `eltolás: ${calibration.dx.toFixed(5)} lng, ${calibration.dy.toFixed(5)} lat<br>` +
-    `méret: ${(calibration.scale * 100).toFixed(1)}% · forgatás: ${(calibration.rot || 0).toFixed(1)}°`;
+    `méret: ${(calibration.scale * 100).toFixed(1)}% · forgatás: ${(calibration.rot || 0).toFixed(1)}°<br>` +
+    `tükrözés: X ${calibration.flipX ? 'BE' : 'ki'} · Y ${calibration.flipY ? 'BE' : 'ki'}`;
 }
 
 init();
