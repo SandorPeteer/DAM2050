@@ -62,7 +62,6 @@ html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Ari
     <a class="btn" href="index.html">FŐOLDAL</a>
     <button class="btn active" id="satBtn" type="button">MŰHOLD</button>
     <button class="btn" id="mapBtn" type="button">TÉRKÉP</button>
-    <button class="btn active" id="labelBtn" type="button">CÍMKÉK</button>
     <a class="btn subtle" href="dam_pdf_kalibracio.html">SZERKESZTÉS</a>
     <button class="btn" id="hideBtn" type="button">UI KI</button>
   </div>
@@ -100,18 +99,9 @@ const CAT = {
   'hasznosítandó':          { label:'Hasznosítandó', fill:'#16a34a' },
   'védett':                 { label:'Védett örökség', fill:'#2563eb' }
 };
-const IMPORTANT = [
-  'I. Hivatalház', 'II. Hivatalház', 'Konzumsor', 'Vasúti Felépítménygyártó Műhely',
-  'Egyedi Gépgyár', 'Keleti Erőmű', 'Középhengermű', 'Csavargyár', 'Mozdonyszín',
-  'Tűzállótéglagyár', 'Turbókompresszor gépház', 'Hűtőtornyok', 'Nagykovácsműhely',
-  'Vasgyári fürdő', 'Vasgyári vasútállomás', 'Vízmű C-telep'
-];
-
 let map;
 let bounds;
 let pdfPolygons = [];
-let labels = [];
-let labelsVisible = true;
 
 function loadGoogle() {
   if (!window.GOOGLE_MAPS_API_KEY || window.GOOGLE_MAPS_API_KEY.includes('PASTE_')) {
@@ -146,11 +136,6 @@ window.initMap = function() {
 function wireUi() {
   document.getElementById('satBtn').addEventListener('click', () => setBase('satellite'));
   document.getElementById('mapBtn').addEventListener('click', () => setBase('roadmap'));
-  document.getElementById('labelBtn').addEventListener('click', () => {
-    labelsVisible = !labelsVisible;
-    document.getElementById('labelBtn').classList.toggle('active', labelsVisible);
-    labels.forEach(l => l.setMap(labelsVisible ? map : null));
-  });
   document.getElementById('hideBtn').addEventListener('click', () => {
     document.getElementById('top').style.display = 'none';
     document.getElementById('legend').style.display = 'none';
@@ -171,7 +156,6 @@ function loadLayers() {
   ]).then(([pdfSource, calibrationData]) => {
     const pdfFeatures = buildPdfFeatures(pdfSource.buildings, pdfSource.labels || [], calibrationData.calibration);
     renderPdf(pdfFeatures);
-    renderLabels(pdfFeatures);
     const named = pdfFeatures.filter(f => f.name).length;
     document.getElementById('totalStat').textContent = `${pdfFeatures.length} PDF elem`;
     document.getElementById('nameStat').textContent = `${named} név`;
@@ -269,6 +253,7 @@ function infoHtml(f, cfg) {
   const labels = f.pdfLabels.length
     ? `<div style="margin-top:8px"><strong>PDF feliratok a közelben:</strong><br>${f.pdfLabels.map(escapeHtml).join('<br>')}</div>`
     : '<div style="margin-top:8px"><strong>PDF feliratok:</strong> nincs közeli felirat</div>';
+  const mapsUrl = `https://www.google.com/maps/@${f.center[0].toFixed(7)},${f.center[1].toFixed(7)},180a,35y,0h,60t/data=!3m1!1e3`;
   return `
     <div style="min-width:260px; max-width:360px; font:13px Arial, sans-serif; color:#111827">
       <div style="font-size:16px; font-weight:900; margin-bottom:6px">${escapeHtml(f.name || 'PDF épület')}</div>
@@ -278,6 +263,11 @@ function infoHtml(f, cfg) {
       <div><strong>Térképi koordináta:</strong> ${f.center[0].toFixed(6)}, ${f.center[1].toFixed(6)}</div>
       <div><strong>Poligonpontok:</strong> ${f.pointCount}</div>
       ${labels}
+      <div style="margin-top:10px">
+        <a href="${mapsUrl}" target="_blank" rel="noopener" style="display:inline-block; padding:7px 10px; background:#111827; color:#fff; border-radius:5px; text-decoration:none; font-weight:900">
+          Megnyitás Google Maps 3D-ben
+        </a>
+      </div>
     </div>
   `;
 }
@@ -289,36 +279,6 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
-}
-
-function renderLabels(features) {
-  const groups = new Map();
-  features.filter(f => f.name && IMPORTANT.some(n => f.name.includes(n) || n.includes(f.name))).forEach(f => {
-    const key = IMPORTANT.find(n => f.name.includes(n) || n.includes(f.name)) || f.name;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(f.center);
-  });
-  groups.forEach((pts, name) => {
-    const lat = pts.reduce((s,p) => s+p[0], 0) / pts.length;
-    const lng = pts.reduce((s,p) => s+p[1], 0) / pts.length;
-    labels.push(new google.maps.Marker({
-      position:{ lat, lng },
-      map,
-      icon:{
-        path:google.maps.SymbolPath.CIRCLE,
-        scale:0,
-        fillOpacity:0,
-        strokeOpacity:0
-      },
-      label:{
-        text:name,
-        color:'#111827',
-        fontSize:'13px',
-        fontWeight:'900'
-      },
-      zIndex:10
-    }));
-  });
 }
 
 loadGoogle();
