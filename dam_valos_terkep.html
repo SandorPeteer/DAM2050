@@ -153,7 +153,7 @@ const CAT = {
 
 const map = L.map('map', {
   zoomControl:false,
-  preferCanvas:true,
+  preferCanvas:false,
   center:[48.094722, 20.740000],
   zoom:15
 });
@@ -178,6 +178,14 @@ osm.addTo(map);
 
 const buildingLayer = L.layerGroup().addTo(map);
 const anchorLayer = L.layerGroup().addTo(map);
+const categoryLayers = {
+  bontando:L.layerGroup().addTo(map),
+  bontasra_javasolt:L.layerGroup().addTo(map),
+  'hasznosításra_javasolt':L.layerGroup().addTo(map),
+  'hasznosítandó':L.layerGroup().addTo(map),
+  'védett':L.layerGroup().addTo(map),
+  egyeb:L.layerGroup().addTo(map)
+};
 let currentBounds = L.latLngBounds([]);
 let sourceBuildings = null;
 let calibration = loadCalibration();
@@ -199,6 +207,7 @@ const PDF = {
 };
 
 const DEFAULT_CAL = {
+  version:2,
   west:20.7240,
   east:20.7540,
   south:48.0878,
@@ -210,7 +219,9 @@ const DEFAULT_CAL = {
 
 function loadCalibration() {
   try {
-    return { ...DEFAULT_CAL, ...JSON.parse(localStorage.getItem('damMapCalibration') || '{}') };
+    const saved = JSON.parse(localStorage.getItem('damMapCalibration') || '{}');
+    if (saved.version !== DEFAULT_CAL.version) return { ...DEFAULT_CAL };
+    return { ...DEFAULT_CAL, ...saved };
   } catch {
     return { ...DEFAULT_CAL };
   }
@@ -251,16 +262,20 @@ function renderBuildings() {
   if (!sourceBuildings) return;
   buildingLayer.clearLayers();
   anchorLayer.clearLayers();
+  Object.values(categoryLayers).forEach(layer => layer.clearLayers());
   const nextBounds = L.latLngBounds([]);
   const counts = {};
   let rendered = 0;
+  let failed = 0;
   sourceBuildings.buildings.forEach(b => {
+    try {
     if (!b.pts || b.pts.length < 3) return;
     const cfg = CAT[b.cat] || CAT.egyeb;
     const coords = b.pts.map(p => normToLatLng(p[0], p[1]));
     const isCoolingTower = b.name === 'Hűtőtornyok';
     counts[b.cat] = (counts[b.cat] || 0) + 1;
     rendered++;
+    const targetLayer = categoryLayers[b.cat] || categoryLayers.egyeb;
     L.polygon(coords, {
       pane:'pdfHaloPane',
       color:'#ffffff',
@@ -268,7 +283,7 @@ function renderBuildings() {
       weight:isCoolingTower ? 9 : 7,
       fill:false,
       interactive:false
-    }).addTo(buildingLayer);
+    }).addTo(targetLayer);
     const polygon = L.polygon(coords, {
       ...styleFor(b.cat),
       weight:isCoolingTower ? 5 : 3.2,
@@ -280,11 +295,11 @@ function renderBuildings() {
       weight:isCoolingTower ? 5 : 3.2,
       fillOpacity:isCoolingTower ? 0.88 : 0.76
     }));
-    polygon.addTo(buildingLayer);
+    polygon.addTo(targetLayer);
     if (b.name && ['Hűtőtornyok', 'Keleti Erőmű', 'Középhengermű', 'I. Hivatalház', 'Vasgyári fürdő'].includes(b.name)) {
       L.marker(normToLatLng(b.cx, b.cy), {
         pane:'pdfLabelPane',
-        icon:L.divIcon({ className:'', html:`<div class="pdf-label">${b.name}</div>`, iconSize:null, iconAnchor:[0,0] })
+        icon:L.divIcon({ className:'', html:`<div class="pdf-label">${b.name}</div>`, iconSize:[130,22], iconAnchor:[0,0] })
       }).addTo(anchorLayer);
     }
     if (isCoolingTower) {
@@ -294,10 +309,14 @@ function renderBuildings() {
       }).bindTooltip('Hűtőtorony kontrollpont', { direction:'top' }).addTo(anchorLayer);
     }
     coords.forEach(p => nextBounds.extend(p));
+    } catch (err) {
+      failed++;
+      console.error('PDF poligon render hiba', b, err);
+    }
   });
   currentBounds = nextBounds;
   document.getElementById('overlay-status').textContent =
-    `PDF RÉTEG AKTÍV: ${rendered} poligon · bontandó ${counts.bontando || 0} · védett ${counts['védett'] || 0} · hasznosítható ${(counts['hasznosításra_javasolt'] || 0) + (counts['hasznosítandó'] || 0)}`;
+    `PDF RÉTEG AKTÍV: ${rendered} poligon · hibás ${failed} · bontandó ${counts.bontando || 0} · védett ${counts['védett'] || 0} · hasznosítható ${(counts['hasznosításra_javasolt'] || 0) + (counts['hasznosítandó'] || 0)}`;
   updateCalValues();
 }
 
@@ -321,7 +340,9 @@ satBtn.addEventListener('click', () => setBase('sat'));
 osmBtn.addEventListener('click', () => setBase('osm'));
 document.getElementById('fitBtn').addEventListener('click', fitDam);
 document.getElementById('pdfBtn').addEventListener('click', () => {
-  if (!map.hasLayer(buildingLayer)) buildingLayer.addTo(map);
+  Object.values(categoryLayers).forEach(layer => {
+    if (!map.hasLayer(layer)) layer.addTo(map);
+  });
   if (!map.hasLayer(anchorLayer)) anchorLayer.addTo(map);
   fitDam();
 });
@@ -368,16 +389,25 @@ function updateCalValues() {
 
 L.control.layers(
   { 'OSM / Leaflet térkép':osm, 'Műholdkép':esri },
-  { 'PDF/drónos épületkataszter':buildingLayer, 'Hűtőtornyok kontrollpontok':anchorLayer },
+  {
+    'BONTANDÓ PDF-réteg':categoryLayers.bontando,
+    'BONTÁSRA JAVASOLT PDF-réteg':categoryLayers.bontasra_javasolt,
+    'HASZNOSÍTÁSRA JAVASOLT PDF-réteg':categoryLayers['hasznosításra_javasolt'],
+    'HASZNOSÍTANDÓ PDF-réteg':categoryLayers['hasznosítandó'],
+    'VÉDETT ÖRÖKSÉG PDF-réteg':categoryLayers['védett'],
+    'Hűtőtornyok / címkék':anchorLayer
+  },
   { position:'topright', collapsed:false }
 ).addTo(map);
 
 fetch('dam_buildings2.json')
   .then(r => r.json())
   .then(buildings => {
+  document.getElementById('overlay-status').textContent = `PDF ADAT BETÖLTVE: ${buildings.buildings.length} poligon`;
   loadBuildings(buildings);
   fitDam();
 }).catch(err => {
+  document.getElementById('overlay-status').textContent = 'PDF RÉTEG HIBA - konzolban részletek';
   alert('Nem sikerült betölteni a DAM térképi adatokat. Indítsd helyi szerverről: Indítás.command');
   console.error(err);
 });
