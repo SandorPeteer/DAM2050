@@ -31,7 +31,11 @@ html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Ari
   border-radius:8px; box-shadow:0 10px 34px rgba(0,0,0,.22); padding:18px 20px;
 }
 #legend h2 { margin:0 0 12px; font-size:21px; letter-spacing:.08em; }
-.row { display:flex; align-items:center; gap:12px; margin:10px 0; font-size:16px; font-weight:950; }
+.row {
+  display:flex; align-items:center; gap:12px; margin:10px 0; font-size:16px; font-weight:950;
+  cursor:pointer; user-select:none; transition:opacity .15s, filter .15s;
+}
+.row.off { opacity:.34; filter:grayscale(1); text-decoration:line-through; }
 .sw { width:28px; height:19px; border-radius:3px; border:3px solid #fff; box-shadow:0 0 0 2px #111827; }
 #stats {
   margin-top:14px; padding-top:12px; border-top:2px solid #cbd5e1;
@@ -50,13 +54,13 @@ html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Ari
 <div id="top">
   <div>
     <div id="title">DAM 2050 · ÉPÜLETKATEGÓRIÁK</div>
-    <div id="subtitle">PDF-ből kinyert kategóriák Google műholdképen, nagy kontrasztú prezentációs nézet</div>
+    <div id="subtitle">DAM kategóriák Google műholdképen, nagy kontrasztú prezentációs nézet</div>
   </div>
   <div id="actions">
     <a class="btn" href="index.html">FŐOLDAL</a>
     <button class="btn active" id="satBtn" type="button">MŰHOLD</button>
     <button class="btn" id="mapBtn" type="button">TÉRKÉP</button>
-    <button class="btn active" id="pdfBtn" type="button">PDF RÉTEG</button>
+    <button class="btn active" id="pdfBtn" type="button">DAM RÉTEG</button>
     <a class="btn subtle" href="dam_pdf_kalibracio.html">SZERKESZTÉS</a>
     <button class="btn" id="hideBtn" type="button">UI KI</button>
   </div>
@@ -64,20 +68,20 @@ html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Ari
 
 <div id="legend">
   <h2>JELMAGYARÁZAT</h2>
-  <div class="row"><span class="sw" style="background:#dc2626"></span>Bontandó</div>
-  <div class="row"><span class="sw" style="background:#f97316"></span>Bontásra javasolt</div>
-  <div class="row"><span class="sw" style="background:#84cc16"></span>Hasznosításra javasolt</div>
-  <div class="row"><span class="sw" style="background:#16a34a"></span>Hasznosítandó</div>
-  <div class="row"><span class="sw" style="background:#2563eb"></span>Védett örökség</div>
+  <div class="row" data-layer="bontando"><span class="sw" style="background:#dc2626"></span>Bontandó</div>
+  <div class="row" data-layer="bontasra_javasolt"><span class="sw" style="background:#f97316"></span>Bontásra javasolt</div>
+  <div class="row" data-layer="hasznosításra_javasolt"><span class="sw" style="background:#84cc16"></span>Hasznosításra javasolt</div>
+  <div class="row" data-layer="hasznosítandó"><span class="sw" style="background:#16a34a"></span>Hasznosítandó</div>
+  <div class="row" data-layer="védett"><span class="sw" style="background:#2563eb"></span>Védett örökség</div>
+  <div class="row" data-layer="roads"><span class="sw" style="background:#e5e7eb"></span>Betonozott út</div>
+  <div class="row" data-layer="railways"><span class="sw" style="background:#111827; border-color:#ef4444"></span>Vasút</div>
   <div id="stats">
-    <div id="totalStat">453 PDF elem</div>
+    <div id="totalStat">453 DAM elem</div>
     <div id="nameStat">nevek betöltése...</div>
-    <div id="labelStat">PDF feliratok...</div>
+    <div id="labelStat">DAM feliratok...</div>
     <div>130 ha terület</div>
   </div>
 </div>
-
-
 
 <script src="google_maps_key_public.js"></script>
 <script>
@@ -95,7 +99,19 @@ const CAT = {
 let map;
 let bounds;
 let pdfPolygons = [];
+let infrastructureOverlays = [];
 let pdfVisible = true;
+let layerVisibility = {
+  bontando:true,
+  bontasra_javasolt:true,
+  'hasznosításra_javasolt':true,
+  'hasznosítandó':true,
+  'védett':true,
+  roads:true,
+  railways:true
+};
+let currentInfoWindow = null;
+const MAPS_3D_OFFSET_METERS = { north: -250, east: 0 };
 
 function loadGoogle() {
   if (!window.GOOGLE_MAPS_API_KEY || window.GOOGLE_MAPS_API_KEY.includes('PASTE_')) {
@@ -133,12 +149,20 @@ function wireUi() {
   document.getElementById('pdfBtn').addEventListener('click', () => {
     pdfVisible = !pdfVisible;
     document.getElementById('pdfBtn').classList.toggle('active', pdfVisible);
-    pdfPolygons.forEach(p => p.setMap(pdfVisible ? map : null));
+    applyLayerVisibility();
+    if (!pdfVisible && currentInfoWindow) currentInfoWindow.close();
+  });
+  document.querySelectorAll('#legend .row[data-layer]').forEach(row => {
+    row.addEventListener('click', () => {
+      const layer = row.dataset.layer;
+      layerVisibility[layer] = !layerVisibility[layer];
+      row.classList.toggle('off', !layerVisibility[layer]);
+      applyLayerVisibility();
+    });
   });
   document.getElementById('hideBtn').addEventListener('click', () => {
     document.getElementById('top').style.display = 'none';
     document.getElementById('legend').style.display = 'none';
-    document.getElementById('note').style.display = 'none';
   });
 }
 
@@ -151,17 +175,76 @@ function setBase(type) {
 function loadLayers() {
   Promise.all([
     fetch('dam_buildings2.json?cb=' + Date.now()).then(r => r.json()),
-    fetch('dam_pdf_corner_calibration.json?cb=' + Date.now()).then(r => r.json())
-  ]).then(([pdfSource, calibrationData]) => {
+    fetch('dam_pdf_corner_calibration.json?cb=' + Date.now()).then(r => r.json()),
+    fetch('dam_prez_infrastructure.json?cb=' + Date.now()).then(r => r.json())
+  ]).then(([pdfSource, calibrationData, infrastructureData]) => {
     const pdfFeatures = buildPdfFeatures(pdfSource.buildings, pdfSource.labels || [], calibrationData.calibration);
+    renderInfrastructure(infrastructureData);
     renderPdf(pdfFeatures);
     const named = pdfFeatures.filter(f => f.name).length;
-    document.getElementById('totalStat').textContent = `${pdfFeatures.length} PDF elem`;
+    document.getElementById('totalStat').textContent = `${pdfFeatures.length} DAM elem`;
     document.getElementById('nameStat').textContent = `${named} név`;
-    document.getElementById('labelStat').textContent = `${(pdfSource.labels || []).length} PDF felirat`;
+    document.getElementById('labelStat').textContent = `${(pdfSource.labels || []).length} DAM felirat`;
     map.fitBounds(bounds, 90);
   }).catch(err => {
     document.getElementById('subtitle').textContent = 'Réteg betöltési hiba: ' + err.message;
+  });
+}
+
+function renderInfrastructure(data) {
+  renderPathLines(data.roads || [], {
+    layer:'roads',
+    strokeColor:'#1f2937',
+    strokeOpacity:.36,
+    strokeWeight:5,
+    zIndex:0
+  });
+  renderPathLines(data.roads || [], {
+    layer:'roads',
+    strokeColor:'#f4efe1',
+    strokeOpacity:.78,
+    strokeWeight:2,
+    zIndex:1
+  });
+  renderPathLines(data.railways || [], {
+    layer:'railways',
+    strokeColor:'#111827',
+    strokeOpacity:.82,
+    strokeWeight:3,
+    zIndex:1
+  });
+  renderPathLines(data.railways || [], {
+    layer:'railways',
+    strokeColor:'#ef4444',
+    strokeOpacity:.78,
+    strokeWeight:1,
+    zIndex:1
+  });
+}
+
+function renderPathLines(items, style) {
+  items.forEach(item => {
+    if (!Array.isArray(item.path) || item.path.length < 2) return;
+    const line = new google.maps.Polyline({
+      path:item.path,
+      strokeColor:style.strokeColor,
+      strokeOpacity:style.strokeOpacity,
+      strokeWeight:style.strokeWeight,
+      clickable:false,
+      map:pdfVisible && layerVisibility[style.layer] ? map : null,
+      zIndex:style.zIndex
+    });
+    infrastructureOverlays.push({ overlay:line, layer:style.layer });
+  });
+}
+
+function applyLayerVisibility() {
+  pdfPolygons.forEach(item => {
+    item.halo.setMap(pdfVisible && layerVisibility[item.cat] ? map : null);
+    item.poly.setMap(pdfVisible && layerVisibility[item.cat] ? map : null);
+  });
+  infrastructureOverlays.forEach(item => {
+    item.overlay.setMap(pdfVisible && layerVisibility[item.layer] ? map : null);
   });
 }
 
@@ -181,7 +264,9 @@ function buildPdfFeatures(buildings, pdfLabels, calibration) {
         pointCount:b.pts.length,
         pdfLabels:nearbyPdfLabels(b, pdfLabels),
         coords,
-        center:center(coords)
+        center:center(coords),
+        area:polygonAreaMeters(coords),
+        size:boundsMeters(coords)
       };
     });
 }
@@ -201,6 +286,7 @@ function nearbyPdfLabels(building, pdfLabels) {
     .filter(l => l.x >= minX && l.x <= maxX && l.y >= minY && l.y <= maxY)
     .map(l => String(l.text || '').trim())
     .filter(t => t && (!skip.has(t) || /\d/.test(t)))
+    .filter(isUsefulDamLabel)
     .filter((t, i, arr) => arr.indexOf(t) === i);
   const ordered = [];
   if (building.name) ordered.push(building.name);
@@ -208,6 +294,16 @@ function nearbyPdfLabels(building, pdfLabels) {
     if (!ordered.includes(t)) ordered.push(t);
   });
   return ordered.slice(0, 24);
+}
+
+function isUsefulDamLabel(text) {
+  const t = String(text || '').trim();
+  if (!t) return false;
+  if (t.length === 1) return false;
+  if (/^\d{1,5}([-/]\d{1,3})?\.?$/.test(t)) return false;
+  if (/^\d+([-.]\d+)+$/.test(t)) return false;
+  if (!/[A-Za-zÁÉÍÓÖŐÚÜŰáéíóöőúüű]/.test(t)) return false;
+  return true;
 }
 
 function warpPoint(x, y, calibration) {
@@ -239,36 +335,121 @@ function renderPdf(features) {
       paths:path, strokeColor:cfg.fill, strokeOpacity:1, strokeWeight:4,
       fillColor:cfg.fill, fillOpacity:.42, map:pdfVisible ? map : null, zIndex:3
     });
-    const info = new google.maps.InfoWindow({
-      content:infoHtml(f, cfg)
-    });
-    halo.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
-    poly.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
-    pdfPolygons.push(halo, poly);
+    const info = new google.maps.InfoWindow();
+    const openInfo = e => {
+      if (!pdfVisible) return;
+      if (currentInfoWindow) currentInfoWindow.close();
+      currentInfoWindow = info;
+      info.setContent(infoHtml(f, cfg, [e.latLng.lat(), e.latLng.lng()]));
+      info.setPosition(e.latLng);
+      info.open({ map });
+    };
+    halo.addListener('click', openInfo);
+    poly.addListener('click', openInfo);
+    pdfPolygons.push({ halo, poly, cat:f.cat });
   });
 }
 
-function infoHtml(f, cfg) {
-  const labels = f.pdfLabels.length
-    ? `<div style="margin-top:8px"><strong>PDF feliratok a közelben:</strong><br>${f.pdfLabels.map(escapeHtml).join('<br>')}</div>`
-    : '<div style="margin-top:8px"><strong>PDF feliratok:</strong> nincs közeli felirat</div>';
-  const mapsUrl = `https://www.google.com/maps/@${f.center[0].toFixed(7)},${f.center[1].toFixed(7)},180a,35y,0h,60t/data=!3m1!1e3`;
+function infoHtml(f, cfg, target) {
+  const displayLabels = f.pdfLabels;
+  const title = f.name || displayLabels[0] || 'DAM épület';
+  const labels = displayLabels.length
+    ? displayLabels.map(t => `<div style="margin-top:4px; padding:6px 8px; border-radius:6px; background:#eef2ff; color:#1e293b; font-weight:850; line-height:1.35">${escapeHtml(t)}</div>`).join('')
+    : '<span style="color:#64748b">nincs közeli felirat</span>';
+  const linkPoint = target || f.center;
+  const maps3dPoint = offsetLatLng(linkPoint[0], linkPoint[1], MAPS_3D_OFFSET_METERS.north, MAPS_3D_OFFSET_METERS.east);
+  const lat = maps3dPoint[0].toFixed(7);
+  const lng = maps3dPoint[1].toFixed(7);
+  const pinLat = linkPoint[0].toFixed(7);
+  const pinLng = linkPoint[1].toFixed(7);
+  const centerLat = f.center[0].toFixed(6);
+  const centerLng = f.center[1].toFixed(6);
+  const maps3dUrl = `https://www.google.com/maps/@${lat},${lng},180a,35y,0h,60t/data=!3m1!1e3?entry=ttu`;
+  const mapsPinUrl = `https://www.google.com/maps/search/?api=1&query=${pinLat},${pinLng}`;
+  const area = Math.round(f.area).toLocaleString('hu-HU');
+  const width = Math.round(f.size.width).toLocaleString('hu-HU');
+  const height = Math.round(f.size.height).toLocaleString('hu-HU');
   return `
-    <div style="min-width:260px; max-width:360px; font:13px Arial, sans-serif; color:#111827">
-      <div style="font-size:16px; font-weight:900; margin-bottom:6px">${escapeHtml(f.name || 'PDF épület')}</div>
-      <div><strong>Kategória:</strong> ${escapeHtml(cfg.label)}</div>
-      <div><strong>PDF elem:</strong> ${f.pdf_idx}</div>
-      <div><strong>PDF középpont:</strong> ${f.cx.toFixed(6)}, ${f.cy.toFixed(6)}</div>
-      <div><strong>Térképi koordináta:</strong> ${f.center[0].toFixed(6)}, ${f.center[1].toFixed(6)}</div>
-      <div><strong>Poligonpontok:</strong> ${f.pointCount}</div>
-      ${labels}
+    <div style="min-width:300px; max-width:390px; font:13px Arial, sans-serif; color:#111827">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px">
+        <div>
+          <div style="font-size:18px; font-weight:950; line-height:1.2">${escapeHtml(title)}</div>
+          <div style="margin-top:3px; color:#64748b; font-weight:800">DAM elem #${f.pdf_idx}</div>
+        </div>
+        <div style="white-space:nowrap; padding:5px 8px; border-radius:999px; background:${cfg.fill}; color:#fff; font-size:11px; font-weight:950">
+          ${escapeHtml(cfg.label)}
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0">
+        <div style="padding:8px; border:1px solid #e2e8f0; border-radius:6px"><strong>Alapterület</strong><br>${area} m2</div>
+        <div style="padding:8px; border:1px solid #e2e8f0; border-radius:6px"><strong>Méret</strong><br>${width} x ${height} m</div>
+        <div style="padding:8px; border:1px solid #e2e8f0; border-radius:6px"><strong>Poligonpont</strong><br>${f.pointCount}</div>
+        <div style="padding:8px; border:1px solid #e2e8f0; border-radius:6px"><strong>Épület közepe</strong><br>${centerLat}, ${centerLng}</div>
+      </div>
       <div style="margin-top:10px">
-        <a href="${mapsUrl}" target="_blank" rel="noopener" style="display:inline-block; padding:7px 10px; background:#111827; color:#fff; border-radius:5px; text-decoration:none; font-weight:900">
-          Megnyitás Google Maps 3D-ben
+        <div style="font-weight:950; margin-bottom:3px">DAM feliratok</div>
+        <div>${labels}</div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px">
+        <a href="${maps3dUrl}" target="_blank" rel="noopener" style="display:inline-block; padding:9px 11px; background:#111827; color:#fff; border-radius:6px; text-decoration:none; font-weight:950">
+          Google Maps 3D
         </a>
+        <a href="${mapsPinUrl}" target="_blank" rel="noopener" style="display:inline-block; padding:9px 11px; background:#eef2ff; color:#1e293b; border-radius:6px; text-decoration:none; font-weight:950">
+          Koordináta megnyitása
+        </a>
+      </div>
+      <div style="margin-top:8px; color:#64748b; font-size:12px; font-weight:700">
+        A 3D gomb csak a Google Maps 3D nézetéhez kompenzált célpontot használ; az adatok és a koordináta gomb az eredeti kattintott ponton maradnak.
       </div>
     </div>
   `;
+}
+
+function polygonAreaMeters(coords) {
+  if (coords.length < 3) return 0;
+  const lat0 = coords.reduce((sum, p) => sum + p[0], 0) / coords.length;
+  const metersPerLat = 111320;
+  const metersPerLng = 111320 * Math.cos(lat0 * Math.PI / 180);
+  const pts = coords.map(p => [p[1] * metersPerLng, p[0] * metersPerLat]);
+  let area = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const j = (i + 1) % pts.length;
+    area += pts[i][0] * pts[j][1] - pts[j][0] * pts[i][1];
+  }
+  return Math.abs(area) / 2;
+}
+
+function boundsMeters(coords) {
+  const lats = coords.map(p => p[0]);
+  const lngs = coords.map(p => p[1]);
+  const south = Math.min(...lats);
+  const north = Math.max(...lats);
+  const west = Math.min(...lngs);
+  const east = Math.max(...lngs);
+  const midLat = (south + north) / 2;
+  return {
+    width:distanceMeters(midLat, west, midLat, east),
+    height:distanceMeters(south, west, north, west)
+  };
+}
+
+function distanceMeters(lat1, lng1, lat2, lng2) {
+  const r = 6371000;
+  const toRad = v => v * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * r * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function offsetLatLng(lat, lng, northMeters, eastMeters) {
+  const metersPerLat = 111320;
+  const metersPerLng = 111320 * Math.cos(lat * Math.PI / 180);
+  return [
+    lat + northMeters / metersPerLat,
+    lng + eastMeters / metersPerLng
+  ];
 }
 
 function escapeHtml(value) {
