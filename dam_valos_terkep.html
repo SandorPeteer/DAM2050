@@ -167,14 +167,10 @@ const PDF = {
 };
 
 const DEFAULT_CAL = {
-  version:4,
-  west:20.7240,
-  east:20.7540,
-  south:48.0878,
-  north:48.1012,
-  dx:0.0009,
-  dy:0.00445,
-  scale:0.96,
+  version:5,
+  dx:0,
+  dy:0,
+  scale:1,
   rot:0
 };
 
@@ -198,19 +194,22 @@ function saveCalibration() {
   localStorage.setItem('damMapCalibration', JSON.stringify(calibration));
 }
 
+const TOWER_AFFINE = {
+  lat:[0.0036061800049083104, -0.01155643305109244, 48.10309307859829],
+  lng:[0.026368368035605272, 0.000992317462766401, 20.72907414780178],
+  center:[48.096790544825005, 20.7412467572]
+};
+
 function normToLatLng(x, y) {
-  const x2 = PDF.cx + (x - PDF.cx) * calibration.scale;
-  const y2 = PDF.cy + (y - PDF.cy) * calibration.scale;
-  const nx = (x2 - PDF.minX) / (PDF.maxX - PDF.minX);
-  const ny = (y2 - PDF.minY) / (PDF.maxY - PDF.minY);
-  const centerLat = (calibration.north + calibration.south) / 2 + calibration.dy;
-  const centerLng = (calibration.west + calibration.east) / 2 + calibration.dx;
-  let lat = calibration.north - ny * (calibration.north - calibration.south) + calibration.dy;
-  let lng = calibration.west + nx * (calibration.east - calibration.west) + calibration.dx;
+  let lat = TOWER_AFFINE.lat[0] * x + TOWER_AFFINE.lat[1] * y + TOWER_AFFINE.lat[2];
+  let lng = TOWER_AFFINE.lng[0] * x + TOWER_AFFINE.lng[1] * y + TOWER_AFFINE.lng[2];
+
+  const centerLat = TOWER_AFFINE.center[0] + calibration.dy;
+  const centerLng = TOWER_AFFINE.center[1] + calibration.dx;
   const metersPerLng = 74000;
   const metersPerLat = 111000;
-  const mx = (lng - centerLng) * metersPerLng;
-  const my = (lat - centerLat) * metersPerLat;
+  let mx = (lng - TOWER_AFFINE.center[1]) * metersPerLng * calibration.scale;
+  let my = (lat - TOWER_AFFINE.center[0]) * metersPerLat * calibration.scale;
   const a = (calibration.rot || 0) * Math.PI / 180;
   const rx = mx * Math.cos(a) - my * Math.sin(a);
   const ry = mx * Math.sin(a) + my * Math.cos(a);
@@ -360,7 +359,7 @@ function init() {
       if (action === 'rotLeft') calibration.rot = (calibration.rot || 0) - 0.4;
       if (action === 'rotRight') calibration.rot = (calibration.rot || 0) + 0.4;
       if (action === 'towerFit') calibration = { ...DEFAULT_CAL };
-      if (action === 'reset') calibration = { ...DEFAULT_CAL, dx:0, dy:0, scale:1, rot:0 };
+      if (action === 'reset') calibration = { ...DEFAULT_CAL };
       if (action === 'save') saveCalibration();
       renderBuildings();
       updateCalValues();
