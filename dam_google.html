@@ -70,6 +70,10 @@ html, body { margin:0; width:100%; height:100%; font-family:Arial, Helvetica, sa
 
 <script src="google_maps_key.js"></script>
 <script>
+window.gm_authFailure = function() {
+  status('GOOGLE API HIBA: kulcs/referrer tiltás. Engedélyezd ezt a domaint a Google Cloud Console-ban.');
+};
+
 const CAT = {
   bontando:                 { label:'BONTANDÓ', fill:'#dc2626' },
   bontasra_javasolt:        { label:'BONTÁSRA JAVASOLT', fill:'#f97316' },
@@ -90,14 +94,14 @@ function status(msg) {
 
 function loadGoogle() {
   if (!window.GOOGLE_MAPS_API_KEY || window.GOOGLE_MAPS_API_KEY.includes('PASTE_')) {
-    status('HIÁNYZÓ GOOGLE API KULCS');
+    status('HIÁNYZÓ GOOGLE API KULCS: google_maps_key.js nincs betöltve');
     return;
   }
   const s = document.createElement('script');
   s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(window.GOOGLE_MAPS_API_KEY)}&callback=initMap&v=weekly`;
   s.async = true;
   s.defer = true;
-  s.onerror = () => status('GOOGLE MAPS API HIBA');
+  s.onerror = () => status('GOOGLE MAPS API SCRIPT HIBA');
   document.head.appendChild(s);
 }
 
