@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAM 2050 · Prezentációs térkép</title>
+<style>
+* { box-sizing:border-box; }
+html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Arial, Helvetica, sans-serif; background:#e5e7eb; color:#0f172a; }
+#map { position:fixed; inset:0; width:100vw; height:100vh; background:#d1d5db; }
+#top {
+  position:fixed; top:16px; left:16px; right:16px; z-index:10;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:14px 18px; border-radius:8px; background:rgba(255,255,255,.95);
+  border:2px solid rgba(15,23,42,.18); box-shadow:0 10px 34px rgba(0,0,0,.25);
+}
+#title { font-size:28px; font-weight:950; letter-spacing:.08em; }
+#subtitle { margin-top:4px; font-size:14px; font-weight:900; color:#334155; }
+#actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.btn {
+  border:2px solid #111827; background:#fff; color:#111827; border-radius:6px;
+  padding:10px 13px; font-size:13px; font-weight:950; letter-spacing:.04em; cursor:pointer;
+  text-decoration:none;
+}
+.btn.active, .btn:hover { background:#111827; color:#fff; }
+#legend {
+  position:fixed; left:18px; bottom:18px; z-index:10; width:360px;
+  background:rgba(255,255,255,.95); border:2px solid rgba(15,23,42,.18);
+  border-radius:8px; box-shadow:0 10px 34px rgba(0,0,0,.22); padding:18px 20px;
+}
+#legend h2 { margin:0 0 12px; font-size:21px; letter-spacing:.08em; }
+.row { display:flex; align-items:center; gap:12px; margin:10px 0; font-size:16px; font-weight:950; }
+.sw { width:28px; height:19px; border-radius:3px; border:3px solid #fff; box-shadow:0 0 0 2px #111827; }
+#stats {
+  margin-top:14px; padding-top:12px; border-top:2px solid #cbd5e1;
+  display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:14px; font-weight:950; color:#334155;
+}
+#note {
+  position:fixed; right:18px; bottom:18px; z-index:10; max-width:460px;
+  background:rgba(15,23,42,.9); color:#fff; border-radius:8px; padding:14px 16px;
+  box-shadow:0 10px 34px rgba(0,0,0,.28); font-size:15px; line-height:1.45; font-weight:800;
+}
+@media (max-width: 900px) {
+  #top { align-items:flex-start; flex-direction:column; }
+  #title { font-size:20px; }
+  #legend { width:310px; }
+  #note { display:none; }
+}
+</style>
+</head>
+<body>
+<div id="map"></div>
+
+<div id="top">
+  <div>
+    <div id="title">DAM 2050 · ÉPÜLETKATEGÓRIÁK</div>
+    <div id="subtitle">PDF-ből kinyert kategóriák Google műholdképen, nagy kontrasztú prezentációs nézet</div>
+  </div>
+  <div id="actions">
+    <a class="btn" href="index.html">FŐOLDAL</a>
+    <a class="btn" href="dam_google.html">ELLENŐRZŐ</a>
+    <button class="btn active" id="satBtn" type="button">MŰHOLD</button>
+    <button class="btn" id="mapBtn" type="button">TÉRKÉP</button>
+    <button class="btn" id="osmBtn" type="button">OSM KONTÚR</button>
+    <button class="btn active" id="labelBtn" type="button">CÍMKÉK</button>
+    <button class="btn" id="hideBtn" type="button">UI KI</button>
+  </div>
+</div>
+
+<div id="legend">
+  <h2>JELMAGYARÁZAT</h2>
+  <div class="row"><span class="sw" style="background:#dc2626"></span>Bontandó</div>
+  <div class="row"><span class="sw" style="background:#f97316"></span>Bontásra javasolt</div>
+  <div class="row"><span class="sw" style="background:#84cc16"></span>Hasznosításra javasolt</div>
+  <div class="row"><span class="sw" style="background:#16a34a"></span>Hasznosítandó</div>
+  <div class="row"><span class="sw" style="background:#2563eb"></span>Védett örökség</div>
+  <div id="stats">
+    <div id="totalStat">453 PDF elem</div>
+    <div id="nameStat">nevek betöltése...</div>
+    <div id="osmStat">195 OSM kontúr</div>
+    <div>130 ha terület</div>
+  </div>
+</div>
+
+<div id="note">
+  Ez a nézet prezentációra való: a színes keretek a PDF szerinti döntési kategóriákat mutatják. Az OSM kontúr csak ellenőrző háttérréteg.
+</div>
+
+<script src="google_maps_key.js"></script>
+<script>
+window.gm_authFailure = function() {
+  document.getElementById('subtitle').textContent = 'Google API hiba: kulcs vagy referrer tiltás.';
+};
+
+const CAT = {
+  bontando:                 { label:'Bontandó', fill:'#dc2626' },
+  bontasra_javasolt:        { label:'Bontásra javasolt', fill:'#f97316' },
+  'hasznosításra_javasolt': { label:'Hasznosításra javasolt', fill:'#84cc16' },
+  'hasznosítandó':          { label:'Hasznosítandó', fill:'#16a34a' },
+  'védett':                 { label:'Védett örökség', fill:'#2563eb' }
+};
+const IMPORTANT = [
+  'I. Hivatalház', 'II. Hivatalház', 'Konzumsor', 'Vasúti Felépítménygyártó Műhely',
+  'Egyedi Gépgyár', 'Keleti Erőmű', 'Középhengermű', 'Csavargyár', 'Mozdonyszín',
+  'Tűzállótéglagyár', 'Turbókompresszor gépház', 'Hűtőtornyok', 'Nagykovácsműhely',
+  'Vasgyári fürdő', 'Vasgyári vasútállomás', 'Vízmű C-telep'
+];
+
+let map;
+let bounds;
+let pdfPolygons = [];
+let osmPolygons = [];
+let labels = [];
+let labelsVisible = true;
+let osmVisible = false;
+
+function loadGoogle() {
+  if (!window.GOOGLE_MAPS_API_KEY || window.GOOGLE_MAPS_API_KEY.includes('PASTE_')) {
+    document.getElementById('subtitle').textContent = 'Hiányzó Google API kulcs: google_maps_key.js';
+    return;
+  }
+  const s = document.createElement('script');
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(window.GOOGLE_MAPS_API_KEY)}&callback=initMap&v=weekly&loading=async`;
+  s.async = true;
+  s.defer = true;
+  document.head.appendChild(s);
+}
+
+window.initMap = function() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    center:{ lat:48.0963, lng:20.7398 },
+    zoom:16,
+    mapTypeId:'satellite',
+    renderingType:'RASTER',
+    backgroundColor:'#e5e7eb',
+    tilt:0,
+    fullscreenControl:false,
+    streetViewControl:false,
+    mapTypeControl:false,
+    gestureHandling:'greedy'
+  });
+  bounds = new google.maps.LatLngBounds();
+  wireUi();
+  loadLayers();
+};
+
+function wireUi() {
+  document.getElementById('satBtn').addEventListener('click', () => setBase('satellite'));
+  document.getElementById('mapBtn').addEventListener('click', () => setBase('roadmap'));
+  document.getElementById('osmBtn').addEventListener('click', () => {
+    osmVisible = !osmVisible;
+    document.getElementById('osmBtn').classList.toggle('active', osmVisible);
+    osmPolygons.forEach(p => p.setMap(osmVisible ? map : null));
+  });
+  document.getElementById('labelBtn').addEventListener('click', () => {
+    labelsVisible = !labelsVisible;
+    document.getElementById('labelBtn').classList.toggle('active', labelsVisible);
+    labels.forEach(l => l.setMap(labelsVisible ? map : null));
+  });
+  document.getElementById('hideBtn').addEventListener('click', () => {
+    document.getElementById('top').style.display = 'none';
+    document.getElementById('legend').style.display = 'none';
+    document.getElementById('note').style.display = 'none';
+  });
+}
+
+function setBase(type) {
+  map.setMapTypeId(type);
+  document.getElementById('satBtn').classList.toggle('active', type === 'satellite');
+  document.getElementById('mapBtn').classList.toggle('active', type === 'roadmap');
+}
+
+function loadLayers() {
+  Promise.all([
+    fetch('dam_pdf_aligned_buildings.json?cb=' + Date.now()).then(r => r.json()),
+    fetch('dam_full_osm_buildings.json?cb=' + Date.now()).then(r => r.json())
+  ]).then(([pdf, osm]) => {
+    renderPdf(pdf.features);
+    renderOsm(osm.features);
+    renderLabels(pdf.features);
+    const named = pdf.features.filter(f => f.name).length;
+    document.getElementById('totalStat').textContent = `${pdf.features.length} PDF elem`;
+    document.getElementById('nameStat').textContent = `${named} név`;
+    document.getElementById('osmStat').textContent = `${osm.features.length} OSM kontúr`;
+    map.fitBounds(bounds, 90);
+  }).catch(err => {
+    document.getElementById('subtitle').textContent = 'Réteg betöltési hiba: ' + err.message;
+  });
+}
+
+function renderPdf(features) {
+  features.forEach(f => {
+    const cfg = CAT[f.cat] || { fill:'#64748b', label:'Egyéb' };
+    const path = f.coords.map(c => ({ lat:c[0], lng:c[1] }));
+    path.forEach(p => bounds.extend(p));
+    const halo = new google.maps.Polygon({
+      paths:path, strokeColor:'#fff', strokeOpacity:.96, strokeWeight:9, fillOpacity:0, map, zIndex:2
+    });
+    const poly = new google.maps.Polygon({
+      paths:path, strokeColor:cfg.fill, strokeOpacity:1, strokeWeight:4,
+      fillColor:cfg.fill, fillOpacity:.42, map, zIndex:3
+    });
+    const info = new google.maps.InfoWindow({
+      content:`<strong>${f.name || 'PDF épület'}</strong><br>${cfg.label}<br>PDF elem: ${f.pdf_idx}`
+    });
+    halo.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
+    poly.addListener('click', e => info.open({ map, anchor:null, position:e.latLng }));
+    pdfPolygons.push(halo, poly);
+  });
+}
+
+function renderOsm(features) {
+  features.forEach(f => {
+    const path = f.coords.map(c => ({ lat:c[0], lng:c[1] }));
+    const poly = new google.maps.Polygon({
+      paths:path, strokeColor:'#fff', strokeOpacity:.86, strokeWeight:2,
+      fillColor:'#111827', fillOpacity:.06, map:null, zIndex:1
+    });
+    osmPolygons.push(poly);
+  });
+}
+
+function renderLabels(features) {
+  const groups = new Map();
+  features.filter(f => f.name && IMPORTANT.some(n => f.name.includes(n) || n.includes(f.name))).forEach(f => {
+    const key = IMPORTANT.find(n => f.name.includes(n) || n.includes(f.name)) || f.name;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(f.center);
+  });
+  groups.forEach((pts, name) => {
+    const lat = pts.reduce((s,p) => s+p[0], 0) / pts.length;
+    const lng = pts.reduce((s,p) => s+p[1], 0) / pts.length;
+    labels.push(new google.maps.Marker({
+      position:{ lat, lng },
+      map,
+      icon:{
+        path:google.maps.SymbolPath.CIRCLE,
+        scale:0,
+        fillOpacity:0,
+        strokeOpacity:0
+      },
+      label:{
+        text:name,
+        color:'#111827',
+        fontSize:'13px',
+        fontWeight:'900'
+      },
+      zIndex:10
+    }));
+  });
+}
+
+loadGoogle();
+</script>
+</body>
+</html>
