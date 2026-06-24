@@ -479,6 +479,49 @@ footer strong { color: var(--accent); }
 }
 .img-placeholder svg { opacity: 0.2; }
 
+/* ── COST BADGE ── */
+.cost-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(240,180,41,0.12);
+  border: 1px solid rgba(240,180,41,0.3);
+  color: var(--gold);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 3px 9px;
+  border-radius: 2px;
+  margin-top: 0.5rem;
+  display: block;
+}
+.cost-badge::before { content: '💰 '; }
+
+/* Modal cost box */
+#prez-cost-box {
+  padding: 0.9rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(240,180,41,0.05);
+}
+#prez-cost-label {
+  font-size: 0.62rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.3rem;
+}
+#prez-cost-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--gold);
+}
+#prez-cost-detail {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin-top: 0.3rem;
+  line-height: 1.5;
+}
+
 /* ── KÉPTÁMOGATÁS ── */
 .building-visual.has-pic {
   background: #000 !important;
@@ -510,28 +553,19 @@ footer strong { color: var(--accent); }
 #prez-modal {
   display: none;
   position: fixed; inset: 0; z-index: 9999;
-  background: rgba(0,0,0,0.92);
-  backdrop-filter: blur(6px);
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
+  background: #06080f;
 }
-#prez-modal.open { display: flex; }
+#prez-modal.open { display: flex; flex-direction: column; }
 
 #prez-inner {
   background: var(--surface);
-  border: 1px solid rgba(0,200,255,0.25);
-  border-radius: 10px;
-  width: 100%;
-  max-width: 1100px;
-  max-height: 92vh;
+  width: 100%; height: 100vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 80px rgba(0,200,255,0.1);
-  animation: modalIn 0.2s ease;
+  animation: modalIn 0.18s ease;
 }
-@keyframes modalIn { from { opacity:0; transform:scale(0.97); } to { opacity:1; transform:scale(1); } }
+@keyframes modalIn { from { opacity:0; } to { opacity:1; } }
 
 #prez-header {
   display: flex;
@@ -571,7 +605,7 @@ footer strong { color: var(--accent); }
 
 #prez-body {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 1fr 380px;
   gap: 0;
   flex: 1;
   overflow: hidden;
@@ -585,12 +619,10 @@ footer strong { color: var(--accent); }
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
 }
 #prez-img-wrap img {
   width: 100%; height: 100%;
   object-fit: contain;
-  max-height: 70vh;
 }
 #prez-no-img {
   display: flex;
@@ -633,7 +665,7 @@ footer strong { color: var(--accent); }
 
 #prez-map-box {
   flex: 1;
-  min-height: 220px;
+  min-height: 260px;
   position: relative;
 }
 #prez-map-label {
@@ -650,7 +682,7 @@ footer strong { color: var(--accent); }
   text-transform: uppercase;
   pointer-events: none;
 }
-#prez-map { width: 100%; height: 100%; min-height: 220px; }
+#prez-map { width: 100%; height: 100%; min-height: 260px; }
 
 #prez-footer {
   padding: 0.75rem 1.5rem;
@@ -698,9 +730,10 @@ footer strong { color: var(--accent); }
   background: rgba(0,0,0,0.45);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   #prez-body { grid-template-columns: 1fr; }
-  #prez-side { border-left: none; border-top: 1px solid var(--border); max-height: 300px; }
+  #prez-side { border-left: none; border-top: 1px solid var(--border); max-height: 45vh; overflow-y: auto; }
+  #prez-img-wrap { min-height: 35vh; }
 }
 
 /* ── VÁROSKÖZPONT SZEKCIÓ ── */
@@ -770,6 +803,11 @@ footer strong { color: var(--accent); }
         </div>
       </div>
       <div id="prez-side">
+        <div id="prez-cost-box">
+          <div id="prez-cost-label">Tájékoztató beruházási becslés</div>
+          <div id="prez-cost-val">—</div>
+          <div id="prez-cost-detail"></div>
+        </div>
         <div id="prez-desc-box">
           <div id="prez-use"></div>
           <div id="prez-desc"></div>
@@ -855,7 +893,9 @@ footer strong { color: var(--accent); }
       data-use="Automatizált logisztikai megaközpont — AS/RS · Robot · Drón"
       data-desc="A legnagyobb és legértékesebb védett épület. Alza.hu-stílusú robotizált raktár: AS/RS automatikus polcrendszer, daru-robotok, önjáró AGV-targoncák. A kiszállítást a területen belül drónok és járdai robotok végzik. A meglévő vasúti iparvágányon keresztül utánpótlás és elszállítás."
       data-pic="DAM_NEXUS_AutomatizáltLogisztika"
-      data-lat="48.095400" data-lng="20.737500">
+      data-lat="48.095400" data-lng="20.737500"
+      data-cost="~35–55 Mrd Ft"
+      data-cost-detail="Épület felújítás: 8–12 Mrd · AS/RS robotrendszer: 15–25 Mrd · Drón infrastruktúra: 2–3 Mrd · Vasúti csatlakozás: 3–5 Mrd · IT/szoftver: 5–8 Mrd. Ref: eMAG 117e m² raktár = 40 Mrd Ft">
       <div class="building-visual viz-kozephengermű" data-pic="DAM_NEXUS_AutomatizáltLogisztika">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Épület sziluett -->
@@ -893,7 +933,9 @@ footer strong { color: var(--accent); }
       data-tag="Helyi védett" data-tagclass="tag-protected"
       data-use="Gravitációs energiatároló + geotermikus rendszer"
       data-desc="Az ikonikus tornyok megmaradnak — de új szerepet kapnak. Napelemes felesleg esetén vizet pumpálunk a tornyokba (energia tárolása potenciális energiaként). Csúcsidőben a víz turbinán át folyik le → áramtermelés (Pumped Hydro Storage). Ezen felül geotermikus hőszivattyú-rendszer az egész terület fűtéséhez-hűtéséhez."
-      data-lat="48.096800" data-lng="20.741000">
+      data-lat="48.096800" data-lng="20.741000"
+      data-cost="~6–10 Mrd Ft"
+      data-cost-detail="Torony felújítás + víztározó kialakítás: 2–4 Mrd · Geotermikus fúrás + hőszivattyúk: 2–3 Mrd · Turbina + vezérlés: 1–2 Mrd · Smart Grid integráció: 0,5–1 Mrd. Megtérülés energiamegtakarítással: ~8–12 év">
       <div class="building-visual viz-hutotornyok">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Tornyok sziluett -->
@@ -934,7 +976,9 @@ footer strong { color: var(--accent); }
       data-tag="Helyi védett" data-tagclass="tag-protected"
       data-use="Ipar 4.0 gyártóközpont — CNC · Lézervágó · 3D nyomtató"
       data-desc="A revitalizációs tanulmány szerint raktározásra és egyedi alkatrészgyártásra alkalmas. FabLab + digitális gyár: KKV-k bérelnek gyártási kapacitást. CNC marás, lézervágás, fémnyomtatás, robotizált hegesztőcellák. Az egyetemmel közös kutatási labor."
-      data-lat="48.093600" data-lng="20.742000">
+      data-lat="48.093600" data-lng="20.742000"
+      data-cost="~4–8 Mrd Ft"
+      data-cost-detail="Épület felújítás + tűzvédelem: 1,5–3 Mrd · CNC/lézervágó géppark: 1–2 Mrd · 3D fémnyomtató cellák: 0,5–1 Mrd · FabLab berendezés: 0,3–0,5 Mrd · IT infrastruktúra: 0,3–0,5 Mrd. EU Ipar 4.0 pályázattal részben finanszírozható">
       <div class="building-visual viz-keletierőmű">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Épület -->
@@ -970,7 +1014,9 @@ footer strong { color: var(--accent); }
       data-tag="Helyi védett" data-tagclass="tag-protected"
       data-use="Logisztikai hub + hulladékszállítás vasúton"
       data-desc="A területet behálózó iparvágány egyedülálló lehetőség. A megújított állomásról hulladék-konténereket, ipari alapanyagokat és termékeket szállítunk el vasúton — kamion nélkül. Turisztikai kisvasút a területen belüli közlekedéshez (ipari örökség-élmény)."
-      data-lat="48.091010" data-lng="20.750500">
+      data-lat="48.091010" data-lng="20.750500"
+      data-cost="~2–4 Mrd Ft"
+      data-cost-detail="Állomásépület felújítás: 0,8–1,5 Mrd · Sínfelújítás + váltók: 0,5–1 Mrd · Logisztikai terminál kialakítás: 0,3–0,6 Mrd · Kisvasút szerelvény: 0,2–0,4 Mrd. MÁV-tulajdon miatt állami finanszírozás bevonható">
       <div class="building-visual viz-vasutallomas">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Állomásépület -->
@@ -1017,7 +1063,9 @@ footer strong { color: var(--accent); }
       data-tag="Helyi védett" data-tagclass="tag-protected"
       data-use="Wellness center + telemedicina hub"
       data-desc="Az egykori gyári fürdő rehabilitálva wellness és egészségközponttá válik. Geotermikus energiával fűtött medencék, fizioterápia, prevenciós vizsgálatok. Belső telemedicina fülkék: szakorvosi konzultáció 5G-s videókapcsolattal, wearable integráció, AI-alapú korai diagnosztika."
-      data-lat="48.094700" data-lng="20.733200">
+      data-lat="48.094700" data-lng="20.733200"
+      data-cost="~3–6 Mrd Ft"
+      data-cost-detail="Épület felújítás + medencék: 1–2 Mrd · Geotermikus fűtésrendszer: 0,5–1 Mrd · Orvosi-telemedicina berendezés: 0,8–1,5 Mrd · Wellness gépészet: 0,5–1 Mrd · IT/5G infrastruktúra: 0,3–0,5 Mrd. NEAK finanszírozás részleges lehetőség">
       <div class="building-visual viz-furdő">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Főépület -->
@@ -1050,7 +1098,9 @@ footer strong { color: var(--accent); }
       data-tag="Bontott területek" data-tagclass="tag-demo"
       data-use="Megújuló energiatermelés a lebontott csarnokok helyén"
       data-desc="A fémszerkezetes, lebontott csarnokok helyén ground-mounted bifaciális napelempark épül. Urban wind turbines a szabad területeken. A felesleges energiát a hűtőtornyok pumpált vizes rendszere tárolja. A terület energiamérlegét egy AI-vezérelt Smart Grid optimalizálja valós időben."
-      data-lat="48.094000" data-lng="20.736000">
+      data-lat="48.094000" data-lng="20.736000"
+      data-cost="~8–15 Mrd Ft"
+      data-cost-detail="Ground-mounted napelem (5 MW): 4–7 Mrd · Szélturbinák (10 db): 2–4 Mrd · Smart Grid + inverterek: 1–2 Mrd · Kabelezés, alapozás: 1–2 Mrd. Megtérülés ~12–15 év, utána ingyenes energia. EU Zöld Alap támogatással finanszírozható">
       <div class="building-visual viz-napelem">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Nap -->
@@ -1097,7 +1147,9 @@ footer strong { color: var(--accent); }
       data-tag="Új funkció" data-tagclass="tag-infra"
       data-use="Automatizált beltéri termesztés — 365 nap/év"
       data-desc="Egykori ipari csarnokban (pl. Tűzállótéglagyár) AeroFarms/Plenty technológiájú vertikális farm. LED-es növekedési sorok, aeroponika (95%-kal kevesebb víz mint a hagyományos termesztésnél). Robotizált ültetés, metszés, szüret. A termést önjáró robotok szállítják az automatizált élelmiszerraktárba."
-      data-lat="48.092500" data-lng="20.730500">
+      data-lat="48.092500" data-lng="20.730500"
+      data-cost="~5–9 Mrd Ft"
+      data-cost-detail="Csarnok belső átalakítás + szigetelés: 1–2 Mrd · LED növekedési sorok + aeroponika: 2–4 Mrd · Robot ültetés/szüret gépek: 1–2 Mrd · Klíma + CO2 rendszer: 0,5–1 Mrd. Évi 500–1000 tonna zöldség termelhető, közvetlen árbevétel">
       <div class="building-visual viz-gepeszet">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Csarnok -->
@@ -1133,7 +1185,9 @@ footer strong { color: var(--accent); }
       data-tag="Új funkció" data-tagclass="tag-infra"
       data-use="DaVinci robot sebészet · AI diagnosztika · Drón-mentő"
       data-desc="Csúcstechnológiás orvosi létesítmény: DaVinci robot minimálisan invazív műtétekhez, AI-alapú MRI/CT leletértékelés, telemedicina fülkék, wearable integráció. Drón-mentőszolgálat: AED defibrillátor 90 másodpercen belül bárhova a területen. Automatizált gyógyszerkiadó automata receptre."
-      data-lat="48.094500" data-lng="20.735000">
+      data-lat="48.094500" data-lng="20.735000"
+      data-cost="~12–20 Mrd Ft"
+      data-cost-detail="Épület építés: 3–5 Mrd · DaVinci sebészeti robot (1 db): 2–3 Mrd · AI diagnosztikai rendszer: 1–2 Mrd · Műtők + intenzív: 2–4 Mrd · Drón flotta + infrastruktúra: 0,5–1 Mrd · IT/5G: 1–2 Mrd. PPP modellben (köz-magán) finanszírozható">
       <div class="building-visual" style="background: linear-gradient(160deg, #001522 0%, #002035 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Épület -->
@@ -1402,7 +1456,9 @@ footer strong { color: var(--accent); }
       data-tag="Rekreáció" data-tagclass="tag-infra"
       data-use="Ipari csarnokban — smart fény &amp; hang"
       data-desc="Nagy fedett görkori pálya programozható RGB LED mennyezettel és professzionális hangrendszerrel. Estébe nyúló bulizós görkorcsolyázás. Smart belépő: arcfelismerés vagy NFC karkötő. Automatikus pálya-fertőtlenítés, IoT látogatottság-mérés."
-      data-lat="48.094000" data-lng="20.733000">
+      data-lat="48.094000" data-lng="20.733000"
+      data-cost="~3–5 Mrd Ft"
+      data-cost-detail="Csarnok belső átalakítás + akusztika: 0,8–1,5 Mrd · LED mennyezet programozható RGB: 0,5–1 Mrd · Hangrendszer: 0,3–0,5 Mrd · Görpálya burkolat: 0,2–0,4 Mrd · Smart belépő + IT: 0,2–0,3 Mrd">
       <div class="building-visual" data-pic="gorkorizo" style="background: linear-gradient(160deg, #0a0a2e 0%, #1a0a40 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <ellipse cx="140" cy="130" rx="110" ry="20" fill="rgba(150,0,255,0.1)" stroke="rgba(150,0,255,0.2)" stroke-width="1"/>
@@ -1434,7 +1490,9 @@ footer strong { color: var(--accent); }
       data-tag="Rekreáció" data-tagclass="tag-infra"
       data-use="Tenisz · Padel · Pingpong · Kosár · Futsal"
       data-desc="Minden pálya appból foglalható. Beépített szenzor-hálózat méri az ütések sebességét, pörgetését, a labda pattanási helyét. AI edző valós idejű visszajelzést ad. Automatikus LED-világítás, napenergiával töltött. Foglaláskor arcfelismerés azonosít."
-      data-lat="48.095000" data-lng="20.734000">
+      data-lat="48.095000" data-lng="20.734000"
+      data-cost="~1–2 Mrd Ft"
+      data-cost-detail="Pályaburkolatok (6 pálya): 0,3–0,5 Mrd · Szenzor hálózat + AI rendszer: 0,3–0,5 Mrd · LED világítás napelem: 0,2–0,4 Mrd · App + foglalási rendszer: 0,1–0,2 Mrd · Kerítés, öltöző: 0,2–0,4 Mrd">
       <div class="building-visual" data-pic="sportpalya" style="background: linear-gradient(160deg, #001a10 0%, #002a18 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Teniszpálya -->
@@ -1467,7 +1525,9 @@ footer strong { color: var(--accent); }
       data-tag="Rekreáció" data-tagclass="tag-infra"
       data-use="Geotermikus fűtés · IoT vízminőség · AI úszóedző"
       data-desc="Geotermikus energiával fűtött medence — télen sem drága. IoT szenzorok folyamatosan mérik a pH-t, hőmérsékletet, klórt, automatikusan adagolják a vegyszert. AI kamerarendszer elemzi az úszók technikáját és valós idejű tanácsot küld. Okos kapacitásjelző az appban."
-      data-lat="48.095500" data-lng="20.735000">
+      data-lat="48.095500" data-lng="20.735000"
+      data-cost="~4–7 Mrd Ft"
+      data-cost-detail="Medence építés (50m + tanmedence): 1,5–2,5 Mrd · Geotermikus fűtés: 0,5–1 Mrd · IoT vízkezelő rendszer: 0,3–0,5 Mrd · AI kamera + edző app: 0,2–0,4 Mrd · Öltöző, gépészet: 0,8–1,5 Mrd">
       <div class="building-visual" data-pic="uszouszoda" style="background: linear-gradient(160deg, #001525 0%, #002540 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Medence -->
@@ -1500,7 +1560,9 @@ footer strong { color: var(--accent); }
       data-tag="Rekreáció" data-tagclass="tag-infra"
       data-use="Ipari csarnokban · 5G · Streaming stúdió"
       data-desc="Professzionális e-sport versenyközpont egy egykori ipari csarnokban. 5G ultra-low latency hálózat, 500+ PC/konzol állomás, livestream stúdió. Nézőtér 1000+ főnek. Helyi és regionális bajnokságok otthona. Napenergiával táplált, hővisszanyerős klímarendszerrel."
-      data-lat="48.093000" data-lng="20.732000">
+      data-lat="48.093000" data-lng="20.732000"
+      data-cost="~2–4 Mrd Ft"
+      data-cost-detail="Csarnok belső kialakítás + klimatizálás: 0,6–1 Mrd · 500 gaming PC állomás: 0,5–0,8 Mrd · 5G privát hálózat: 0,3–0,5 Mrd · Streaming stúdió: 0,2–0,4 Mrd · Nézőtér, hangtechnika: 0,4–0,8 Mrd">
       <div class="building-visual" data-pic="esport" style="background: linear-gradient(160deg, #0a001a 0%, #150030 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Monitorok -->
@@ -1532,7 +1594,9 @@ footer strong { color: var(--accent); }
       data-tag="Helyi védett" data-tagclass="tag-protected"
       data-use="I. Hivatalház · Mozdonyszín · Konzumsor"
       data-desc="A védett épületekben sétálható ipari örökség-múzeum. AR-appban a látogató telefonjával virtuálisan látja, hogyan dolgoztak az acélmű fénykorában. Interaktív kiállítás, hanginstallációk, eredeti gépek. QR-kódos önvezető túra. Digitális archívum 1868-tól napjainkig."
-      data-lat="48.094400" data-lng="20.730900">
+      data-lat="48.094400" data-lng="20.730900"
+      data-cost="~2–4 Mrd Ft"
+      data-cost-detail="Épület felújítás (I. Hivatalház + Mozdonyszín): 1–2 Mrd · Kiállítás tervezés + kivitelezés: 0,5–1 Mrd · AR app fejlesztés: 0,2–0,4 Mrd · Digitális archívum: 0,1–0,2 Mrd · Berendezések, eredeti gépek restaurálás: 0,3–0,5 Mrd">
       <div class="building-visual" data-pic="muzeum" style="background: linear-gradient(160deg, #1a1000 0%, #2a1800 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Épület homlokzat -->
@@ -1562,7 +1626,9 @@ footer strong { color: var(--accent); }
       data-tag="Helyi védett" data-tagclass="tag-protected"
       data-use="Sörfőzde · Kávézó · Alkotóközösség · Kisüzemek"
       data-desc="A volt ipari épületek kreatív negyeddé alakulnak — Ruhr-vidék mintájára. Kézműves sörfőzde, specialty kávézó, alkotóközösségek, kisüzemek. Kulturális rendezvények, koncertek a csarnokban. Smart belépő, appban program-értesítők, cashless fizetés."
-      data-lat="48.093500" data-lng="20.730000">
+      data-lat="48.093500" data-lng="20.730000"
+      data-cost="~1,5–3 Mrd Ft"
+      data-cost-detail="Épület felújítás (Konzumsor): 0,6–1,2 Mrd · Sörfőzde technológia: 0,3–0,6 Mrd · Kávézó + kisüzem kialakítás: 0,2–0,4 Mrd · Hangrendszer + LED: 0,2–0,4 Mrd · Smart belépő, cashless rendszer: 0,1–0,2 Mrd">
       <div class="building-visual" data-pic="makersdistrict" style="background: linear-gradient(160deg, #1a0800 0%, #2a1000 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Téglaépület stílus -->
@@ -1893,20 +1959,9 @@ footer strong { color: var(--accent); }
 </footer>
 
 <script>
-// ── LEAFLET TÉRKÉP BETÖLTÉS ──
-(function(){
-  const link = document.createElement('link');
-  link.rel = 'stylesheet'; link.href = 'leaflet.css';
-  document.head.appendChild(link);
-  const s = document.createElement('script');
-  s.src = 'leaflet.js';
-  document.head.appendChild(s);
-})();
-
 const EXTS = ['jpg','jpeg','png','webp','avif'];
 const FOLDER = 'DAM_PIC/';
 
-// Megkeresi az első létező képet, callback(src) vagy callback(null)
 function findPic(key, cb) {
   if (!key) return cb(null);
   let i = 0;
@@ -1922,16 +1977,18 @@ function findPic(key, cb) {
 }
 
 // ── MODAL ──
-const modal   = document.getElementById('prez-modal');
-const imgWrap = document.getElementById('prez-img-wrap');
-const noImg   = document.getElementById('prez-no-img');
-const mTitle  = document.getElementById('prez-title');
-const mTag    = document.getElementById('prez-tag');
-const mUse    = document.getElementById('prez-use');
-const mDesc   = document.getElementById('prez-desc');
+const modal    = document.getElementById('prez-modal');
+const imgWrap  = document.getElementById('prez-img-wrap');
+const noImg    = document.getElementById('prez-no-img');
+const mTitle   = document.getElementById('prez-title');
+const mTag     = document.getElementById('prez-tag');
+const mUse     = document.getElementById('prez-use');
+const mDesc    = document.getElementById('prez-desc');
+const mCostVal = document.getElementById('prez-cost-val');
+const mCostDet = document.getElementById('prez-cost-detail');
 
-let miniMap = null;
-let miniMarker = null;
+let gMap = null;
+let gMarker = null;
 let allCards = [];
 let currentIdx = 0;
 
@@ -1939,11 +1996,13 @@ function openModal(card, idx) {
   currentIdx = idx;
   const d = card.dataset;
 
-  mTitle.textContent = d.name || '—';
-  mTag.textContent   = d.tag  || '';
-  mTag.className     = 'building-tag ' + (d.tagclass || '');
-  mUse.textContent   = d.use  || '';
-  mDesc.textContent  = d.desc || '';
+  mTitle.textContent    = d.name || '—';
+  mTag.textContent      = d.tag  || '';
+  mTag.className        = 'building-tag ' + (d.tagclass || '');
+  mUse.textContent      = d.use  || '';
+  mDesc.textContent     = d.desc || '';
+  mCostVal.textContent  = d.cost || 'Becslés folyamatban';
+  mCostDet.textContent  = d.costDetail || '';
 
   // Kép
   imgWrap.querySelectorAll('img').forEach(e => e.remove());
@@ -1960,10 +2019,9 @@ function openModal(card, idx) {
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
 
-  // Térkép — kis késleltetés hogy a modal már látható legyen
   const lat = parseFloat(d.lat);
   const lng = parseFloat(d.lng);
-  setTimeout(() => initMiniMap(lat, lng), 80);
+  setTimeout(() => initGMap(lat, lng), 120);
 }
 
 function closeModal() {
@@ -1971,40 +2029,93 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 
-function initMiniMap(lat, lng) {
+// ── GOOGLE MAPS SATELLITE MINI TÉRKÉP ──
+function initGMap(lat, lng) {
   if (isNaN(lat) || isNaN(lng)) return;
-  if (!window.L) return;
   const mapEl = document.getElementById('prez-map');
-  if (!miniMap) {
-    miniMap = L.map(mapEl, { zoomControl: true, attributionControl: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19
-    }).addTo(miniMap);
-    // Sötét overlay réteg az OSM felett
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19, opacity: 0.7
-    }).addTo(miniMap);
+
+  if (window.google && window.google.maps) {
+    renderGMap(mapEl, lat, lng);
+  } else {
+    // Betöltjük a Google Maps API-t (kulcs már megvan a google_maps_key_public.js-ből)
+    if (!window.GOOGLE_MAPS_API_KEY) return;
+    if (document.getElementById('gmaps-script')) {
+      // Már folyamatban, várunk
+      const wait = setInterval(() => {
+        if (window.google && window.google.maps) {
+          clearInterval(wait);
+          renderGMap(mapEl, lat, lng);
+        }
+      }, 100);
+      return;
+    }
+    window._gmapCallback = () => renderGMap(mapEl, lat, lng);
+    const s = document.createElement('script');
+    s.id = 'gmaps-script';
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(window.GOOGLE_MAPS_API_KEY)}&callback=_gmapCallback&v=weekly&loading=async`;
+    document.head.appendChild(s);
   }
-  miniMap.setView([lat, lng], 17);
-  if (miniMarker) miniMarker.remove();
-  const icon = L.divIcon({
-    className: '',
-    html: '<div style="width:18px;height:18px;background:#00c8ff;border:3px solid #fff;border-radius:50%;box-shadow:0 0 12px #00c8ff88;"></div>',
-    iconSize: [18, 18], iconAnchor: [9, 9]
-  });
-  miniMarker = L.marker([lat, lng], { icon }).addTo(miniMap);
-  miniMap.invalidateSize();
 }
 
-// Kártya kattintás
+function renderGMap(mapEl, lat, lng) {
+  const pos = { lat, lng };
+  if (!gMap) {
+    gMap = new google.maps.Map(mapEl, {
+      center: pos,
+      zoom: 18,
+      mapTypeId: 'satellite',
+      tilt: 0,
+      disableDefaultUI: false,
+      zoomControl: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      styles: []
+    });
+  } else {
+    gMap.setCenter(pos);
+    gMap.setZoom(18);
+  }
+
+  if (gMarker) gMarker.setMap(null);
+  gMarker = new google.maps.Marker({
+    position: pos,
+    map: gMap,
+    title: mTitle.textContent,
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 12,
+      fillColor: '#00c8ff',
+      fillOpacity: 0.95,
+      strokeColor: '#ffffff',
+      strokeWeight: 3
+    }
+  });
+}
+
+// ── COST BADGE JS GENERÁLÁS ──
+function addCostBadges() {
+  document.querySelectorAll('[data-modal="1"][data-cost]').forEach(card => {
+    const body = card.querySelector('.building-card-body, .city-card-body');
+    if (!body) return;
+    const use = body.querySelector('.building-use, .city-card-sub');
+    if (!use) return;
+    const badge = document.createElement('span');
+    badge.className = 'cost-badge';
+    badge.textContent = card.dataset.cost;
+    use.after(badge);
+  });
+}
+
+// ── SETUP ──
 function setupCards() {
   allCards = Array.from(document.querySelectorAll('[data-modal="1"]'));
   allCards.forEach((card, idx) => {
     card.addEventListener('click', () => openModal(card, idx));
   });
+  addCostBadges();
 }
 
-// Navigáció
 document.getElementById('prez-prev').addEventListener('click', e => {
   e.stopPropagation();
   currentIdx = (currentIdx - 1 + allCards.length) % allCards.length;
@@ -2023,6 +2134,12 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight') document.getElementById('prez-next').click();
   if (e.key === 'ArrowLeft')  document.getElementById('prez-prev').click();
 });
+
+// Google Maps API kulcs betöltése (az oldal már tartalmazza)
+const _gkScript = document.createElement('script');
+_gkScript.src = 'google_maps_key_public.js';
+_gkScript.onload = () => {}; // kulcs most már elérhető
+document.head.appendChild(_gkScript);
 
 document.addEventListener('DOMContentLoaded', setupCards);
 </script>
