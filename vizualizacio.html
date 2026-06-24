@@ -478,6 +478,16 @@ footer strong { color: var(--accent); }
 .zone-table tr:hover td { background: var(--surface2); }
 .zone-table td:first-child { color: var(--accent); font-weight: 700; white-space: nowrap; }
 
+/* Zóna jelmagyarázat */
+.zlitem {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.78rem; color: var(--text-dim); white-space: nowrap;
+}
+.zlitem span {
+  display: inline-block; width: 14px; height: 14px; border-radius: 3px;
+  background: var(--zc); opacity: 0.85; flex-shrink: 0;
+}
+
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
@@ -2107,6 +2117,21 @@ footer strong { color: var(--accent); }
       </tr>
     </tbody>
   </table>
+
+  <!-- ZÓNA TÉRKÉP -->
+  <div id="zone-map-wrap" style="margin-top:2.5rem;">
+    <div style="font-size:0.75rem;letter-spacing:3px;color:var(--text-dim);margin-bottom:1rem;text-transform:uppercase;">Zónák elhelyezkedése a területen</div>
+    <div id="zone-map" style="width:100%;height:520px;border-radius:12px;border:1px solid var(--border);overflow:hidden;"></div>
+    <div id="zone-legend" style="display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:1rem;">
+      <div class="zlitem" style="--zc:#00ff99"><span></span>INF – Infrastruktúra</div>
+      <div class="zlitem" style="--zc:#00c8ff"><span></span>TP – Technológiai Park</div>
+      <div class="zlitem" style="--zc:#cc88ff"><span></span>K – Kultúra & Kreatív</div>
+      <div class="zlitem" style="--zc:#ffaa00"><span></span>KSZ – Kereskedelmi</div>
+      <div class="zlitem" style="--zc:#ff4444"><span></span>I – Ipari Park</div>
+      <div class="zlitem" style="--zc:#f0b429"><span></span>R – Rekreáció</div>
+      <div class="zlitem" style="--zc:#44dd66"><span></span>Z – Zöldfelület & Sétány</div>
+    </div>
+  </div>
 </section>
 
 <!-- ═══════════════════════════════════ ÜTEMEZÉS ═══════════════════════════════════ -->
@@ -2449,10 +2474,109 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft')  document.getElementById('prez-prev').click();
 });
 
+// ── ZÓNA TÉRKÉP ──
+const ZONE_DATA = [
+  { id:'INF', label:'INF\nInfrastruktúra',    color:'#00ff99',
+    coords:[[48.0985,20.733],[48.0985,20.748],[48.0955,20.748],[48.0955,20.738],[48.0963,20.733]] },
+  { id:'TP',  label:'TP\nTechnológiai Park',  color:'#00c8ff',
+    coords:[[48.0963,20.733],[48.0963,20.742],[48.0935,20.742],[48.0935,20.733]] },
+  { id:'K',   label:'K\nKultúra & Kreatív',   color:'#cc88ff',
+    coords:[[48.0955,20.728],[48.0955,20.733],[48.0900,20.733],[48.0900,20.728]] },
+  { id:'KSZ', label:'KSZ\nKereskedelmi',      color:'#ffaa00',
+    coords:[[48.0955,20.748],[48.0955,20.758],[48.0900,20.758],[48.0900,20.748]] },
+  { id:'I',   label:'I\nIpari Park',          color:'#ff4444',
+    coords:[[48.0935,20.733],[48.0935,20.748],[48.0888,20.748],[48.0888,20.733]] },
+  { id:'R',   label:'R\nRekreáció',           color:'#f0b429',
+    coords:[[48.1001,20.728],[48.1001,20.733],[48.0963,20.733],[48.0963,20.728]] },
+  { id:'Z',   label:'Z\nZöldfelület',         color:'#44dd66',
+    coords:[[48.0957,20.728],[48.0958,20.758],[48.0954,20.758],[48.0953,20.728]] },
+];
+
+let zoneMap = null;
+
+function initZoneMap() {
+  const el = document.getElementById('zone-map');
+  if (!el || zoneMap) return;
+  if (!window.google || !window.google.maps) return;
+
+  zoneMap = new google.maps.Map(el, {
+    center: { lat: 48.0940, lng: 20.7430 },
+    zoom: 14,
+    mapTypeId: 'satellite',
+    tilt: 0,
+    zoomControl: true,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: true,
+  });
+
+  const bounds = new google.maps.LatLngBounds();
+
+  ZONE_DATA.forEach(zone => {
+    const path = zone.coords.map(c => ({ lat: c[0], lng: c[1] }));
+    path.forEach(p => bounds.extend(p));
+
+    // Polygon
+    new google.maps.Polygon({
+      paths: path,
+      strokeColor: zone.color,
+      strokeOpacity: 0.95,
+      strokeWeight: 2.5,
+      fillColor: zone.color,
+      fillOpacity: 0.18,
+      map: zoneMap,
+      zIndex: 5,
+    });
+
+    // Label marker (a polygon közepén)
+    const clat = zone.coords.reduce((s,c)=>s+c[0],0)/zone.coords.length;
+    const clng = zone.coords.reduce((s,c)=>s+c[1],0)/zone.coords.length;
+    new google.maps.Marker({
+      position: { lat: clat, lng: clng },
+      map: zoneMap,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 0,
+      },
+      label: {
+        text: zone.label,
+        color: zone.color,
+        fontSize: '11px',
+        fontWeight: '900',
+      },
+      zIndex: 10,
+    });
+  });
+
+  zoneMap.fitBounds(bounds, 30);
+}
+
+// Zóna térkép IntersectionObserver — csak akkor töltjük be amikor látható
+const zoneObserver = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    zoneObserver.disconnect();
+    if (window.google && window.google.maps) {
+      initZoneMap();
+    } else {
+      const wait = setInterval(() => {
+        if (window.google && window.google.maps) {
+          clearInterval(wait);
+          initZoneMap();
+        }
+      }, 200);
+    }
+  }
+}, { threshold: 0.1 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const zEl = document.getElementById('zone-map');
+  if (zEl) zoneObserver.observe(zEl);
+});
+
 // Google Maps API kulcs betöltése (az oldal már tartalmazza)
 const _gkScript = document.createElement('script');
 _gkScript.src = 'google_maps_key_public.js';
-_gkScript.onload = () => {}; // kulcs most már elérhető
+_gkScript.onload = () => {};
 document.head.appendChild(_gkScript);
 
 document.addEventListener('DOMContentLoaded', setupCards);
