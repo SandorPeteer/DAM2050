@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digitális Acélváros 2050 – Befektetői Prezentáció</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#04080f;--bg2:#07111f;--acc:#00ffcc;--acc2:#0088ff;--acc3:#cc88ff;
+  --warn:#ffaa00;--red:#ff3333;--green:#00ff88;--text:#ccdde8;--dim:#334455;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;overflow-x:hidden}
+
+/* SCANLINES */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(4,8,15,.95);border-bottom:1px solid #00ffcc18;
+  backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:54px}
+.nav-logo{font-size:13px;font-weight:900;letter-spacing:5px;color:var(--acc);
+  text-shadow:0 0 14px #00ffcc66}
+.nav-links{display:flex;gap:6px}
+.nav-links a{color:#334455;font-size:8px;letter-spacing:2px;padding:5px 10px;
+  border-radius:4px;text-decoration:none;transition:all .2s;border:1px solid transparent}
+.nav-links a:hover{color:var(--acc);border-color:#00ffcc22;background:#00ffcc08}
+.nav-back{color:#334455;font-size:8px;letter-spacing:2px;padding:5px 12px;
+  border:1px solid #00ffcc22;border-radius:4px;text-decoration:none;
+  transition:all .2s}
+.nav-back:hover{color:var(--acc);background:#00ffcc0a}
+
+/* HERO */
+#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;padding:80px 24px 60px;position:relative;overflow:hidden}
+#hero-bg{position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 40%,#001a2e 0%,var(--bg) 70%);
+  z-index:0}
+#hero-grid{position:absolute;inset:0;z-index:0;opacity:.4;
+  background-image:linear-gradient(#00ffcc08 1px,transparent 1px),linear-gradient(90deg,#00ffcc08 1px,transparent 1px);
+  background-size:50px 50px;animation:gridmv 25s linear infinite}
+@keyframes gridmv{from{background-position:0 0}to{background-position:50px 50px}}
+#hero>*{position:relative;z-index:1}
+.hero-tag{font-size:9px;letter-spacing:5px;color:#005566;border:1px solid #00ffcc18;
+  padding:5px 14px;border-radius:20px;margin-bottom:28px;display:inline-block}
+.hero-hex{font-size:56px;color:var(--acc);
+  text-shadow:0 0 30px #00ffcc,0 0 60px #0088ff;
+  animation:hexglow 3s ease-in-out infinite;margin-bottom:4px}
+@keyframes hexglow{0%,100%{text-shadow:0 0 30px #00ffcc,0 0 60px #0088ff}
+  50%{text-shadow:0 0 50px #00ffcc,0 0 100px #0055ff,0 0 150px #0022aa}}
+.hero-title{font-size:clamp(28px,5vw,54px);font-weight:900;letter-spacing:8px;
+  color:#fff;line-height:1.1;margin-bottom:10px}
+.hero-sub{font-size:clamp(10px,1.5vw,13px);letter-spacing:4px;color:#005577;margin-bottom:36px}
+.hero-lead{max-width:640px;font-size:clamp(12px,1.6vw,15px);line-height:1.85;
+  color:#6688aa;margin-bottom:44px}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.btn-prim{background:linear-gradient(135deg,#004455,#002233);border:1px solid var(--acc);
+  color:var(--acc);padding:12px 28px;border-radius:8px;font-family:inherit;
+  font-size:9px;letter-spacing:3px;font-weight:900;cursor:pointer;text-decoration:none;
+  transition:all .25s;box-shadow:0 0 20px #00ffcc18}
+.btn-prim:hover{background:linear-gradient(135deg,#006677,#003344);box-shadow:0 0 30px #00ffcc33;transform:translateY(-2px)}
+.btn-sec{background:transparent;border:1px solid #00ffcc22;color:#334455;
+  padding:12px 28px;border-radius:8px;font-family:inherit;
+  font-size:9px;letter-spacing:3px;font-weight:900;cursor:pointer;text-decoration:none;transition:all .25s}
+.btn-sec:hover{border-color:#00ffcc44;color:#669aaa;background:#00ffcc08}
+.hero-stats{display:flex;gap:40px;margin-top:56px;flex-wrap:wrap;justify-content:center}
+.hstat{text-align:center}
+.hstat-v{font-size:clamp(22px,3vw,32px);font-weight:900;color:var(--acc);
+  text-shadow:0 0 12px #00ffcc55}
+.hstat-l{font-size:8px;letter-spacing:2px;color:#223344;margin-top:3px}
+.hstat-div{width:1px;background:linear-gradient(180deg,transparent,#00ffcc22,transparent);align-self:stretch}
+
+/* SECTION */
+section{padding:80px 24px;max-width:1100px;margin:0 auto}
+.sec-tag{font-size:8px;letter-spacing:4px;color:#004455;margin-bottom:10px}
+.sec-title{font-size:clamp(20px,3vw,30px);font-weight:900;letter-spacing:3px;
+  color:#fff;margin-bottom:8px}
+.sec-desc{font-size:13px;color:#445566;line-height:1.8;max-width:620px;margin-bottom:44px}
+.divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,#00ffcc18,transparent);margin:0 0 56px}
+
+/* ZÓNA KÁRTYÁK */
+.zones{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.zone-card{background:rgba(4,12,28,.9);border:1px solid #00ffcc12;border-radius:10px;
+  padding:22px 20px;transition:all .25s;cursor:default;position:relative;overflow:hidden}
+.zone-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--zc,#00ffcc),transparent)}
+.zone-card:hover{border-color:#00ffcc22;transform:translateY(-3px);
+  box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.zc-tag{font-size:7px;letter-spacing:3px;font-weight:900;padding:3px 8px;
+  border-radius:4px;display:inline-block;margin-bottom:12px;
+  background:color-mix(in srgb,var(--zc,#00ffcc) 15%,transparent);
+  color:var(--zc,#00ffcc);border:1px solid color-mix(in srgb,var(--zc,#00ffcc) 30%,transparent)}
+.zc-title{font-size:14px;font-weight:900;letter-spacing:1px;color:#fff;margin-bottom:4px}
+.zc-sub{font-size:8px;letter-spacing:2px;color:#334455;margin-bottom:12px}
+.zc-desc{font-size:11px;color:#445566;line-height:1.75;margin-bottom:14px}
+.zc-features{display:flex;flex-wrap:wrap;gap:5px}
+.zc-feat{font-size:7px;letter-spacing:1px;padding:2px 6px;border-radius:4px;
+  background:#0a1828;border:1px solid #00ffcc0e;color:#334455}
+.zc-phase{font-size:7px;letter-spacing:2px;margin-top:12px;padding-top:10px;
+  border-top:1px solid #00ffcc0a;color:#22333f}
+
+/* IDŐ ÜTEMEZÉS */
+.timeline{display:flex;flex-direction:column;gap:0;position:relative;padding-left:32px}
+.timeline::before{content:'';position:absolute;left:8px;top:12px;bottom:12px;
+  width:1px;background:linear-gradient(180deg,var(--acc),var(--acc2),var(--acc3))}
+.tl-item{position:relative;padding:0 0 40px 24px}
+.tl-dot{position:absolute;left:-28px;top:4px;width:12px;height:12px;
+  border-radius:50%;border:2px solid var(--dc,#00ffcc);background:var(--bg);
+  box-shadow:0 0 10px var(--dc,#00ffcc)}
+.tl-phase{font-size:8px;letter-spacing:3px;color:var(--dc,#00ffcc);margin-bottom:5px}
+.tl-title{font-size:16px;font-weight:900;letter-spacing:1px;color:#fff;margin-bottom:8px}
+.tl-items{list-style:none;display:flex;flex-direction:column;gap:5px}
+.tl-items li{font-size:11px;color:#445566;line-height:1.6;padding-left:14px;position:relative}
+.tl-items li::before{content:'→';position:absolute;left:0;color:#004455}
+
+/* SZÁMOK */
+.numbers{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.num-card{background:rgba(4,12,28,.9);border:1px solid #00ffcc0e;border-radius:10px;
+  padding:24px 20px;text-align:center}
+.num-v{font-size:36px;font-weight:900;color:var(--nc,#00ffcc);
+  text-shadow:0 0 16px color-mix(in srgb,var(--nc,#00ffcc) 40%,transparent)}
+.num-u{font-size:12px;color:var(--nc,#00ffcc);opacity:.6;margin-left:2px}
+.num-l{font-size:8px;letter-spacing:2px;color:#223344;margin-top:5px}
+
+/* KOCKÁZAT / VÁLASZ */
+.risks{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.risk-card{background:rgba(4,12,28,.9);border:1px solid #ff330015;border-radius:10px;padding:20px}
+.risk-q{font-size:11px;font-weight:900;color:#cc4444;margin-bottom:8px;
+  padding-bottom:8px;border-bottom:1px solid #ff330018}
+.risk-a{font-size:11px;color:#445566;line-height:1.7}
+.risk-a strong{color:#00aa66;font-weight:900}
+
+/* ÖRÖKSÉG */
+.heritage{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.her-card{background:rgba(4,12,28,.9);border:1px solid #ffee4415;border-radius:8px;
+  padding:16px;display:flex;gap:12px;align-items:flex-start}
+.her-n{width:24px;height:24px;border-radius:50%;background:#ffee4408;border:1px solid #ffee4430;
+  display:flex;align-items:center;justify-content:center;font-size:9px;
+  font-weight:900;color:#ffee44;flex-shrink:0;margin-top:1px}
+.her-info{}
+.her-name{font-size:11px;font-weight:900;color:#ccbb44;margin-bottom:3px}
+.her-use{font-size:9px;color:#334433;letter-spacing:1px}
+
+/* RUHR REFERENCIA */
+.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+@media(max-width:640px){.ref-grid{grid-template-columns:1fr}}
+.ref-block{background:rgba(4,12,28,.9);border:1px solid #00ffcc0e;border-radius:10px;padding:24px}
+.ref-title{font-size:12px;font-weight:900;letter-spacing:2px;color:var(--acc);margin-bottom:14px}
+.ref-item{font-size:11px;color:#445566;line-height:1.75;padding-left:14px;position:relative;margin-bottom:6px}
+.ref-item::before{content:'▸';position:absolute;left:0;color:#004455}
+
+/* FOOTER */
+footer{background:#030810;border-top:1px solid #00ffcc0a;padding:44px 24px;text-align:center}
+.footer-logo{font-size:20px;font-weight:900;letter-spacing:8px;color:#001a22;margin-bottom:8px}
+.footer-sub{font-size:8px;letter-spacing:3px;color:#0a1820}
+.footer-links{display:flex;gap:20px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.footer-links a{font-size:8px;letter-spacing:2px;color:#112233;text-decoration:none;
+  padding:5px 10px;border:1px solid #00ffcc0a;border-radius:4px;transition:all .2s}
+.footer-links a:hover{color:#00ffcc44;border-color:#00ffcc22}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  nav{padding:0 16px}
+  .nav-links{display:none}
+  section{padding:56px 16px}
+  .hero-stats{gap:20px}
+  .hstat-div{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">⬡ DAM 2050</div>
+  <div class="nav-links">
+    <a href="#zónák">ZÓNÁK</a>
+    <a href="#számok">ADATOK</a>
+    <a href="#ütemezés">ÜTEMEZÉS</a>
+    <a href="#örökség">ÖRÖKSÉG</a>
+    <a href="#kockázatok">KOCKÁZATOK</a>
+  </div>
+  <a href="index.html" class="nav-back">← FŐOLDAL</a>
+</nav>
+
+<!-- HERO -->
+<div id="hero">
+  <div id="hero-bg"></div>
+  <div id="hero-grid"></div>
+  <div class="hero-tag">BEFEKTETŐI · ÖNKORMÁNYZATI PREZENTÁCIÓ · 2025</div>
+  <div class="hero-hex">⬡</div>
+  <h1 class="hero-title">DIGITÁLIS ACÉLVÁROS<br>2050</h1>
+  <p class="hero-sub">MISKOLC · DIÓSGYŐRI ACÉLMŰ · 130 HEKTÁR</p>
+  <p class="hero-lead">
+    A DAM Miskolc legnagyobb fejlesztési tartaléka: 130 hektár a városközpontban,
+    ahol az ipari örökség megőrzésével, az emberközpontú technológia bevezetésével
+    és a közösségi zöld terek létrehozásával egy 21. századi, élhető, fenntartható
+    és gazdaságilag erős városrész épülhet fel.
+  </p>
+  <div class="hero-btns">
+    <a href="dam_2050.html" class="btn-prim">⬡ 3D JÖVŐKÉP MEGNYITÁSA</a>
+    <a href="dam_prezentacio_terkep.html" class="btn-sec">🗺 TÉRKÉP NÉZET</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hstat"><div class="hstat-v">130</div><div class="hstat-l">HEKTÁR</div></div>
+    <div class="hstat-div"></div>
+    <div class="hstat"><div class="hstat-v" style="color:#cc88ff">7</div><div class="hstat-l">FEJLESZTÉSI ZÓNA</div></div>
+    <div class="hstat-div"></div>
+    <div class="hstat"><div class="hstat-v" style="color:#ffee44">14</div><div class="hstat-l">VÉDETT ÉPÜLET</div></div>
+    <div class="hstat-div"></div>
+    <div class="hstat"><div class="hstat-v" style="color:#ff6633">30</div><div class="hstat-l">ÉV PROGRAM</div></div>
+    <div class="hstat-div"></div>
+    <div class="hstat"><div class="hstat-v" style="color:#00ff88">20 000</div><div class="hstat-l">ÚJ MUNKAHELY (CÉL)</div></div>
+  </div>
+</div>
+
+<!-- ZÓNÁK -->
+<div class="divider"></div>
+<section id="zónák">
+  <div class="sec-tag">TERÜLETHASZNÁLAT</div>
+  <h2 class="sec-title">7 FEJLESZTÉSI ZÓNA</h2>
+  <p class="sec-desc">A „C funkciómix" verzió alapján – az ipari funkciók a déli területre koncentrálódnak, az északi rész közösségi és kereskedelmi funkciókat kap, a DAM Sétány K-NY zöldtengelyként fogja össze az egészet.</p>
+  <div class="zones">
+
+    <div class="zone-card" style="--zc:#00ff88">
+      <div class="zc-tag">DAM SÉTÁNY</div>
+      <div class="zc-title">ZÖLD FŐTENGELY</div>
+      <div class="zc-sub">K–NY ZÖLDINFRASTRUKTÚRA</div>
+      <div class="zc-desc">Gyalogos-kerékpáros főtengely, fasoros sétány, smart padok, közbringa állomások, vizes élőhelyek, vertikális kertek. Az egész területet átszövő strukturális elem.</div>
+      <div class="zc-features">
+        <span class="zc-feat">KERÉKPÁRÚT</span><span class="zc-feat">SMART PADOK</span>
+        <span class="zc-feat">KÖZBRINGA</span><span class="zc-feat">VIZES ÉLŐHELY</span>
+      </div>
+      <div class="zc-phase">1. ÜTEM · 2026–2028</div>
+    </div>
+
+    <div class="zone-card" style="--zc:#aa44ff">
+      <div class="zc-tag">MAKERS / KULTÚRA</div>
+      <div class="zc-title">MAKERS DISTRICT</div>
+      <div class="zc-sub">KONZUMSOR · NYUGATI KAPU</div>
+      <div class="zc-desc">Kulturális és kreatívipari negyed a DAM nyugati bejáratánál. Ipartörténeti élményközpont, sörfőzde, design műhelyek, galéria, FabLab – a helyi védett Konzumsor épületegyüttesben.</div>
+      <div class="zc-features">
+        <span class="zc-feat">MÚZEUM</span><span class="zc-feat">SÖRFŐZDE</span>
+        <span class="zc-feat">GALÉRIA</span><span class="zc-feat">FABLAB</span><span class="zc-feat">STREET FOOD</span>
+      </div>
+      <div class="zc-phase">1. ÜTEM · 2026–2028</div>
+    </div>
+
+    <div class="zone-card" style="--zc:#0088ff">
+      <div class="zc-tag">TECHNOLÓGIAI PARK</div>
+      <div class="zc-title">KÖZÉPHENGERMŰ HUB</div>
+      <div class="zc-sub">MISKOLCI EGYETEM KFI PARTNER</div>
+      <div class="zc-desc">A volt Középhengermű innovációs centrumként újjáéled. Startup inkubátor, KFI laborok, bérelhető irodák, gyártócellák, 3D nyomtatók, CNC gépek – nyitott innovációs ökoszisztéma.</div>
+      <div class="zc-features">
+        <span class="zc-feat">AI LABOR</span><span class="zc-feat">3D NYOMTATÁS</span>
+        <span class="zc-feat">FABLAB</span><span class="zc-feat">STARTUP HUB</span><span class="zc-feat">KFI</span>
+      </div>
+      <div class="zc-phase">2. ÜTEM · 2028–2031</div>
+    </div>
+
+    <div class="zone-card" style="--zc:#ffaa00">
+      <div class="zc-tag">KERESKEDELEM</div>
+      <div class="zc-title">KISS ERNŐ ÚT ZÓNA</div>
+      <div class="zc-sub">RETAIL · IRODÁK · SZOLGÁLTATÁSOK</div>
+      <div class="zc-desc">A Kiss Ernő út mentén vegyes kereskedelmi-irodai fejlesztések, a meglévő városi övezethez igazodva. Áruházak, éttermek, irodaházak, EV töltők, P+R parkolók.</div>
+      <div class="zc-features">
+        <span class="zc-feat">ÉTTERMEK</span><span class="zc-feat">IRODAHÁZAK</span>
+        <span class="zc-feat">EV TÖLTŐK</span><span class="zc-feat">RETAIL</span>
+      </div>
+      <div class="zc-phase">2. ÜTEM · 2028–2032</div>
+    </div>
+
+    <div class="zone-card" style="--zc:#ff6600">
+      <div class="zc-tag">REKREÁCIÓ</div>
+      <div class="zc-title">DAM ARÉNA · ÉSZAKI ZÓNA</div>
+      <div class="zc-sub">SPORT · RENDEZVÉNY · KONFERENCIA</div>
+      <div class="zc-desc">1000 fős konferenciaközpont, sportcsarnok, jégcsarnok, uszoda, esport-aréna. Kapcsolódik a Szinva zöldfolyosóhoz és a városi P+R hálózathoz.</div>
+      <div class="zc-features">
+        <span class="zc-feat">KONFERENCIA 1000 FŐ</span><span class="zc-feat">JÉGCSARNOK</span>
+        <span class="zc-feat">USZODA</span><span class="zc-feat">P+R</span><span class="zc-feat">ESPORT</span>
+      </div>
+      <div class="zc-phase">3. ÜTEM · 2032–2038</div>
+    </div>
+
+    <div class="zone-card" style="--zc:#ff3333">
+      <div class="zc-tag">IPARI PARK</div>
+      <div class="zc-title">DÉLI ZÉRÓ-EMISSZIÓS PARK</div>
+      <div class="zc-sub">&gt;30 HA · VASÚTI KAPCSOLAT</div>
+      <div class="zc-desc">30+ hektáros egybefüggő ipari terület vasúti kapcsolattal. Dróngyártás, EV alkatrész, villamosgyártás, napelemgyártás, gépgyártás, egészségügyi műszerek. Zéró emissziós követelmény.</div>
+      <div class="zc-features">
+        <span class="zc-feat">DRÓNGYÁRTÁS</span><span class="zc-feat">VASÚTI KAPCSOLAT</span>
+        <span class="zc-feat">VILLAMOSGYÁRTÁS</span><span class="zc-feat">ZÉRÓ EMISSZIÓ</span>
+      </div>
+      <div class="zc-phase">2–3. ÜTEM · 2028–2035</div>
+    </div>
+
+    <div class="zone-card" style="--zc:#00ffcc">
+      <div class="zc-tag">INFRA · ENERGIA</div>
+      <div class="zc-title">SMART ENERGIA HUB</div>
+      <div class="zc-sub">GEOTERMIKUS · NAPENERGIA · BIOGÁZ</div>
+      <div class="zc-desc">Hűtőtornyok geotermikus hőcserélőként, 5 MW naperőmű, Vízmű C-telep, biogáz, smart grid IoT vezérléssel. A terület energiafüggetlenségének alapja.</div>
+      <div class="zc-features">
+        <span class="zc-feat">GEOTERMIKUS</span><span class="zc-feat">NAPERŐMŰ 5MW</span>
+        <span class="zc-feat">BIOGÁZ</span><span class="zc-feat">SMART GRID</span><span class="zc-feat">IOT</span>
+      </div>
+      <div class="zc-phase">1. ÜTEM · 2026–2027</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SZÁMOK -->
+<div class="divider"></div>
+<section id="számok">
+  <div class="sec-tag">FŐBB ADATOK</div>
+  <h2 class="sec-title">A FEJLESZTÉS SZÁMOKBAN</h2>
+  <p class="sec-desc">A 449 oldalas Ex Ante – DANU – EX-ACT revitalizációs tanulmány (2024. november) és a Miskolci Fejlesztési Központ összefoglalója alapján.</p>
+  <div class="numbers">
+    <div class="num-card"><div class="num-v" style="--nc:#00ffcc">130<span class="num-u">ha</span></div><div class="num-l">TELJES TERÜLET</div></div>
+    <div class="num-card"><div class="num-v" style="--nc:#0088ff">1868</div><div class="num-l">ALAPÍTÁS ÉVE</div></div>
+    <div class="num-card"><div class="num-v" style="--nc:#cc88ff">20 000</div><div class="num-l">FÉNYKORI FOGLALKOZTATOTT</div></div>
+    <div class="num-card"><div class="num-v" style="--nc:#ffaa00">144</div><div class="num-l">JELENLEGI TULAJDONOS</div></div>
+    <div class="num-card"><div class="num-v" style="--nc:#ff6633">75</div><div class="num-l">VÁLLALKOZÁS A TERÜLETEN</div></div>
+    <div class="num-card"><div class="num-v" style="--nc:#00ff88">650</div><div class="num-l">AKTÍV FOGLALKOZTATOTT (2024)</div></div>
+    <div class="num-card"><div class="num-v" style="--nc:#00ffcc">26<span class="num-u">Mrd</span></div><div class="num-l">ÉVI ÁRBEVÉTEL (2024)</div></div>
+    <div class="num-card"><div class="num-v" style="--nc:#ffee44">14</div><div class="num-l">HELYI VÉDETT ÉPÜLET</div></div>
+    <div class="num-card"><div class="num-v" style="--nc:#ff3333">3</div><div class="num-l">SZENNYEZÉSI GÓCPONT</div></div>
+    <div class="num-card"><div class="num-v" style="--nc:#0088ff">5<span class="num-u">MW</span></div><div class="num-l">TERVEZETT NAPERŐMŰ</div></div>
+    <div class="num-card"><div class="num-v" style="--nc:#00ff88">30<span class="num-u">év</span></div><div class="num-l">MEGVALÓSÍTÁSI HORIZONT</div></div>
+    <div class="num-card"><div class="num-v" style="--nc:#cc88ff">2009</div><div class="num-l">TERMELÉS LEÁLLÁSA</div></div>
+  </div>
+</section>
+
+<!-- ÜTEMEZÉS -->
+<div class="divider"></div>
+<section id="ütemezés">
+  <div class="sec-tag">MEGVALÓSÍTÁS</div>
+  <h2 class="sec-title">3 ÜTEM · 30 ÉV</h2>
+  <p class="sec-desc">Az akupunktúra-fejlesztési logika szerint: kis beavatkozásokkal indul, amelyek megteremtik a feltételeket a nagyobb fejlesztési fázisokhoz.</p>
+  <div class="timeline">
+
+    <div class="tl-item" style="--dc:#00ff88">
+      <div class="tl-dot"></div>
+      <div class="tl-phase">1. ÜTEM · 0–3 ÉV · 2026–2028</div>
+      <div class="tl-title">JOGI RENDEZÉS ÉS ELSŐ BEAVATKOZÁSOK</div>
+      <ul class="tl-items">
+        <li>Tulajdoni viszonyok rendezése, közös fejlesztési szervezet (nonprofit Zrt.) létrehozása</li>
+        <li>Környezeti felmérés: 3 szennyezési gócpont célzott kezelése</li>
+        <li>K-NY gyűjtőút alapja, közmű gerinc kiépítése</li>
+        <li>Ideiglenes zöldterületek és naperőmű az INF területeken (azonnali imázs)</li>
+        <li>Makers District aktiválása: Konzumsor rehabilitálása, kulturális funkciók</li>
+        <li>14 helyi védett épület sürgős állagmegóvása (tető, nyílások)</li>
+      </ul>
+    </div>
+
+    <div class="tl-item" style="--dc:#0088ff">
+      <div class="tl-dot"></div>
+      <div class="tl-phase">2. ÜTEM · 3–10 ÉV · 2028–2035</div>
+      <div class="tl-title">GAZDASÁGI MAG ÉS KÖZÖSSÉGI TÉR</div>
+      <ul class="tl-items">
+        <li>Középhengermű: Technológiai Park megnyitása (Miskolci Egyetem partnerséggel)</li>
+        <li>Déli ipari park első területegységeinek értékesítése és fejlesztése</li>
+        <li>DAM Sétány és teljes zöldtengely kiépítése</li>
+        <li>Vasgyári fürdő (1897) és Keleti Erőmű rehabilitálása</li>
+        <li>Kiss Ernő út menti kereskedelmi-irodai fejlesztések</li>
+        <li>Közösségi közlekedés javítása: villamos-végállomás, kerékpárút-kapcsolat</li>
+      </ul>
+    </div>
+
+    <div class="tl-item" style="--dc:#cc88ff">
+      <div class="tl-dot"></div>
+      <div class="tl-phase">3. ÜTEM · 10–30+ ÉV · 2035–2050</div>
+      <div class="tl-title">TELJES VÁROSRÉSZ</div>
+      <ul class="tl-items">
+        <li>Déli ipari park teljessége, vasúti kapcsolat visszaállítása (MÁV iparvágány)</li>
+        <li>DAM Aréna: 1000 fős konferenciaközpont, jégcsarnok, uszoda, esport</li>
+        <li>Lakó- és vegyes funkciójú fejlesztések az északi területen</li>
+        <li>Teljes zöldinfrastruktúra hálózat, Szinva zöldfolyosó csatlakozás</li>
+        <li>Smart grid és IoT infrastruktúra: energiafüggetlen városrész</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- ÖRÖKSÉG -->
+<div class="divider"></div>
+<section id="örökség">
+  <div class="sec-tag">HELYI VÉDETTSÉG · 44/2017. (XII. 22.) ÖNKORMÁNYZATI RENDELET</div>
+  <h2 class="sec-title">14 VÉDETT ÉPÜLET</h2>
+  <p class="sec-desc">Az örökség nem teher, hanem identitás és erőforrás. Adaptív újrahasznosítással – a Ruhr-vidéki modell szerint – mindegyik új funkciót kap.</p>
+  <div class="heritage">
+    <div class="her-card"><div class="her-n">1</div><div class="her-info"><div class="her-name">I. HIVATALHÁZ (1890)</div><div class="her-use">KULTURÁLIS · KÖZÖSSÉGI HUB</div></div></div>
+    <div class="her-card"><div class="her-n">2</div><div class="her-info"><div class="her-name">KONZUMSOR (23365/5)</div><div class="her-use">MAKERS DISTRICT · GALÉRIÁK</div></div></div>
+    <div class="her-card"><div class="her-n">3</div><div class="her-info"><div class="her-name">VASÚTI FELÉPÍTMÉNYGYÁRTÓ</div><div class="her-use">IPARI ÖRÖKSÉG · MÚZEUM</div></div></div>
+    <div class="her-card"><div class="her-n">4</div><div class="her-info"><div class="her-name">VOLT EGYEDI GÉPGYÁR</div><div class="her-use">CO-WORKING · IRODÁK</div></div></div>
+    <div class="her-card"><div class="her-n">5</div><div class="her-info"><div class="her-name">VOLT KELETI ERŐMŰ</div><div class="her-use">KULTURÁLIS CENTRUM · CNC LABOR</div></div></div>
+    <div class="her-card"><div class="her-n">6</div><div class="her-info"><div class="her-name">VOLT KÖZÉPHENGERMŰ</div><div class="her-use">TECHNOLÓGIAI PARK MAGJA</div></div></div>
+    <div class="her-card"><div class="her-n">7</div><div class="her-info"><div class="her-name">VOLT CSAVARGYÁR</div><div class="her-use">FABLAB · MAKERS SPACE</div></div></div>
+    <div class="her-card"><div class="her-n">8</div><div class="her-info"><div class="her-name">MOZDONYSZÍN</div><div class="her-use">VASÚTI MÚZEUM · RENDEZVÉNY</div></div></div>
+    <div class="her-card"><div class="her-n">9</div><div class="her-info"><div class="her-name">TŰZÁLLÓTÉGLAGYÁR</div><div class="her-use">CSARNOK · IPARI ÖRÖKSÉG</div></div></div>
+    <div class="her-card"><div class="her-n">10</div><div class="her-info"><div class="her-name">TURBÓ-KOMPRESSZOR GÉPHÁZ</div><div class="her-use">ENERGETIKAI MÚZEUM</div></div></div>
+    <div class="her-card"><div class="her-n">11</div><div class="her-info"><div class="her-name">HŰTŐTORNYOK</div><div class="her-use">GEOTERMIKUS ENERGIA HUB</div></div></div>
+    <div class="her-card"><div class="her-n">12</div><div class="her-info"><div class="her-name">"HÁMOR" NAGYKOVÁCSMŰHELY</div><div class="her-use">KREATÍV IPAR · MŰHELYEK</div></div></div>
+    <div class="her-card"><div class="her-n">13</div><div class="her-info"><div class="her-name">VASGYÁRI VASÚTÁLLOMÁS</div><div class="her-use">MULTIMODÁLIS KÖZLEKEDÉSI HUB</div></div></div>
+    <div class="her-card"><div class="her-n">14</div><div class="her-info"><div class="her-name">VASGYÁRI FÜRDŐ (1897)</div><div class="her-use">SPA · WELLNESS · TERMÁL</div></div></div>
+  </div>
+</section>
+
+<!-- KOCKÁZATOK -->
+<div class="divider"></div>
+<section id="kockázatok">
+  <div class="sec-tag">KOCKÁZATKEZELÉS</div>
+  <h2 class="sec-title">KIHÍVÁSOK ÉS VÁLASZOK</h2>
+  <p class="sec-desc">A projekt főbb kockázatai és az arra adott strukturális válaszok – a tanulmány alapján.</p>
+  <div class="risks">
+    <div class="risk-card">
+      <div class="risk-q">Elaprózott tulajdonviszonyok (144 tulajdonos)</div>
+      <div class="risk-a"><strong>→</strong> Közös fejlesztési szervezet (nonprofit Zrt.) a legnagyobb tulajdonosokkal. Állami és önkormányzati területszerzés célzottan a kulcs-telkekre.</div>
+    </div>
+    <div class="risk-card">
+      <div class="risk-q">Talajszennyezés (PAH, fémek, szénhidrogén)</div>
+      <div class="risk-a"><strong>→</strong> 3 azonosított gócpont célzott kármentesítése fejlesztéssel összehangolva. Szennyezett területeken ideiglenes naperőmű (átmeneti hasznosítás).</div>
+    </div>
+    <div class="risk-card">
+      <div class="risk-q">Elektromos kapacitáshiány (3 éves kiépítési idő)</div>
+      <div class="risk-a"><strong>→</strong> Azonnali igénybejelentés az elosztóhálózatba. Saját 5 MW naperőmű + smart grid mint első ütem.</div>
+    </div>
+    <div class="risk-card">
+      <div class="risk-q">Miskolc demográfiai csökkenése</div>
+      <div class="risk-a"><strong>→</strong> Nem lakóterület-fókusz, hanem <strong>munkahelyteremtés</strong> és vonzó közösségi tér. A DAM mint megtartó erő a fiatalok számára.</div>
+    </div>
+    <div class="risk-card">
+      <div class="risk-q">Nagy külföldi tőke hiánya (FDI)</div>
+      <div class="risk-a"><strong>→</strong> Akupunktúra-fejlesztések helyi tőkéből. <strong>EU rozsdaövezeti finanszírozás</strong> (ERFA, JTF). Egyetem-ipar partnerség mint katalizátor.</div>
+    </div>
+    <div class="risk-card">
+      <div class="risk-q">Hosszú időhorizont (30 év) → politikai kockázat</div>
+      <div class="risk-a"><strong>→</strong> Ütemezett megvalósítás: minden fázis önmagában is értéket termel. Az 1. ütem eredményei legitimálják a folytatást.</div>
+    </div>
+  </div>
+</section>
+
+<!-- RUHR REFERENCIA -->
+<div class="divider"></div>
+<section>
+  <div class="sec-tag">REFERENCIA</div>
+  <h2 class="sec-title">A RUHR-VIDÉK TANULSÁGA</h2>
+  <p class="sec-desc">Zeche Zollverein, Landschaftspark Duisburg-Nord, Jahrhunderthalle Bochum – a világ legjobban sikerült ipari rozsdaövezet-rehabilitációi (TERINNO 2023).</p>
+  <div class="ref-grid">
+    <div class="ref-block">
+      <div class="ref-title">MIT MUTAT A RUHR-MODELL?</div>
+      <div class="ref-item">Az ipari örökség <strong style="color:#00ffcc">nem teher, hanem identitás és turisztikai erőforrás</strong></div>
+      <div class="ref-item">Az adaptív újrahasznosítás (nem lebontás + újraépítés) fenntarthatóbb és olcsóbb</div>
+      <div class="ref-item">A sikeres transzformáció évtizedes folyamat, de kis lépésekkel indul</div>
+      <div class="ref-item">A társadalom bevonása (helyi közösség, volt munkások, fiatalok) elengedhetetlen</div>
+      <div class="ref-item">A DAM mint kollektív emlékezet és brand – a miskolci identitás része</div>
+    </div>
+    <div class="ref-block">
+      <div class="ref-title">A DAM ALAPELVE</div>
+      <div class="ref-item">A cél <strong style="color:#cc88ff">nem az ipar eltüntetése</strong>, nem is ipari múzeum</div>
+      <div class="ref-item">Hanem egy modern, vegyes használatú, <strong style="color:#00ff88">élhető városrész</strong></div>
+      <div class="ref-item">Amely megőrzi az ipari identitást és örökséget</div>
+      <div class="ref-item">Helyet ad korszerű, <strong style="color:#0088ff">fenntartható gazdasági funkciónak</strong></div>
+      <div class="ref-item">Valódi közösségi és zöld városi teret teremt</div>
+      <div class="ref-item">Szervesen csatlakozik Miskolc meglévő városrészeihez</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="divider"></div>
+<footer>
+  <div class="footer-logo">⬡ DAM 2050</div>
+  <div class="footer-sub">DIGITÁLIS ACÉLVÁROS · MISKOLC · DIÓSGYŐRI ACÉLMŰ REVITALIZÁCIÓ</div>
+  <div style="margin-top:12px;font-size:8px;color:#0a1820;letter-spacing:2px">
+    Forrás: Ex Ante – DANU – EX-ACT revitalizációs tanulmány, 2024. november (449 oldal)<br>
+    Miskolci Fejlesztési Központ Nonprofit Kft. · TERINNO 2023 Ruhr-vidék esettanulmány
+  </div>
+  <div class="footer-links">
+    <a href="index.html">FŐOLDAL</a>
+    <a href="dam_2050.html">3D JÖVŐKÉP</a>
+    <a href="dam_prezentacio_terkep.html">TÉRKÉP</a>
+    <a href="dam_3d.html">JELENLEGI 3D</a>
+  </div>
+</footer>
+
+<script>
+// Smooth scroll nav links
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}
+  });
+});
+
+// Fade-in sections on scroll
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';}
+  });
+},{threshold:0.08});
+document.querySelectorAll('section,.divider').forEach(el=>{
+  el.style.cssText='opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease';
+  obs.observe(el);
+});
+
+// Számok count-up animáció
+const numEls=document.querySelectorAll('.num-v');
+const numObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const el=e.target;
+    const raw=el.textContent.replace(/[^0-9]/g,'');
+    const target=parseInt(raw)||0;
+    const unit=el.querySelector('.num-u');
+    const unitTxt=unit?unit.textContent:'';
+    if(!target)return;
+    let cur=0;const dur=1200;const start=Date.now();
+    const tick=()=>{
+      const p=Math.min(1,(Date.now()-start)/dur);
+      cur=Math.round(p*p*target);
+      el.textContent=cur.toLocaleString('hu-HU')+(unitTxt?'':'')+' ';
+      if(unit){el.appendChild(unit);}
+      if(p<1)requestAnimationFrame(tick);
+      else{el.textContent=target.toLocaleString('hu-HU')+' ';if(unit)el.appendChild(unit);}
+    };tick();
+    numObs.unobserve(el);
+  });
+},{threshold:0.5});
+numEls.forEach(el=>numObs.observe(el));
+</script>
+</body>
+</html>

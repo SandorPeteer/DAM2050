@@ -2,886 +2,759 @@
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Digitális Acélváros 2050</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digitális Acélváros 2050 – DAM Miskolc</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;overflow:hidden;font-family:Arial,Helvetica,sans-serif;background:#0a0e08}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#07111f;overflow:hidden;font-family:'Courier New',monospace}
 canvas{display:block}
-#top{position:fixed;top:14px;left:14px;right:14px;z-index:10;
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:12px 16px;border-radius:10px;
-  background:rgba(8,18,10,0.96);border:1.5px solid rgba(100,200,100,.3);
-  box-shadow:0 8px 32px rgba(0,0,0,.6)}
-#title{font-size:22px;font-weight:950;letter-spacing:.07em;color:#90ee90}
-#subtitle{margin-top:3px;font-size:12px;font-weight:700;color:#4a8;letter-spacing:.03em}
-#actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.btn{border:1.5px solid #3a7d3a;background:rgba(50,120,50,.12);color:#90ee90;
-  border-radius:6px;padding:8px 12px;font-size:11px;font-weight:950;
-  letter-spacing:.04em;cursor:pointer;text-decoration:none;font-family:inherit;transition:all .2s}
-.btn:hover,.btn.active{background:#3a7d3a;color:#0a1a0a}
-.btn.dim{border-color:#1a3a1a;color:#2a6a2a}
-.btn.dim:hover{background:#1a3a1a;color:#90ee90}
-.btn.night{border-color:#334;color:#88a}
-.btn.night.active,.btn.night:hover{background:#334;color:#cce}
-
-#legend{position:fixed;left:14px;bottom:14px;z-index:10;width:210px;
-  background:rgba(8,18,10,0.97);border:1.5px solid rgba(100,200,100,.25);
-  border-radius:10px;padding:14px 16px;box-shadow:0 8px 28px rgba(0,0,0,.5)}
-#legend h2{margin:0 0 10px;font-size:13px;letter-spacing:.1em;color:#90ee90;font-weight:950}
-.li{display:flex;align-items:center;gap:9px;margin:5px 0;font-size:11px;font-weight:700;color:#b8e8b8}
-.li-dot{width:16px;height:10px;border-radius:2px;flex-shrink:0}
-.li-sep{height:1px;background:#1a3a1a;margin:7px 0}
-
-#info-panel{position:fixed;right:14px;bottom:14px;z-index:10;width:250px;
-  background:rgba(8,18,10,0.97);border:1.5px solid rgba(100,200,100,.25);
-  border-radius:10px;padding:14px 16px;box-shadow:0 8px 28px rgba(0,0,0,.5)}
-#info-panel h3{margin:0 0 7px;font-size:12px;letter-spacing:.08em;color:#90ee90;font-weight:950}
-#info-content{font-size:11px;color:#6baa6b;line-height:1.7;font-weight:600}
-
-#tl-wrap{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
-  z-index:10;display:flex;flex-direction:column;align-items:center;gap:6px}
-#year-disp{font-size:38px;font-weight:950;letter-spacing:.1em;color:#90ee90;
-  text-shadow:0 0 20px rgba(80,200,80,.5)}
-#tl-row{display:flex;align-items:center;gap:10px}
-#slider{-webkit-appearance:none;appearance:none;width:300px;height:5px;
-  border-radius:3px;outline:none;cursor:pointer;
-  background:linear-gradient(90deg,#1a4a1a,#3a9a3a,#90ee90)}
-#slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;
-  border-radius:50%;background:#90ee90;border:2px solid #0a1a0a;
-  box-shadow:0 0 10px rgba(80,220,80,.6);cursor:pointer}
-#play-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid #3a7d3a;
-  background:rgba(50,120,50,.15);color:#90ee90;font-size:14px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:all .2s}
-#play-btn:hover{background:#3a7d3a;color:#0a1a0a}
-#tl-lbls{display:flex;justify-content:space-between;width:300px}
-.tl-l{font-size:9px;font-weight:900;color:#2a6a2a;letter-spacing:2px}
-
-#tooltip{position:fixed;z-index:200;pointer-events:none;
-  background:rgba(8,18,10,0.98);border:1.5px solid rgba(100,200,100,.4);
-  border-radius:10px;padding:12px 16px;display:none;
-  box-shadow:0 8px 28px rgba(0,0,0,.6);max-width:300px}
-#tt-cat{font-size:9px;letter-spacing:2px;padding:2px 8px;border-radius:5px;
-  display:inline-block;margin-bottom:7px;font-weight:700}
-#tt-name{font-size:15px;font-weight:950;margin-bottom:5px;color:#c8e8c8}
-#tt-info{font-size:11px;line-height:1.7;color:#6baa6b;font-weight:600}
-#tt-fut{font-size:11px;margin-top:7px;color:#90ee90;font-weight:900;
-  border-top:1px solid #1a3a1a;padding-top:7px;display:none}
-
-#loading{position:fixed;inset:0;z-index:500;background:#0a0e08;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
-#loading-txt{color:#3a9a3a;font-size:13px;letter-spacing:5px;font-weight:950}
-#loading-bar{width:240px;height:3px;background:#0a2a0a;border-radius:2px;overflow:hidden}
-#loading-fill{height:100%;background:linear-gradient(90deg,#1a5a1a,#90ee90);width:0;transition:width .3s}
-
-@media(max-width:900px){#top{flex-direction:column}#legend,#info-panel{display:none}#slider{width:200px}#tl-lbls{width:200px}}
+#title{position:fixed;top:14px;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none;z-index:10}
+#title h1{font-size:17px;font-weight:900;letter-spacing:5px;color:#00ffcc;text-shadow:0 0 18px #00ffcc,0 0 36px #0088ff;animation:glow 3s ease-in-out infinite}
+#title p{font-size:9px;color:#006688;letter-spacing:3px;margin-top:3px}
+@keyframes glow{0%,100%{text-shadow:0 0 18px #00ffcc,0 0 36px #0088ff}50%{text-shadow:0 0 30px #00ffcc,0 0 60px #0088ff,0 0 90px #0055ff}}
+#controls{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10;flex-wrap:wrap;justify-content:center}
+.cb{background:rgba(4,18,40,0.92);border:1px solid #00ffcc44;color:#00ccaa;padding:6px 13px;border-radius:14px;font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .18s;backdrop-filter:blur(6px)}
+.cb:hover,.cb.active{border-color:#00ffcc;color:#fff;background:rgba(0,70,90,0.8);box-shadow:0 0 12px #00ffcc33}
+#legend{position:fixed;top:76px;left:14px;background:rgba(4,10,24,0.92);border:1px solid #00ffcc22;border-radius:8px;padding:11px 13px;z-index:10;pointer-events:none}
+#legend h3{color:#00ffcc;font-size:7px;letter-spacing:3px;margin-bottom:7px}
+.li{display:flex;align-items:center;margin-bottom:4px}
+.lc{width:9px;height:9px;border-radius:2px;margin-right:6px;flex-shrink:0}
+.ll{color:#aaccdd;font-size:8px}
+#stats{position:fixed;top:14px;right:14px;display:flex;flex-direction:column;gap:4px;z-index:10;pointer-events:none}
+.st{background:rgba(0,0,0,0.55);border:1px solid #00ffcc1a;border-radius:4px;padding:4px 9px;display:flex;align-items:center;gap:6px}
+.sl{color:#004455;font-size:7px;letter-spacing:2px}.sv{color:#00ffcc;font-size:11px;font-weight:bold}
+#info{position:fixed;right:14px;top:50%;transform:translateY(-50%);width:270px;background:rgba(3,10,28,0.97);border:1px solid #00ffcc44;border-radius:10px;padding:18px;display:none;z-index:20;backdrop-filter:blur(14px)}
+#info.show{display:block}
+#ic{position:absolute;top:9px;right:12px;color:#00ffcc;cursor:pointer;font-size:15px;background:none;border:none}
+#iz{font-size:7px;letter-spacing:3px;padding:2px 6px;border-radius:6px;display:inline-block;margin-bottom:9px;font-weight:bold}
+#it{color:#fff;font-size:13px;font-weight:900;letter-spacing:1px;margin-bottom:4px}
+#is{color:#00aacc;font-size:8px;letter-spacing:2px;margin-bottom:11px}
+#id{color:#bbd8e8;font-size:10px;line-height:1.75;margin-bottom:11px}
+.ft{display:inline-block;background:rgba(0,50,90,0.55);border:1px solid #00ffcc1a;color:#88ccee;font-size:7px;padding:2px 5px;border-radius:6px;margin:2px}
+#istatus{margin-top:11px;padding-top:9px;border-top:1px solid #00ffcc14;display:flex;align-items:center;gap:6px}
+.sd{width:6px;height:6px;border-radius:50%;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#stxt{color:#779aaa;font-size:8px;letter-spacing:1px}
+#tooltip{position:fixed;pointer-events:none;z-index:30;background:rgba(0,6,18,0.94);border:1px solid #00ffcc44;color:#00ffcc;font-size:9px;padding:4px 9px;border-radius:4px;display:none}
+#loading{position:fixed;inset:0;background:#030810;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;transition:opacity .8s}
+#loading h2{color:#00ffcc;font-size:15px;letter-spacing:6px;margin-bottom:14px;text-shadow:0 0 18px #00ffcc}
+#lbo{width:280px;height:2px;background:#001020;border-radius:2px;margin-bottom:9px}
+#lb{width:0%;height:100%;background:linear-gradient(90deg,#00ffcc,#0088ff);border-radius:2px;transition:width .25s}
+#lt{color:#003344;font-size:8px;letter-spacing:3px}
+#scanlines{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.018) 2px,rgba(0,0,0,.018) 4px);pointer-events:none;z-index:5}
 </style>
 </head>
 <body>
-<div id="loading"><div id="loading-txt">DIGITÁLIS ACÉLVÁROS 2050 · BETÖLTÉS...</div>
-<div id="loading-bar"><div id="loading-fill"></div></div></div>
-
-<div id="top">
-  <div>
-    <div id="title">DIGITÁLIS ACÉLVÁROS 2050</div>
-    <div id="subtitle">Drag: forgat · Scroll: zoom · Shift+drag: mozgat · R: reset · F: felülnézet</div>
-  </div>
-  <div id="actions">
-    <a class="btn dim" href="index.html">FŐOLDAL</a>
-    <a class="btn dim" href="dam_prezentacio_terkep.html">TÉRKÉP</a>
-    <a class="btn dim" href="dam_3d.html">JELENLEGI 3D</a>
-    <button class="btn active" id="btn-2050" onclick="setEra(2050)">2050</button>
-    <button class="btn" id="btn-2026" onclick="setEra(2026)">2026</button>
-    <button class="btn night" id="btn-night" onclick="toggleNight()">ÉJJEL</button>
-    <button class="btn dim" id="hideBtn">UI KI</button>
-  </div>
-</div>
-
+<div id="loading"><h2>⬡ DIGITÁLIS ACÉLVÁROS 2050 ⬡</h2><div id="lbo"><div id="lb"></div></div><p id="lt">INICIALIZÁLÁS...</p></div>
+<div id="scanlines"></div>
+<div id="title"><h1>⬡ DIGITÁLIS ACÉLVÁROS 2050 ⬡</h1><p>MISKOLC · DIÓSGYŐRI ACÉLMŰ · TECHNOLÓGIA AZ EMBEREK SZOLGÁLATÁBAN</p></div>
 <div id="legend">
-  <h2>ZÓNÁK 2050</h2>
-  <div class="li"><div class="li-dot" style="background:#1e88e5"></div>Technológiai Park</div>
-  <div class="li"><div class="li-dot" style="background:#8e24aa"></div>Kultúra / Makers</div>
-  <div class="li"><div class="li-dot" style="background:#f4511e"></div>Ipari Park</div>
-  <div class="li"><div class="li-dot" style="background:#00897b"></div>Sport / Rekreáció</div>
-  <div class="li"><div class="li-dot" style="background:#f9a825"></div>Kereskedelem</div>
-  <div class="li"><div class="li-dot" style="background:#e53935"></div>Kórház / Egészség</div>
-  <div class="li"><div class="li-dot" style="background:#43a047"></div>Oktatás</div>
-  <div class="li"><div class="li-dot" style="background:#37474f"></div>Infrastruktúra</div>
-  <div class="li-sep"></div>
-  <div class="li"><div class="li-dot" style="background:#2e7d32;border:1px solid #90ee90"></div>Védett örökség</div>
-  <div class="li-sep"></div>
-  <div class="li"><div class="li-dot" style="background:#1a5a1a"></div>Park / Zöldterület</div>
-  <div class="li"><div class="li-dot" style="background:#1565c0"></div>Tó / Víztározó</div>
-  <div class="li"><div class="li-dot" style="background:#424242"></div>Tér / Sétány</div>
+  <h3>ZÓNA TÉRKÉP</h3>
+  <div class="li"><div class="lc" style="background:#00ff88"></div><div class="ll">DAM SÉTÁNY / ZÖLD</div></div>
+  <div class="li"><div class="lc" style="background:#aa44ff"></div><div class="ll">MAKERS / KULTÚRA</div></div>
+  <div class="li"><div class="lc" style="background:#0088ff"></div><div class="ll">TECHNOLÓGIAI PARK</div></div>
+  <div class="li"><div class="lc" style="background:#ff6600"></div><div class="ll">REKREÁCIÓ / SPORT</div></div>
+  <div class="li"><div class="lc" style="background:#ffaa00"></div><div class="ll">KERESKEDELEM</div></div>
+  <div class="li"><div class="lc" style="background:#ff3333"></div><div class="ll">IPARI PARK (DÉL)</div></div>
+  <div class="li"><div class="lc" style="background:#00ffcc"></div><div class="ll">INFRA / ENERGIA</div></div>
+  <div class="li"><div class="lc" style="background:#ffee44"></div><div class="ll">VÉDETT ÖRÖKSÉG</div></div>
 </div>
-
-<div id="info-panel">
-  <h3 id="info-title">DIGITÁLIS ACÉLVÁROS 2050</h3>
-  <div id="info-content">130 hektár revitalizációja Miskolc szívében. Vidd az egeret egy épületre a részletekért.</div>
+<div id="stats">
+  <div class="st"><span class="sl">TERÜLET</span><span class="sv">130 ha</span></div>
+  <div class="st"><span class="sl">MISKOLC</span><span class="sv">2050</span></div>
 </div>
-
-<div id="tl-wrap">
-  <div id="year-disp">2050</div>
-  <div id="tl-row">
-    <button id="play-btn">▶</button>
-    <div>
-      <input type="range" id="slider" min="2026" max="2050" value="2050" step="1">
-      <div id="tl-lbls"><span class="tl-l">2026</span><span class="tl-l">2030</span><span class="tl-l">2040</span><span class="tl-l">2050</span></div>
-    </div>
-  </div>
+<div id="controls">
+  <button class="cb active" id="btn-overview" onclick="setView('overview')">⬡ TELJES</button>
+  <button class="cb" id="btn-setany" onclick="setView('setany')">⟶ SÉTÁNY</button>
+  <button class="cb" id="btn-makers" onclick="setView('makers')">◈ MAKERS</button>
+  <button class="cb" id="btn-tech" onclick="setView('tech')">⬢ TECH PARK</button>
+  <button class="cb" id="btn-vasut" onclick="setView('vasut')">⟹ VASÚT</button>
+  <button class="cb" id="btn-rekr" onclick="setView('rekr')">● REKREÁCIÓ</button>
+  <button class="cb" id="btn-night" onclick="toggleNight()">🌙 ÉJJEL</button>
 </div>
-
-<div id="tooltip">
-  <div id="tt-cat"></div>
-  <div id="tt-name"></div>
-  <div id="tt-info"></div>
-  <div id="tt-fut"></div>
+<div id="info">
+  <button id="ic" onclick="closeInfo()">✕</button>
+  <div id="iz"></div><div id="it"></div><div id="is"></div><div id="id"></div>
+  <div id="ift"></div>
+  <div id="istatus"><div class="sd" id="sd"></div><span id="stxt"></span></div>
 </div>
+<div id="tooltip"></div>
 
 <script src="three.min.js"></script>
+<script src="GLTFLoader.js"></script>
 <script>
-// ═══════════════════════════════════════════════════════════════════
-// KONFIG
-// ═══════════════════════════════════════════════════════════════════
-const CAT26 = {
-  bontando:                 {col:0xdc2626,emi:0x220000,h:0.005,label:'BONTANDÓ',css:'#dc2626'},
-  bontasra_javasolt:        {col:0xf97316,emi:0x241000,h:0.006,label:'BONTÁSRA JAVASOLT',css:'#f97316'},
-  'hasznosításra_javasolt': {col:0x84cc16,emi:0x102000,h:0.007,label:'HASZNOSÍTÁSRA JAVASOLT',css:'#65a30d'},
-  'hasznosítandó':          {col:0x16a34a,emi:0x00200b,h:0.008,label:'HASZNOSÍTANDÓ',css:'#16a34a'},
-  'védett':                 {col:0x2563eb,emi:0x000c2c,h:0.011,label:'VÉDETT ÖRÖKSÉG',css:'#2563eb'},
-  egyeb:                    {col:0x64748b,emi:0x000000,h:0.003,label:'EGYÉB',css:'#64748b'},
-};
-const ZONE = {
-  tech:    {col:0x1e88e5,emi:0x001828,h:0.014,label:'TECHNOLÓGIAI PARK',css:'#1e88e5'},
-  kultura: {col:0x8e24aa,emi:0x0e0018,h:0.010,label:'KULTÚRA / MAKERS',css:'#8e24aa'},
-  ipari:   {col:0xf4511e,emi:0x1a0800,h:0.008,label:'IPARI PARK',css:'#f4511e'},
-  sport:   {col:0x00897b,emi:0x001210,h:0.006,label:'SPORT / REKREÁCIÓ',css:'#00897b'},
-  ker:     {col:0xf9a825,emi:0x1a1000,h:0.009,label:'KERESKEDELEM',css:'#f9a825'},
-  korhaz:  {col:0xe53935,emi:0x1a0000,h:0.018,label:'KÓRHÁZ / EGÉSZSÉG',css:'#e53935'},
-  oktat:   {col:0x43a047,emi:0x001800,h:0.012,label:'OKTATÁS',css:'#43a047'},
-  infra:   {col:0x37474f,emi:0x000305,h:0.005,label:'INFRASTRUKTÚRA',css:'#37474f'},
-  vedett:  {col:0x2e7d32,emi:0x001500,h:0.013,label:'VÉDETT ÖRÖKSÉG',css:'#2e7d32'},
-  torony:  {col:0x1565c0,emi:0x000c20,h:0.055,label:'IRODATORONY',css:'#1565c0'},
-};
-const KB = {
-  'Középhengermű':                   {now:'Helyi védett csarnok (1955). Üresen áll.',floors:2,zone:'tech',future:'Miskolci Egyetem Technológiai Park — inkubátor, laborok, FabLab, CNC, 3D nyomtatás',roof:true},
-  'Keleti Erőmű':                    {now:'Helyi védett erőmű, 1940. Üresen áll.',floors:3,zone:'kultura',future:'Kulturális és kreatív hub — kiállítótér, műhelyek, kávézó, eseménytér',roof:false},
-  'I. Hivatalház':                   {now:'Helyi védett, 1890-es évek, háromszintes.',floors:3,zone:'tech',future:'Startup irodák, co-working, konferenciatermek',roof:false},
-  'II. Hivatalház':                  {now:'1960-as évekbeli irodaépület. Üresen áll.',floors:4,zone:'tech',future:'Bériroda és szolgáltató negyed',roof:true},
-  'Csavargyár':                      {now:'Helyi védett (1935). Üresen áll.',floors:2,zone:'kultura',future:'Makers District — FabLab, közösségi műhely, sörfőzde',roof:true},
-  'Vasúti Felépítménygyártó Műhely': {now:'Helyi védett ipari műhely.',floors:1,zone:'ipari',future:'Vagon- és villamoskarbantartó műhely — ipari örökség aktív funkcióban',roof:false},
-  'Konzumsor':                       {now:'Részben működő kereskedelmi sor.',floors:2,zone:'ker',future:'Felújított kereskedelmi sor — helyi piac, éttermek, közösségi tér',roof:true},
-  'Nagykovácsműhely':                {now:'Helyi védett, aktív ipari funkció.',floors:1,zone:'ipari',future:'Kézműves ipari műhely — kovács, öntöde, ipari örökség',roof:false},
-  'Mozdonyszín':                     {now:'Helyi védett mozdonyjavító műhely.',floors:1,zone:'kultura',future:'Vasúttörténeti múzeum és élményközpont',roof:false},
-  'Tűzállótéglagyár (É)':           {now:'Helyi védett, nagy belmagasságú csarnok.',floors:1,zone:'sport',future:'Indoor sportcsarnok — kézilabda, kosárlabda, rendezvénytér',roof:true},
-  'Tűzállótéglagyár (D)':           {now:'Helyi védett csarnok.',floors:1,zone:'sport',future:'Műkorcsolya pálya és jégcsarnok — fedett, egész évben nyitva',roof:false},
-  'Vasgyári vasútállomás':           {now:'MÁV-tulajdon, bezárt. 8+8 vágány.',floors:2,zone:'infra',future:'Felújított vasútállomás — zöld közlekedési csomópont, P+R parkoló',roof:false},
-  'Hűtőtornyok':                     {now:'Ikonikus ipari látványelem, helyi védett.',floors:6,zone:'infra',future:'Geotermikus hőcserélő tornyok — a terület fűtési/hűtési rendszerének szíve',roof:false},
-  'Bugacsiszoló':                    {now:'Gyártócsarnok, részben használatban.',floors:1,zone:'ipari',future:'Precíziós gyártócsarnok — mikroelektronika, műszergyártás',roof:false},
-  'Hengereszterga műhely':           {now:'Ipari műhely, részben működő.',floors:1,zone:'ipari',future:'Gépgyártó műhely — CNC megmunkálás, ipari bérmunka',roof:false},
-  'Vasszerk. Üzem':                  {now:'Vasszerkezeti üzem, részben aktív.',floors:2,zone:'ipari',future:'Acélszerkezeti gyártás — napelempanel vázak, építőelemek',roof:true},
-  'Egyedi Gépgyár':                  {now:'Helyi védett, speciális gépgyártás.',floors:2,zone:'ipari',future:'Drón és autonóm jármű fejlesztőközpont',roof:true},
-  'Vasgyári fürdő':                  {now:'Helyi védett, 1897-es fürdő. Üresen áll.',floors:2,zone:'sport',future:'Felújított közösségi fürdő és wellness — spa, uszoda',roof:false},
-  'Menza':                           {now:'Egykori gyári étkezde.',floors:2,zone:'ker',future:'Közösségi étkezde és piactér — helyi termelők, street food',roof:true},
-  'Vízlágyító':                      {now:'Működő vízkezelő üzem.',floors:1,zone:'infra',future:'Okos vízkezelő és esővíz-visszanyerő rendszer — IoT monitorozás',roof:false},
-  'Vízmű C-telep':                   {now:'Működő Vízmű telep.',floors:1,zone:'infra',future:'Korszerűsített ivóvíz-ellátó rendszer — szolárpaneles energetika',roof:false},
-  'Turbókompresszor gépház':         {now:'Helyi védett kompresszorgépház.',floors:2,zone:'infra',future:'Geotermikus energiaközpont — hőszivattyú, megújuló energetika',roof:false},
-  'Forgattyús tengely üzem':         {now:'Ipari forgattyús tengely gyártó.',floors:1,zone:'ipari',future:'Elektromobilitás gyártóbázis — EV alkatrész, hőszivattyú komponens',roof:false},
-};
-const ZONE_INFO = {
-  tech:    {title:'TECHNOLÓGIAI PARK',text:'Miskolci Egyetem KFI hub. Startup inkubátor, laborok, FabLab, 3D nyomtatás, CNC – nyitott innovációs ökoszisztéma a volt Középhengermű épületében.'},
-  kultura: {title:'KULTÚRA · MAKERS DISTRICT',text:'Kreatív negyed a DAM nyugati bejáratánál. Kiállítótér, műhelyek, sörfőzde, kávézó – az ipari identitás megőrzésével, a Keleti Erőmű és Csavargyár épületében.'},
-  ipari:   {title:'IPARI PARK',text:'30+ hektáros egybefüggő ipari terület vasúti kapcsolattal. Mikroelektronika, drón, EV alkatrész, gépgyártás, élelmiszeripar.'},
-  sport:   {title:'SPORT · REKREÁCIÓ',text:'Jégcsarnok, műkorcsolya, indoor sportok, uszoda, közösségi rendezvénytér, Vasgyári fürdő felújítva.'},
-  ker:     {title:'KERESKEDELEM · SZOLGÁLTATÁS',text:'Kiss Ernő út mentén: áruházak, helyi piac, éttermek, irodák. A Konzumsor felújítva közösségi kereskedelmi sorrá.'},
-  korhaz:  {title:'KÓRHÁZ · DA VINCI ROBOTKLINIKA',text:'Modern egészségügyi centrum a DAM területen belül. Da Vinci robotsebészet, járóbeteg-rendelő, laborok, mentőállomás.'},
-  oktat:   {title:'OKTATÁSI CENTRUM',text:'Általános iskola, gimnázium, szakképző – a terület saját oktatási intézményhálózata. Kapcsolódik a Technológiai Parkhoz.'},
-  infra:   {title:'INFRASTRUKTÚRA · ENERGIA',text:'Geotermikus hőcserélő (Hűtőtornyok), naperőmű, okos vízkezelés, IoT közvilágítás, EV töltők, föld alatti esővíz-gyűjtő.'},
-  vedett:  {title:'VÉDETT IPARI ÖRÖKSÉG',text:'14 helyi védett épület megőrizve és új funkcióban. Az ipari identitás és kulturális emlékezet megmarad – nem lebontva, hanem élővé téve.'},
-  torony:  {title:'IRODATORONY',text:'Modern magasépület a bontott területen. Vegyes funkció: irodák, lakások, tetőterasz kilátóval a DAM területre és Miskolcra.'},
+// ── ZÓNÁK ─────────────────────────────────────────────────────
+const Z={
+  setany:{n:"DAM SÉTÁNY – ZÖLD TENGELY",s:"K–NY ZÖLDINFRASTRUKTÚRA",z:"DAM SÉTÁNY",c:"#00ff88",d:"Gyalogos-kerékpáros főtengely, fasoros sétány, smart padok, közbringa állomások, vizes élőhelyek, vertikális kertek.",f:["KERÉKPÁRÚT","SMART PADOK","KÖZBRINGA","VIZES ÉLŐHELY","VERTIKÁLIS KERT"],st:"1. ÜTEM – 2026",sc:"#ffaa00"},
+  makers:{n:"MAKERS DISTRICT – KONZUMSOR",s:"KULTÚRA ÉS KREATÍVIPAR",z:"MAKERS / KULTÚRA",c:"#aa44ff",d:"A DAM nyugati kapuja. Sörfőzde, design műhelyek, galéria, ipartörténeti kiállítás, street food. Helyi védett Konzumsor épületegyüttesben.",f:["MÚZEUM","SÖRFŐZDE","GALÉRIA","FABLAB","STREET FOOD"],st:"1. ÜTEM – 2026",sc:"#00ff88"},
+  tech:{n:"TECHNOLÓGIAI PARK – KÖZÉPHENGERMŰ",s:"INNOVÁCIÓS INKUBÁTOR HUB",z:"TECHNOLÓGIAI PARK",c:"#0088ff",d:"A volt Középhengermű innovációs centrumként újjáéled. Miskolci Egyetem KFI laborok, startup inkubátor, FabLab, 3D nyomtatók, CNC gépek.",f:["AI LABOR","3D NYOMTATÁS","FABLAB","STARTUP HUB","KFI LABOR"],st:"2. ÜTEM – 2028",sc:"#ffaa00"},
+  rekr:{n:"REKREÁCIÓS ZÓNA – ÉSZAKI RÉSZ",s:"SPORT, RENDEZVÉNY, KONFERENCIA",z:"REKREÁCIÓ",c:"#ff6600",d:"1000 fős konferenciaközpont, sportcsarnok, jégcsarnok, uszoda, P+R parkoló. Kapcsolódik a Szinva zöldfolyosóhoz.",f:["KONFERENCIA 1000 FŐ","JÉGCSARNOK","USZODA","P+R","ESPORT"],st:"3. ÜTEM – 2032",sc:"#ffaa00"},
+  keres:{n:"KERESKEDELMI ZÓNA – KISS ERNŐ ÚT",s:"RETAIL, IRODÁK, SZOLGÁLTATÁSOK",z:"KERESKEDELEM",c:"#ffaa00",d:"Kiss Ernő út mentén vegyes kereskedelmi-irodai fejlesztések. Áruházak, éttermek, irodaházak, EV töltők.",f:["ÉTTERMEK","IRODAHÁZAK","EV TÖLTŐK","RETAIL"],st:"2. ÜTEM – 2028",sc:"#ffaa00"},
+  ipari:{n:"DÉLI IPARI PARK",s:"ZÉRÓ EMISSZIÓS GYÁRTÁS",z:"IPARI PARK",c:"#ff3333",d:"30+ hektáros ipari terület vasúti kapcsolattal. Dróngyártás, EV alkatrész, villamosgyártás, napelemgyártás, gépgyártás.",f:["DRÓNGYÁRTÁS","VASÚTI KAPCSOLAT","VILLAMOSGYÁRTÁS","ZÉRÓ EMISSZIÓ"],st:"2–3. ÜTEM – 2028–2035",sc:"#ffaa00"},
+  infra:{n:"INFRASTRUKTÚRA – ENERGIA HUB",s:"SMART ENERGIA INFRASTRUKTÚRA",z:"INFRA / ENERGIA",c:"#00ffcc",d:"Hűtőtornyok geotermikus hőcserélőként, naperőmű 5 MW, Vízmű C-telep, biogáz, smart grid IoT vezérléssel.",f:["GEOTERMIKUS","NAPERŐMŰ 5MW","BIOGÁZ","SMART GRID","IOT HUB"],st:"1. ÜTEM – 2026",sc:"#00ff88"},
+  orokség:{n:"VÉDETT IPARI ÖRÖKSÉG",s:"14 HELYI VÉDETT ÉPÜLET",z:"VÉDETT ÖRÖKSÉG",c:"#ffee44",d:"I. Hivatalház (1890), Keleti Erőmű, Mozdonyszín, Vasgyári fürdő (1897), Hűtőtornyok – adaptív újrahasznosítással.",f:["14 VÉDETT ÉPÜLET","ADAPTÍV REHAB","IPARI ÖRÖKSÉG","KULTURÁLIS HUB"],st:"ÁLLAGMEGÓVÁS AZONNAL",sc:"#ff4444"},
+  vasutallomas:{n:"VASGYÁRI VASÚTÁLLOMÁS",s:"MULTIMODÁLIS KÖZLEKEDÉSI HUB",z:"INFRA / ENERGIA",c:"#00ffcc",d:"Felújított vasútállomás: személy- és teherforgalom, P+R, hidrogén buszok, kerékpáros hub.",f:["SZEMÉLYFORGALOM","P+R","HIDROGÉN BUS","CARGO"],st:"2. ÜTEM – 2028",sc:"#ffaa00"},
+  fürdő:{n:"VASGYÁRI FÜRDŐ",s:"SPA ÉS WELLNESS (1897)",z:"VÉDETT ÖRÖKSÉG",c:"#ffee44",d:"Az 1897-es helyi védett fürdőépület teljes rehabilitációval. Uszoda, termálmedence, spa, szauna.",f:["USZODA","TERMÁLMEDENCE","SPA","ÖRÖKSÉG"],st:"2. ÜTEM – 2029",sc:"#ffaa00"},
 };
 
-// ═══════════════════════════════════════════════════════════════════
-// KOORDINÁTA RENDSZER
-// ═══════════════════════════════════════════════════════════════════
-let S_OLat=48.094,S_OLng=20.743,S_Scale=44.84;
-let _cal=null;
+// ── ZÓNA SZÍNEK (GLB modellekre ráfestjük) ────────────────────
+const ZONE_COL={
+  makers:0x6622aa, tech:0x0055bb, rekr:0xaa4400, keres:0x886600,
+  ipari:0x881111, infra:0x006655, orokség:0x887700, vasutallomas:0x005566,
+  fürdő:0x775500, setany:0x115522,
+};
 
-function warp(px,py){
-  const tl=_cal.tl,tr=_cal.tr,bl=_cal.bl,br=_cal.br;
-  const tLa=tl.lat+(tr.lat-tl.lat)*px,tLo=tl.lng+(tr.lng-tl.lng)*px;
-  const bLa=bl.lat+(br.lat-bl.lat)*px,bLo=bl.lng+(br.lng-bl.lng)*px;
-  return[tLa+(bLa-tLa)*py,tLo+(bLo-tLo)*py];
-}
-function ll2s(lat,lng){
-  const c=Math.cos(S_OLat*Math.PI/180);
-  return[(lng-S_OLng)*c*S_Scale,-(lat-S_OLat)*S_Scale];
-}
-function path2pts(path){return path.map(p=>{const[x,z]=ll2s(p.lat,p.lng);return[x,z];});}
-function polyArea(pts){
-  let a=0;for(let i=0;i<pts.length;i++){const j=(i+1)%pts.length;a+=pts[i][0]*pts[j][1]-pts[j][0]*pts[i][1];}return Math.abs(a)/2;
-}
-function polyCX(pts){return pts.reduce((s,p)=>s+p[0],0)/pts.length;}
-function polyCZ(pts){return pts.reduce((s,p)=>s+p[1],0)/pts.length;}
+// ── THREE.JS ──────────────────────────────────────────────────
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x07111f);
+scene.fog=new THREE.Fog(0x07111f,550,1050);
 
-// ═══════════════════════════════════════════════════════════════════
-// RENDERER
-// ═══════════════════════════════════════════════════════════════════
-let VW=window.innerWidth,VH=window.innerHeight;
-const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-renderer.setSize(VW,VH);
-renderer.shadowMap.enabled=true;
-renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.setClearColor(0x0a1208);
+const camera=new THREE.PerspectiveCamera(48,innerWidth/innerHeight,1,2000);
+camera.position.set(0,300,500);
+
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(1); // Fix 1x pixel ratio = gyorsabb
+renderer.shadowMap.enabled=false; // TELJESEN KI – fő lag ok
+renderer.toneMapping=THREE.NoToneMapping;
 document.body.appendChild(renderer.domElement);
 
-const scene=new THREE.Scene();
-scene.fog=new THREE.Fog(0x0a1208,2.5,7.0);
-
-const camera=new THREE.PerspectiveCamera(42,VW/VH,0.001,20);
-
-// Fények (nappal + éjjel)
-const ambDay=new THREE.AmbientLight(0xd4e8d4,0.75);
-const ambNight=new THREE.AmbientLight(0x101830,0.5);
-scene.add(ambDay); scene.add(ambNight); ambNight.visible=false;
-
-const sunLight=new THREE.DirectionalLight(0xfff5e0,1.1);
-sunLight.position.set(0.7,2.2,1.0);
-sunLight.castShadow=true;
-sunLight.shadow.mapSize.set(2048,2048);
-sunLight.shadow.camera.left=-1.5;sunLight.shadow.camera.right=1.5;
-sunLight.shadow.camera.top=1.5;sunLight.shadow.camera.bottom=-1.5;
-sunLight.shadow.camera.near=0.01;sunLight.shadow.camera.far=12;
-scene.add(sunLight);
-
-const moonLight=new THREE.DirectionalLight(0x334466,0.35);
-moonLight.position.set(-0.5,1.5,-0.8);
-scene.add(moonLight); moonLight.visible=false;
-
+const clock=new THREE.Clock(),ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
+const clickable=[],animQ=[];
 let isNight=false;
 
-// Talaj
-const groundMat=new THREE.MeshLambertMaterial({color:0x1a2a1a});
-const ground=new THREE.Mesh(new THREE.PlaneGeometry(3,3),groundMat);
-ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
+// ── FÉNYEK (egyszerű, kevés) ───────────────────────────────────
+const amb=new THREE.AmbientLight(0xffffff,1.0);scene.add(amb);
+const sun=new THREE.DirectionalLight(0xfff5e0,0.9);
+sun.position.set(-200,400,-150);scene.add(sun);
+const fill=new THREE.DirectionalLight(0x8899cc,0.5);
+fill.position.set(200,200,200);scene.add(fill);
+const ambN=new THREE.AmbientLight(0x0a1428,0.7);scene.add(ambN);ambN.visible=false;
 
-// ═══════════════════════════════════════════════════════════════════
-// TALAJZÓNA LAP — szín szerint park/tó/tér/napelem
-// ═══════════════════════════════════════════════════════════════════
-function addGroundZone(pts2d,color,y,opacity){
-  // pts2d: [[x,z],...] scene koordináták
-  const shape=new THREE.Shape();
-  shape.moveTo(pts2d[0][0],pts2d[0][1]);
-  for(let i=1;i<pts2d.length;i++) shape.lineTo(pts2d[i][0],pts2d[i][1]);
-  shape.closePath();
-  const geo=new THREE.ShapeGeometry(shape);
-  // ShapeGeometry XY síkban, forgatjuk XZ-re
-  geo.rotateX(-Math.PI/2);
-  const mat=new THREE.MeshBasicMaterial({color,transparent:true,opacity,
-    side:THREE.DoubleSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4});
-  const mesh=new THREE.Mesh(geo,mat);
-  mesh.position.y=y;
-  mesh.renderOrder=0;
-  scene.add(mesh);
-  return mesh;
-}
-
-// GPS alapú zónalapok
-function addGPSZone(latlngs,color,y,opacity){
-  const pts=latlngs.map(ll=>ll2s(ll[0],ll[1]));
-  return addGroundZone(pts,color,y,opacity);
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// ÉPÜLETEK
-// ═══════════════════════════════════════════════════════════════════
-const bldEntries=[];
-const allMesh26=[],allMesh50=[];
-
-function bldH(b,cfg){
-  const kb=b.name?KB[b.name]:null;
-  if(kb&&kb.floors){const mf=(b.cat==='védett'||b.cat==='hasznosítandó')?8:5;return(kb.floors*mf)/1800;}
-  const a=polyArea(b.pts);const af=Math.min(Math.sqrt(a/0.00015),2.0);return cfg.h*(0.7+0.3*af);
-}
-
-function makeShape3D(b){
-  const shape=new THREE.Shape();
-  let first=true;
-  for(const pt of b.pts){
-    const[lat,lng]=warp(pt[0],pt[1]);const[sx,sz]=ll2s(lat,lng);
-    if(first){shape.moveTo(sx,-sz);first=false;}else shape.lineTo(sx,-sz);
-  }
-  shape.closePath();
-  return shape;
-}
-
-function addBuilding(b){
-  const cfg26=CAT26[b.cat]||CAT26.egyeb;
-  const kb=b.name?KB[b.name]:null;
-  const zone=kb&&kb.zone?kb.zone:(b.cat==='védett'?'vedett':(b.cat==='hasznosítandó'?'tech':null));
-  const cfg50=zone?ZONE[zone]:null;
-  const h26=bldH(b,cfg26);
-  const h50=cfg50?bldH(b,cfg50):h26;
-  const disappears=b.cat==='bontando'||b.cat==='bontasra_javasolt';
-  const shape=makeShape3D(b);
-
-  // 2026 mesh
-  const g26=new THREE.ExtrudeGeometry(shape,{depth:h26,bevelEnabled:false});
-  g26.rotateX(-Math.PI/2);
-  const m26=new THREE.MeshLambertMaterial({color:cfg26.col,emissive:cfg26.emi,transparent:true,opacity:1});
-  const mesh26=new THREE.Mesh(g26,m26);
-  mesh26.castShadow=true;mesh26.receiveShadow=true;
-  scene.add(mesh26);allMesh26.push(mesh26);
-
-  // 2050 mesh
-  let mesh50=null;
-  if(!disappears){
-    const g50=new THREE.ExtrudeGeometry(shape,{depth:h50,bevelEnabled:false});
-    g50.rotateX(-Math.PI/2);
-    const c50=cfg50?cfg50.col:cfg26.col,e50=cfg50?cfg50.emi:cfg26.emi;
-    const m50=new THREE.MeshLambertMaterial({color:c50,emissive:e50,transparent:true,opacity:0});
-    mesh50=new THREE.Mesh(g50,m50);
-    mesh50.castShadow=true;mesh50.receiveShadow=true;mesh50.visible=false;
-    scene.add(mesh50);allMesh50.push(mesh50);
-  }
-
-  // Tetőkert
-  let roofM=null;
-  if(kb&&kb.roof&&!disappears){
-    // Sík lap a tetőn
-    const g50=mesh50?mesh50.geometry:g26;
-    // Kis zöld lap a tető közepén
-    const bPts=b.pts.map(pt=>{const[la,lo]=warp(pt[0],pt[1]);return ll2s(la,lo);});
-    const cx=polyCX(bPts),cz=polyCZ(bPts);
-    const rGeo=new THREE.PlaneGeometry(0.018,0.018);
-    const rMat=new THREE.MeshLambertMaterial({color:0x2d6a1f,emissive:0x0a1a00,transparent:true,opacity:0});
-    roofM=new THREE.Mesh(rGeo,rMat);
-    roofM.rotation.x=-Math.PI/2;
-    roofM.position.set(cx,h50+0.001,cz);
-    roofM.visible=false;
-    scene.add(roofM);
-  }
-
-  bldEntries.push({mesh26,mesh50,roofM,b,kb,cfg26,cfg50,zone,h26,h50,disappears});
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// ÚJ 2050-ES ÉPÜLETEK (procedurálisan, bontott területekre)
-// ═══════════════════════════════════════════════════════════════════
-const new50Meshes=[];
-
-function addNewBuilding(x,z,w,d,h,zone,nameStr,futureStr){
-  const cfg=ZONE[zone]||ZONE.tech;
-  const shape=new THREE.Shape();
-  shape.moveTo(-w/2,-d/2);shape.lineTo(w/2,-d/2);shape.lineTo(w/2,d/2);shape.lineTo(-w/2,d/2);
-  shape.closePath();
-  const geo=new THREE.ExtrudeGeometry(shape,{depth:h,bevelEnabled:false});
-  geo.rotateX(-Math.PI/2);
-  const mat=new THREE.MeshLambertMaterial({color:cfg.col,emissive:cfg.emi,transparent:true,opacity:0});
-  const mesh=new THREE.Mesh(geo,mat);
-  mesh.position.set(x,0,z);
-  mesh.castShadow=true;mesh.receiveShadow=true;mesh.visible=false;
-  scene.add(mesh);
-  allMesh50.push(mesh);
-  new50Meshes.push({mesh,cfg,zone,nameStr,futureStr});
-  return mesh;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// INFRASTRUKTÚRA SZALAG
-// ═══════════════════════════════════════════════════════════════════
-function addBand(segs,opts){
-  const verts=[],idx=[];
-  for(const s of segs){
-    const[x0,z0,x1,z1]=[s[0],s[1],s[2],s[3]];
-    const dx=x1-x0,dz=z1-z0,len=Math.hypot(dx,dz);
-    if(len<0.00001)continue;
-    const lw=opts.w*(0.7+Math.min(Math.max(s[4]||1,0.4),3.0)*0.15);
-    const nx=-dz/len*lw*.5,nz=dx/len*lw*.5;
-    const i=verts.length/3;
-    verts.push(x0-nx,opts.y,z0-nz,x0+nx,opts.y,z0+nz,x1+nx,opts.y,z1+nz,x1-nx,opts.y,z1-nz);
-    idx.push(i,i+1,i+2,i,i+2,i+3);
-  }
-  if(!verts.length)return;
-  const geo=new THREE.BufferGeometry();
-  geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
-  geo.setIndex(idx);geo.computeVertexNormals();
-  const mat=new THREE.MeshBasicMaterial({color:opts.col,transparent:true,opacity:opts.op,
-    side:THREE.DoubleSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
-  const mesh=new THREE.Mesh(geo,mat);mesh.renderOrder=1;scene.add(mesh);
-  return mesh;
-}
-
-function kindW(k){
-  if(!k)return 0.8;
-  if(['motorway','trunk','primary'].includes(k))return 3.5;
-  if(['secondary','tertiary'].includes(k))return 2.5;
-  if(['residential','unclassified'].includes(k))return 1.5;
-  if(k==='service')return 1.0;
-  return 0.7;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// ANIMÁLT JÁRMŰVEK
-// ═══════════════════════════════════════════════════════════════════
-const vehicles=[];
-
-function spawnVehicle(pts2d,col,w,h,spd,type){
-  // pts2d: [[x,z],...]
-  if(!pts2d||pts2d.length<2)return;
-  let totalLen=0;const lens=[];
-  for(let i=0;i<pts2d.length-1;i++){
-    const d=Math.hypot(pts2d[i+1][0]-pts2d[i][0],pts2d[i+1][1]-pts2d[i][1]);
-    lens.push(d);totalLen+=d;
-  }
-  if(totalLen<0.001)return;
-  let geo;
-  if(type==='train') geo=new THREE.BoxGeometry(w,h,w*4);
-  else if(type==='bus') geo=new THREE.BoxGeometry(w,h,w*2.5);
-  else if(type==='car') geo=new THREE.BoxGeometry(w*0.9,h*0.7,w*1.6);
-  else geo=new THREE.SphereGeometry(w*0.4,6,6); // ember
-  const mat=new THREE.MeshLambertMaterial({color:col,emissive:col,emissiveIntensity:0.2,transparent:true,opacity:1});
-  const mesh=new THREE.Mesh(geo,mat);
-  mesh.castShadow=false;
-  // Éjjeli fény a járművön
-  let light=null;
-  if(type==='train'||type==='bus'){
-    light=new THREE.PointLight(col,0.4,0.08);
-    mesh.add(light);light.visible=false;
-  }
-  scene.add(mesh);
-  vehicles.push({mesh,pts:pts2d,lens,totalLen,t:Math.random()*totalLen,spd,yOff:h*0.5+0.003,type,light,isRail:type==='train'});
-}
-
-function updateVehicles(dt){
-  for(const v of vehicles){
-    v.t=(v.t+v.spd*dt)%v.totalLen;
-    let rem=v.t,seg=0;
-    for(let i=0;i<v.lens.length;i++){if(rem<=v.lens[i]){seg=i;break;}rem-=v.lens[i];}
-    const f=rem/(v.lens[seg]||0.0001);
-    const p0=v.pts[seg],p1=v.pts[Math.min(seg+1,v.pts.length-1)];
-    const x=p0[0]+(p1[0]-p0[0])*f,z=p0[1]+(p1[1]-p0[1])*f;
-    const dx=p1[0]-p0[0],dz=p1[1]-p0[1];
-    v.mesh.position.set(x,v.yOff,z);
-    if(Math.hypot(dx,dz)>0.00001) v.mesh.rotation.y=-Math.atan2(dx,dz);
-    if(v.light) v.light.visible=isNight&&v.mesh.visible;
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// UTCAI FÉNYEK (éjjeli)
-// ═══════════════════════════════════════════════════════════════════
-const streetLights=[];
-function addStreetLight(x,z){
-  const light=new THREE.PointLight(0xffd080,0.5,0.12);
-  light.position.set(x,0.015,z);
-  light.visible=false;
-  scene.add(light);
-  streetLights.push(light);
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// KAMERA
-// ═══════════════════════════════════════════════════════════════════
-let theta=-0.5,phi=1.05,radius=0.90;
-const camTgt=new THREE.Vector3(0,0,0);
-function syncCam(){
-  camera.position.set(
-    camTgt.x+radius*Math.sin(phi)*Math.sin(theta),
-    camTgt.y+radius*Math.cos(phi),
-    camTgt.z+radius*Math.sin(phi)*Math.cos(theta));
-  camera.lookAt(camTgt);
-}
-syncCam();
-let camAnim=null;
-function animCamTo(nt,np,nr,ntg,dur=700){
-  const s=performance.now(),ft=theta,fp=phi,fr=radius,ftg=camTgt.clone();
-  camAnim={update(now){
-    const t=Math.min((now-s)/dur,1),e=1-(1-t)*(1-t);
-    theta=ft+(nt-ft)*e;phi=fp+(np-fp)*e;radius=fr+(nr-fr)*e;
-    if(ntg)camTgt.lerpVectors(ftg,ntg,e);syncCam();return t<1;
-  }};
-}
-let isDrag=false,isPan=false,lx=0,ly=0;
-const cv=renderer.domElement;
-cv.addEventListener('mousedown',e=>{isDrag=true;isPan=e.shiftKey||e.button===1||e.button===2;lx=e.clientX;ly=e.clientY;});
-cv.addEventListener('contextmenu',e=>e.preventDefault());
-window.addEventListener('mouseup',()=>isDrag=false);
-window.addEventListener('mousemove',e=>{
-  if(!isDrag){doHover(e);return;}camAnim=null;
-  const dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;
-  if(isPan||e.shiftKey){
-    const r=new THREE.Vector3(),fwd=new THREE.Vector3();camera.getWorldDirection(fwd);
-    r.crossVectors(fwd,new THREE.Vector3(0,1,0)).normalize();
-    const sp=0.0012*radius;camTgt.addScaledVector(r,-dx*sp);camTgt.y+=dy*sp*0.5;
-  }else{theta-=dx*0.007;phi=Math.max(0.06,Math.min(Math.PI/2.05,phi+dy*0.007));}
-  syncCam();
+// Zóna PointLight-ok (kevesebb, kisebb hatótáv)
+const zPLs=[];
+[[0x44aaff,0,-30],[0x8844ff,-350,-60],[0xff6600,60,200],[0x00ffcc,300,170]].forEach(([c,x,z])=>{
+  const pl=new THREE.PointLight(c,2.5,220);pl.position.set(x,30,z);scene.add(pl);
+  zPLs.push({pl,ph:Math.random()*Math.PI*2});
 });
-cv.addEventListener('wheel',e=>{e.preventDefault();camAnim=null;radius=Math.max(0.05,Math.min(4.0,radius*(e.deltaY>0?1.11:0.90)));syncCam();},{passive:false});
-let tP=null;
-cv.addEventListener('touchstart',e=>{if(e.touches.length===1){isDrag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;}else if(e.touches.length===2)tP=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);},{passive:true});
-cv.addEventListener('touchmove',e=>{e.preventDefault();camAnim=null;if(e.touches.length===1&&isDrag){const dx=e.touches[0].clientX-lx,dy=e.touches[0].clientY-ly;lx=e.touches[0].clientX;ly=e.touches[0].clientY;theta-=dx*0.009;phi=Math.max(0.06,Math.min(Math.PI/2.05,phi+dy*0.009));syncCam();}else if(e.touches.length===2&&tP){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);radius=Math.max(0.05,Math.min(4.0,radius*(tP/d)));tP=d;syncCam();}},{passive:false});
-cv.addEventListener('touchend',()=>{isDrag=false;tP=null;});
-document.addEventListener('keydown',e=>{if(e.key==='r'||e.key==='R')resetView();if(e.key==='f'||e.key==='F')topView();if(e.key==='n'||e.key==='N')toggleNight();});
-function resetView(){animCamTo(-0.5,1.05,0.90,new THREE.Vector3(0,0,0));}
-function topView(){animCamTo(theta,0.06,0.90,new THREE.Vector3(0,0,0));}
-window.resetView=resetView;window.topView=topView;
 
-// ═══════════════════════════════════════════════════════════════════
-// ÉJJEL / NAPPAL
-// ═══════════════════════════════════════════════════════════════════
+// ── TALAJ ─────────────────────────────────────────────────────
+scene.add(new THREE.Mesh(
+  new THREE.PlaneGeometry(1600,1400),
+  new THREE.MeshLambertMaterial({color:0x0c1a0e})
+).rotateX(-Math.PI/2));
+scene.add(new THREE.GridHelper(1600,64,0x0d2218,0x091610));
+
+// ── ANYAG CACHE ───────────────────────────────────────────────
+const matCache={};
+function getMat(col){
+  if(!matCache[col])matCache[col]=new THREE.MeshLambertMaterial({color:col});
+  return matCache[col];
+}
+
+// ── ÉPÜLET (egyszerű, performant) ─────────────────────────────
+function bld(x,z,w,d,h,col,zKey,name){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),getMat(col));
+  m.position.set(x,h/2,z);scene.add(m);
+  // Él glow – csak egy LineSegments
+  const eg=new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d)),
+    new THREE.LineBasicMaterial({color:new THREE.Color(col).multiplyScalar(2),transparent:true,opacity:0.6})
+  );
+  eg.position.set(x,h/2,z);scene.add(eg);
+  if(zKey){m.userData={zKey,name};clickable.push(m);}
+  return m;
+}
+
+// ── GLB MODELL (zóna színnel felülírva) ───────────────────────
+function glb(proto,x,z,size,rotY,zKey,name){
+  if(!proto)return;
+  const m=proto.clone();
+  const zonecol=zKey?ZONE_COL[zKey]:null;
+  m.traverse(c=>{
+    if(c.isMesh){
+      // Felülírjuk a Kenney fehér anyagot zóna színre
+      c.material=new THREE.MeshLambertMaterial({
+        color: zonecol||c.material.color||0x888888,
+        map: null // textúra nélkül, csak szín
+      });
+      if(zKey&&name){c.userData={zKey,name};clickable.push(c);}
+    }
+  });
+  const bb=new THREE.Box3().setFromObject(m);
+  const sz=bb.getSize(new THREE.Vector3());
+  m.scale.setScalar(size/Math.max(sz.x,sz.y,sz.z));
+  const bb2=new THREE.Box3().setFromObject(m);
+  m.position.set(x,-bb2.min.y+0.5,z);
+  m.rotation.y=rotY||0;
+  scene.add(m);
+}
+
+// ── TALAJZÓNA ─────────────────────────────────────────────────
+function patch(x,z,w,d,col,op,zKey){
+  const m=new THREE.Mesh(
+    new THREE.PlaneGeometry(w,d),
+    new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op,side:THREE.DoubleSide,depthWrite:false})
+  );
+  m.rotation.x=-Math.PI/2;m.position.set(x,0.4,z);m.renderOrder=0;scene.add(m);
+  const eg=new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(w,0.2,d)),
+    new THREE.LineBasicMaterial({color:new THREE.Color(col).multiplyScalar(2.5),transparent:true,opacity:0.5})
+  );
+  eg.position.set(x,0.5,z);scene.add(eg);
+  if(zKey){m.userData={zKey,name:Z[zKey]?Z[zKey].n:zKey};clickable.push(m);}
+}
+
+// ── ÚT ────────────────────────────────────────────────────────
+function road(x1,z1,x2,z2,w,col,y){
+  const dx=x2-x1,dz=z2-z1,len=Math.hypot(dx,dz);if(len<1)return;
+  const m=new THREE.Mesh(
+    new THREE.PlaneGeometry(len,w),
+    new THREE.MeshBasicMaterial({color:col,depthWrite:false})
+  );
+  m.renderOrder=1;m.rotation.order='YXZ';
+  m.rotation.y=Math.atan2(dx,dz);m.rotation.x=-Math.PI/2;
+  m.position.set((x1+x2)/2,y,(z1+z2)/2);scene.add(m);
+}
+
+// ── VASÚT ─────────────────────────────────────────────────────
+function rail(pts){
+  for(let i=0;i<pts.length-1;i++){
+    const[x0,z0]=pts[i],[x1,z1]=pts[i+1];
+    road(x0,z0,x1,z1,12,0x111827,1.5);
+    road(x0,z0,x1,z1,4,0x222222,2.2);
+    road(x0,z0,x1,z1,1,0xaa2222,3.0);
+  }
+}
+
+// ── FA (instanced – SOKKAL gyorsabb) ──────────────────────────
+let treeCount=0;
+const MAX_TREES=220;
+const treeM=new THREE.InstancedMesh(
+  new THREE.SphereGeometry(1,6,5),
+  new THREE.MeshLambertMaterial({color:0x226622}),
+  MAX_TREES
+);
+treeM.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+scene.add(treeM);
+const trunkIM=new THREE.InstancedMesh(
+  new THREE.CylinderGeometry(0.4,0.6,1,5),
+  new THREE.MeshLambertMaterial({color:0x3a2010}),
+  MAX_TREES
+);scene.add(trunkIM);
+const _treeM=new THREE.Matrix4(),_tv=new THREE.Vector3(),_tq=new THREE.Quaternion(),_ts=new THREE.Vector3();
+
+function tree(x,z,h,r){
+  if(treeCount>=MAX_TREES)return;
+  h=h||(4+Math.random()*4);r=r||(2+Math.random()*1.5);
+  // Lombkorona
+  _treeM.compose(new THREE.Vector3(x,h+r*0.7,z),_tq.identity(),new THREE.Vector3(r,r,r));
+  treeM.setMatrixAt(treeCount,_treeM);
+  // Törzs
+  _treeM.compose(new THREE.Vector3(x,h/2,z),_tq.identity(),new THREE.Vector3(1,h,1));
+  trunkIM.setMatrixAt(treeCount,_treeM);
+  treeCount++;
+}
+function flushTrees(){treeM.count=treeCount;trunkIM.count=treeCount;treeM.instanceMatrix.needsUpdate=true;trunkIM.instanceMatrix.needsUpdate=true;}
+
+// ── NAPELEM ───────────────────────────────────────────────────
+function solar(x,z){
+  const m=new THREE.Mesh(
+    new THREE.BoxGeometry(9,0.3,6),
+    new THREE.MeshLambertMaterial({color:0x001566})
+  );
+  m.rotation.x=-0.6;m.position.set(x,3.5,z);scene.add(m);
+  animQ.push({m,type:'solar',ph:Math.random()*Math.PI*2});
+}
+
+// ── STEAM ─────────────────────────────────────────────────────
+function steam(x,z,h){
+  for(let i=0;i<4;i++){
+    const m=new THREE.Mesh(
+      new THREE.SphereGeometry(2.5,5,4),
+      new THREE.MeshBasicMaterial({color:0x99bbcc,transparent:true,opacity:0.22})
+    );
+    m.position.set(x+(Math.random()-.5)*5,h+3+i*8,z+(Math.random()-.5)*5);
+    scene.add(m);animQ.push({m,type:'steam',baseY:m.position.y,ph:i*1.2});
+  }
+}
+
+// ── PARTICLES ─────────────────────────────────────────────────
+function particles(){
+  const n=300,pos=new Float32Array(n*3);
+  for(let i=0;i<n;i++){pos[i*3]=(Math.random()-.5)*1200;pos[i*3+1]=4+Math.random()*120;pos[i*3+2]=(Math.random()-.5)*1000;}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  const m=new THREE.Points(geo,new THREE.PointsMaterial({color:0x00ffcc,size:1.0,transparent:true,opacity:0.22}));
+  scene.add(m);animQ.push({m,type:'particles',pos});
+}
+
+// ── JÁRMŰ RENDSZER ────────────────────────────────────────────
+const movers=[];
+function pathMeta(pts){let t=0;const l=[];for(let i=0;i<pts.length-1;i++){const d=Math.hypot(pts[i+1][0]-pts[i][0],pts[i+1][1]-pts[i][1]);l.push(d);t+=d;}return{l,t};}
+function pathPos(pts,l,tot,t){
+  let r=((t%tot)+tot)%tot;
+  let s=0;
+  for(let i=0;i<l.length;i++){
+    if(r<=l[i]){s=i;break;}
+    r-=l[i];
+  }
+  const seg=l[s]||0.001;
+  const f=Math.min(1,r/seg);
+  const p0=pts[s],p1=pts[Math.min(s+1,pts.length-1)];
+  return{x:p0[0]+(p1[0]-p0[0])*f,z:p0[1]+(p1[1]-p0[1])*f,dx:p1[0]-p0[0],dz:p1[1]-p0[1]};
+}
+
+function mover(proto,pts,size,spd,yOff,rotOff,col){
+  if(!proto||pts.length<2)return;
+  const{l,t}=pathMeta(pts);if(t<2)return;
+  const m=proto.clone();
+  const zonecol=col;
+  m.traverse(c=>{
+    if(c.isMesh){
+      c.material=new THREE.MeshLambertMaterial({color:col||0x888888});
+    }
+  });
+  const bb=new THREE.Box3().setFromObject(m);
+  const sz=bb.getSize(new THREE.Vector3());
+  m.scale.setScalar(size/Math.max(sz.x,sz.y,sz.z));
+  scene.add(m);
+  movers.push({m,pts,l,t,cur:Math.random()*t,spd,yOff:yOff||0.5,rotOff:rotOff||0});
+}
+
+// Fallback jármű (doboz) ha nincs GLB
+function moverBox(pts,w,h,d,col,spd,yOff){
+  if(pts.length<2)return;
+  const{l,t}=pathMeta(pts);if(t<2)return;
+  const g=new THREE.Group();
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(w,h,d),getMat(col)),{position:{x:0,y:h/2,z:0}}));
+  const bm=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),getMat(col));bm.position.y=h/2;g.add(bm);
+  scene.add(g);
+  movers.push({m:g,pts,l,t,cur:Math.random()*t,spd,yOff:yOff||0.5,rotOff:0});
+}
+
+// Ember (instanced) ─────────────────────────────────────────────
+const MAX_PEOPLE=80;
+const peopleIM=new THREE.InstancedMesh(
+  new THREE.CylinderGeometry(0.5,0.6,2.2,5),
+  new THREE.MeshLambertMaterial({color:0x6688aa}),
+  MAX_PEOPLE
+);peopleIM.count=0;scene.add(peopleIM);
+const headIM=new THREE.InstancedMesh(
+  new THREE.SphereGeometry(0.6,5,4),
+  new THREE.MeshLambertMaterial({color:0xffddbb}),
+  MAX_PEOPLE
+);headIM.count=0;scene.add(headIM);
+const peopleData=[];
+const _pm=new THREE.Matrix4(),_pq=new THREE.Quaternion(),_euP=new THREE.Euler();
+
+function addPeople(pts,count){
+  const{l,t}=pathMeta(pts);if(t<2)return;
+  for(let i=0;i<count&&peopleData.length<MAX_PEOPLE;i++){
+    const offset=[(Math.random()-.5)*6,(Math.random()-.5)*4];
+    peopleData.push({pts,l,t,cur:Math.random()*t,spd:0.05+Math.random()*0.07,bob:Math.random()*Math.PI*2,offset,idx:peopleData.length});
+  }
+}
+
+// ── KAMERA ────────────────────────────────────────────────────
+let isDrag=false,prevX=0,prevY=0,phi=0.68,theta=0.12,rad=560;
+let tPos={x:0,y:300,z:500},cPos={x:0,y:300,z:500},tLook={x:0,y:0,z:0},cLook={x:0,y:0,z:0};
+function updCam(){tPos.x=rad*Math.sin(phi)*Math.sin(theta)+tLook.x;tPos.y=rad*Math.cos(phi)+8;tPos.z=rad*Math.sin(phi)*Math.cos(theta)+tLook.z;}
+renderer.domElement.addEventListener('mousedown',e=>{isDrag=true;prevX=e.clientX;prevY=e.clientY;});
+window.addEventListener('mouseup',()=>isDrag=false);
+renderer.domElement.addEventListener('mousemove',e=>{
+  if(isDrag){theta-=(e.clientX-prevX)*0.004;phi=Math.max(0.12,Math.min(1.42,phi-(e.clientY-prevY)*0.004));prevX=e.clientX;prevY=e.clientY;updCam();}
+  else onHover(e);
+});
+renderer.domElement.addEventListener('wheel',e=>{rad=Math.max(55,Math.min(1100,rad+e.deltaY*0.3));updCam();});
+renderer.domElement.addEventListener('click',onClick);
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+const VIEWS={
+  overview:{look:[0,0,0],r:560,th:0.12,ph:0.68},
+  setany:{look:[0,0,20],r:340,th:0.05,ph:0.60},
+  makers:{look:[-320,0,-40],r:250,th:-0.55,ph:0.56},
+  tech:{look:[0,0,-20],r:260,th:0.08,ph:0.52},
+  vasut:{look:[20,0,270],r:300,th:0.08,ph:0.56},
+  rekr:{look:[50,0,220],r:240,th:0.18,ph:0.53},
+};
+function setView(v){
+  document.querySelectorAll('.cb').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById('btn-'+v);if(el)el.classList.add('active');
+  const vd=VIEWS[v];if(!vd)return;
+  tLook={x:vd.look[0],y:vd.look[1],z:vd.look[2]};theta=vd.th;phi=vd.ph;rad=vd.r;updCam();
+}window.setView=setView;
+
 function toggleNight(){
   isNight=!isNight;
-  document.getElementById('btn-night').classList.toggle('active',isNight);
-  ambDay.visible=!isNight; ambNight.visible=isNight;
-  sunLight.visible=!isNight; moonLight.visible=isNight;
-  renderer.setClearColor(isNight?0x020508:0x0a1208);
-  scene.fog.color.setHex(isNight?0x020508:0x0a1208);
-  groundMat.color.setHex(isNight?0x080f08:0x1a2a1a);
-  streetLights.forEach(l=>l.visible=isNight);
-  // Épületek éjjeli emissive boost
-  for(const e of bldEntries){
-    if(e.mesh50&&e.mesh50.visible&&e.cfg50){
-      const eBase=isNight?0x182828:e.cfg50.emi;
-      e.mesh50.material.emissive.setHex(eBase);
-    }
+  const btn=document.getElementById('btn-night');
+  if(isNight){
+    scene.background=new THREE.Color(0x010508);scene.fog=new THREE.Fog(0x010508,450,950);
+    amb.visible=false;ambN.visible=true;sun.visible=false;fill.visible=false;
+    btn.classList.add('active');btn.textContent='☀ NAPPAL';
+  }else{
+    scene.background=new THREE.Color(0x07111f);scene.fog=new THREE.Fog(0x07111f,550,1050);
+    amb.visible=true;ambN.visible=false;sun.visible=true;fill.visible=true;
+    btn.classList.remove('active');btn.textContent='🌙 ÉJJEL';
   }
-  for(const n of new50Meshes){
-    if(n.mesh.visible){
-      const eBase=isNight?0x182828:n.cfg.emi;
-      n.mesh.material.emissive.setHex(eBase);
-    }
-  }
-}
-window.toggleNight=toggleNight;
+}window.toggleNight=toggleNight;
 
-// ═══════════════════════════════════════════════════════════════════
-// ÉV ANIMÁCIÓ
-// ═══════════════════════════════════════════════════════════════════
-let curYear=2050;
-
-function applyYear(t){
-  // t = 0(2026)..1(2050)
-  for(const e of bldEntries){
-    if(e.disappears){
-      const f=Math.max(0,Math.min(1,1-(t-0.08)/0.25));
-      e.mesh26.visible=f>0.01;e.mesh26.material.opacity=f;
-    }else{
-      const f26=Math.max(0,Math.min(1,1-(t-0.15)/0.35));
-      const f50=Math.max(0,Math.min(1,(t-0.2)/0.45));
-      e.mesh26.visible=f26>0.01;e.mesh26.material.opacity=f26;
-      if(e.mesh50){e.mesh50.visible=f50>0.01;e.mesh50.material.opacity=f50;}
-      if(e.roofM){const rf=Math.max(0,Math.min(1,(t-0.65)/0.25));e.roofM.visible=rf>0.01;e.roofM.material.opacity=rf;}
-    }
-  }
-  for(const n of new50Meshes){
-    const fn=Math.max(0,Math.min(1,(t-0.35)/0.5));
-    n.mesh.visible=fn>0.01;n.mesh.material.opacity=fn;
-  }
-  // Zónalapos átlátszóság
-  for(const z of zonePatches){
-    const fz=Math.max(0,Math.min(1,(t-0.1)/0.6));
-    z.material.opacity=fz*z._maxOp;
-    z.visible=fz>0.01;
-  }
-  // Járművek
-  for(const v of vehicles){
-    if(v.isRail){v.mesh.visible=true;}
-    else{const fv=Math.max(0,Math.min(1,(t-0.25)/0.3));v.mesh.visible=fv>0.01;v.mesh.material.opacity=fv;}
-  }
-  groundMat.color.setHex(t>0.5?0x1a2a1a:0x141e14);
+function onClick(e){
+  mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;
+  ray.setFromCamera(mouse,camera);
+  const h=ray.intersectObjects(clickable,true);
+  if(h.length){const ud=h[0].object.userData;if(ud.zKey)showInfo(ud.zKey,ud.name);}
 }
-
-function setYear(y){
-  y=Math.round(y);
-  document.getElementById('year-disp').textContent=y;
-  document.getElementById('slider').value=y;
-  curYear=y;
-  const t=(y-2026)/24;
-  applyYear(t);
-}
-
-function setEra(yr){
-  document.getElementById('btn-2050').classList.toggle('active',yr===2050);
-  document.getElementById('btn-2026').classList.toggle('active',yr===2026);
-  let y=curYear,step=yr>curYear?1:-1,target=yr;
-  const iv=setInterval(()=>{y+=step*2;if((step>0&&y>=target)||(step<0&&y<=target)){y=target;clearInterval(iv);}curYear=y-step;setYear(y);},25);
-}
-window.setEra=setEra;
-
-// ═══════════════════════════════════════════════════════════════════
-// TOOLTIP
-// ═══════════════════════════════════════════════════════════════════
-const raycast=new THREE.Raycaster(),mPtr=new THREE.Vector2();
-let hovEntry=null;
-
-function getHoverables(){
-  const out=[];
-  for(const e of bldEntries){if(e.mesh26&&e.mesh26.visible)out.push(e.mesh26);if(e.mesh50&&e.mesh50.visible)out.push(e.mesh50);}
-  for(const n of new50Meshes){if(n.mesh.visible)out.push(n.mesh);}
-  return out;
-}
-function findEntry(mesh){
-  for(const e of bldEntries){if(e.mesh26===mesh||e.mesh50===mesh)return{type:'bld',e};}
-  for(const n of new50Meshes){if(n.mesh===mesh)return{type:'new',n};}
-  return null;
-}
-function doHover(ev){
-  mPtr.x=(ev.clientX/VW)*2-1;mPtr.y=-(ev.clientY/VH)*2+1;
-  raycast.setFromCamera(mPtr,camera);
-  const hits=raycast.intersectObjects(getHoverables());
+function onHover(e){
+  mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;
+  ray.setFromCamera(mouse,camera);
+  const h=ray.intersectObjects(clickable,true);
   const tt=document.getElementById('tooltip');
-  if(hits.length>0){
-    const found=findEntry(hits[0].object);
-    if(found){
-      clearHov();hovEntry=found;
-      if(found.type==='bld'){
-        const e=found.e;
-        e.mesh26.material.emissive.setHex(0x1a3a1a);
-        if(e.mesh50)e.mesh50.material.emissive.setHex(0x1a3a1a);
-        const cfg=curYear>2035&&e.cfg50?e.cfg50:e.cfg26;
-        showTT(ev,e.b.name||cfg.label,cfg,(e.kb&&e.kb.now)||'',(e.kb&&e.kb.future)||(e.disappears?'2050: Lebontva — helyén park és zöldterület':''));
-        if(e.zone&&ZONE_INFO[e.zone]){document.getElementById('info-title').textContent=ZONE_INFO[e.zone].title;document.getElementById('info-content').textContent=ZONE_INFO[e.zone].text;}
-      }else{
-        const n=found.n;n.mesh.material.emissive.setHex(0x1a3a1a);
-        const cfg=n.cfg;
-        showTT(ev,n.nameStr,cfg,'',n.futureStr);
-        if(n.zone&&ZONE_INFO[n.zone]){document.getElementById('info-title').textContent=ZONE_INFO[n.zone].title;document.getElementById('info-content').textContent=ZONE_INFO[n.zone].text;}
-      }
-    }
-    cv.style.cursor='pointer';
-  }else{clearHov();tt.style.display='none';cv.style.cursor='grab';}
+  if(h.length&&h[0].object.userData.name){tt.style.display='block';tt.style.left=(e.clientX+11)+'px';tt.style.top=(e.clientY-9)+'px';tt.textContent='▸ '+h[0].object.userData.name;renderer.domElement.style.cursor='pointer';}
+  else{tt.style.display='none';renderer.domElement.style.cursor='default';}
 }
-function clearHov(){
-  if(!hovEntry)return;
-  if(hovEntry.type==='bld'){const e=hovEntry.e;e.mesh26.material.emissive.setHex(e.cfg26.emi);if(e.mesh50)e.mesh50.material.emissive.setHex(e.cfg50?e.cfg50.emi:e.cfg26.emi);}
-  else{const n=hovEntry.n;n.mesh.material.emissive.setHex(n.cfg.emi);}
-  hovEntry=null;
+function showInfo(key,name){
+  const d=Z[key];if(!d)return;
+  document.getElementById('iz').textContent=d.z;
+  document.getElementById('iz').style.cssText=`background:${d.c}22;color:${d.c};border:1px solid ${d.c}55;font-size:7px;letter-spacing:3px;padding:2px 6px;border-radius:6px;display:inline-block;margin-bottom:9px;font-weight:bold;`;
+  document.getElementById('it').textContent=name||d.n;
+  document.getElementById('is').textContent=d.s;
+  document.getElementById('id').textContent=d.d;
+  document.getElementById('ift').innerHTML=d.f.map(f=>`<span class="ft">${f}</span>`).join('');
+  document.getElementById('sd').style.cssText=`background:${d.sc};box-shadow:0 0 6px ${d.sc};width:6px;height:6px;border-radius:50%;animation:blink 1.5s infinite;`;
+  document.getElementById('stxt').textContent=d.st;
+  document.getElementById('info').classList.add('show');
 }
-function showTT(ev,name,cfg,info,fut){
-  document.getElementById('tt-cat').textContent=cfg.label;
-  document.getElementById('tt-cat').style.cssText=`background:${cfg.css}33;color:${cfg.css};border:1px solid ${cfg.css}66;font-size:9px;letter-spacing:2px;padding:2px 8px;border-radius:5px;display:inline-block;margin-bottom:7px;font-weight:700;`;
-  document.getElementById('tt-name').textContent=name;
-  document.getElementById('tt-info').textContent=info;
-  const fe=document.getElementById('tt-fut');fe.textContent=fut?'2050: '+fut:'';fe.style.display=fut?'block':'none';
-  document.getElementById('tooltip').style.display='block';moveTT(ev);
-}
-function moveTT(ev){
-  const tt=document.getElementById('tooltip');
-  let x=ev.clientX+18,y=ev.clientY-8;
-  if(x+tt.offsetWidth>VW-10)x=ev.clientX-tt.offsetWidth-18;
-  if(y+tt.offsetHeight>VH-58)y=ev.clientY-tt.offsetHeight-8;
-  tt.style.left=x+'px';tt.style.top=y+'px';
-}
+function closeInfo(){document.getElementById('info').classList.remove('show');}window.closeInfo=closeInfo;
 
-// ═══════════════════════════════════════════════════════════════════
-// PLAY
-// ═══════════════════════════════════════════════════════════════════
-let playing=false;
-const playBtn=document.getElementById('play-btn');
-playBtn.addEventListener('click',()=>{playing=!playing;playBtn.textContent=playing?'⏸':'▶';if(playing&&curYear>=2050){curYear=2025;setYear(2026);}});
-document.getElementById('slider').addEventListener('input',e=>{curYear=+e.target.value-1;setYear(+e.target.value);});
-
-// ═══════════════════════════════════════════════════════════════════
-// RENDER LOOP
-// ═══════════════════════════════════════════════════════════════════
-const zonePatches=[];
-let lastTs=0;
-function animate(ts){
+// ── ANIMÁCIÓ ──────────────────────────────────────────────────
+function animate(){
   requestAnimationFrame(animate);
-  const dt=Math.min((ts-lastTs)/1000,0.05);lastTs=ts;
-  if(playing){const ny=Math.min(2050,curYear+dt*7);if(Math.floor(ny)!==curYear){curYear=Math.floor(ny)-1;setYear(Math.floor(ny));}if(ny>=2050){playing=false;playBtn.textContent='▶';}}
-  updateVehicles(dt);
-  if(camAnim&&!camAnim.update(ts))camAnim=null;
+  const t=clock.getElapsedTime(),k=0.05;
+  cPos.x+=(tPos.x-cPos.x)*k;cPos.y+=(tPos.y-cPos.y)*k;cPos.z+=(tPos.z-cPos.z)*k;
+  cLook.x+=(tLook.x-cLook.x)*k;cLook.z+=(tLook.z-cLook.z)*k;
+  camera.position.set(cPos.x,cPos.y,cPos.z);camera.lookAt(cLook.x,cLook.y,cLook.z);
+
+  zPLs.forEach(({pl,ph})=>{pl.intensity=2.0+1.2*Math.sin(t*0.4+ph);});
+
+  animQ.forEach(o=>{
+    if(o.type==='steam'){const dy=(t*0.22+o.ph*4)%28;o.m.position.y=o.baseY+dy;o.m.material.opacity=0.18*(1-dy/28);}
+    else if(o.type==='solar'){o.m.material.color.setHSL(0.62,0.9,0.12+0.06*Math.abs(Math.sin(t*0.35+o.ph)));}
+    else if(o.type==='particles'){for(let i=0;i<o.pos.length/3;i++){o.pos[i*3+1]-=0.6;if(o.pos[i*3+1]<3)o.pos[i*3+1]=120;}o.m.geometry.attributes.position.needsUpdate=true;}
+  });
+
+  // Járművek
+  movers.forEach(v=>{
+    v.cur+=v.spd;
+    const{x,z,dx,dz}=pathPos(v.pts,v.l,v.t,v.cur);
+    v.m.position.set(x,v.yOff,z);
+    if(Math.hypot(dx,dz)>0.05)v.m.rotation.y=-Math.atan2(dx,dz)+v.rotOff;
+  });
+
+  // Emberek (instanced)
+  peopleData.forEach((p,i)=>{
+    p.cur+=p.spd;p.bob+=0.15;
+    const{x,z,dx,dz}=pathPos(p.pts,p.l,p.t,p.cur);
+    const px=x+p.offset[0],pz=z+p.offset[1],py=Math.abs(Math.sin(p.bob))*0.4;
+    const rotY=Math.hypot(dx,dz)>0.05?-Math.atan2(dx,dz)+Math.PI:0;
+    _euP.set(0,rotY,0);_pq.setFromEuler(_euP);
+    _pm.compose(new THREE.Vector3(px,py+1.1,pz),_pq,new THREE.Vector3(1,1,1));
+    peopleIM.setMatrixAt(i,_pm);
+    _pm.compose(new THREE.Vector3(px,py+2.8,pz),_pq,new THREE.Vector3(1,1,1));
+    headIM.setMatrixAt(i,_pm);
+  });
+  if(peopleData.length){peopleIM.instanceMatrix.needsUpdate=true;headIM.instanceMatrix.needsUpdate=true;}
+
   renderer.render(scene,camera);
 }
-window.addEventListener('resize',()=>{VW=window.innerWidth;VH=window.innerHeight;renderer.setSize(VW,VH);camera.aspect=VW/VH;camera.updateProjectionMatrix();});
-document.getElementById('hideBtn').addEventListener('click',()=>['top','legend','info-panel','tl-wrap'].forEach(id=>document.getElementById(id).style.display='none'));
 
-// ═══════════════════════════════════════════════════════════════════
-// BETÖLTÉS
-// ═══════════════════════════════════════════════════════════════════
-function setP(p){document.getElementById('loading-fill').style.width=p+'%';}
+// ── MAIN SCENE ────────────────────────────────────────────────
+async function main(){
+  setP(5,'GLB MODELLEK...');
 
-Promise.all([
-  fetch('dam_buildings2.json').then(r=>r.json()),
-  fetch('dam_prez_infrastructure.json').then(r=>r.json()),
-  fetch('dam_pdf_corner_calibration.json').then(r=>r.json()),
-]).then(([bData,infra,calData])=>{
-  _cal=calData.calibration;
-  setP(15);
+  // GLB betöltés – csak az autókhoz és kulcsépületekhez
+  const M={};
+  if(THREE.GLTFLoader){
+    const loader=new THREE.GLTFLoader();
+    const toLoad={
+      car:'dam_models/car-sedan.glb',
+      suv:'dam_models/car-suv.glb',
+      van:'dam_models/car-van.glb',
+      taxi:'dam_models/car-taxi.glb',
+      truck:'dam_models/car-truck.glb',
+      // Csak 3 kulcsépület GLB-ként
+      sky:'dam_models/sky-a.glb',
+      ind:'dam_models/ind-a.glb',
+      bld:'dam_models/bld-d.glb',
+    };
+    let done=0,total=Object.keys(toLoad).length;
+    await Promise.all(Object.entries(toLoad).map(([k,url])=>new Promise(res=>{
+      loader.load(url,g=>{M[k]=g.scene;done++;setP(5+done/total*30,'MODELLEK: '+done+'/'+total);res();},
+      undefined,()=>{done++;res();});
+    })));
+  }
+  setP(38,'ZÓNÁK...');
 
-  // Origó és skála kalibráció
-  const bs=bData.buildings.filter(b=>b.pts&&b.pts.length>=3);
-  let mnLa=Infinity,mxLa=-Infinity,mnLo=Infinity,mxLo=-Infinity;
-  for(const b of bs)for(const pt of b.pts){const[la,lo]=warp(pt[0],pt[1]);if(la<mnLa)mnLa=la;if(la>mxLa)mxLa=la;if(lo<mnLo)mnLo=lo;if(lo>mxLo)mxLo=lo;}
-  S_OLat=(mnLa+mxLa)/2;S_OLng=(mnLo+mxLo)/2;
-  const cosL=Math.cos(S_OLat*Math.PI/180);
-  S_Scale=0.9/Math.max((mxLa-mnLa),(mxLo-mnLo)*cosL);
-  setP(25);
+  // ── TALAJZÓNÁK ─────────────────────────────────────────────
+  patch(-360,-30,230,320,0x220044,0.5,'makers');
+  patch(  20,-30,390,280,0x001833,0.5,'tech');
+  patch( 285,-80,225,200,0x221a00,0.4,'keres');
+  patch(  20,-225,400,185,0x221a00,0.38,'rekr');
+  patch( -55,282,570,225,0x1a0000,0.5,'ipari');
+  patch( 305,168,205,205,0x002211,0.4,'infra');
+  patch(  20,  0,710, 62,0x002200,0.55,'setany');
 
-  // ── UTAK & VASÚT ──────────────────────────────────────────────
-  const roads=infra.roads||[],railways=infra.railways||[];
-  const roadSegs=[],railSegs=[],mainRailPts=[];
+  setP(44,'UTAK...');
 
-  // Utak
-  for(const r of roads){
-    const pts=r.path;const lw=kindW(r.kind);
-    for(let i=0;i<pts.length-1;i++){
-      const[x0,z0]=ll2s(pts[i].lat,pts[i].lng),[x1,z1]=ll2s(pts[i+1].lat,pts[i+1].lng);
-      roadSegs.push([x0,z0,x1,z1,lw]);
+  // ── FŐUTAK ────────────────────────────────────────────────
+  // DAM Sétány főút K-NY
+  road(-560,0,560,0,30,0x1a2a1a,2);
+  road(-560,0,560,0,2,0x334433,3.8); // zöld sáv
+  // Kerékpárút
+  road(-560,14,560,14,3,0x113311,3);
+  road(-560,-14,560,-14,3,0x113311,3);
+
+  // É-D főút
+  road(0,-380,0,420,24,0x182018,2);
+
+  // Makers belső utak
+  road(-450,-155,-450,155,16,0x161a16,2);
+  road(-450,-155,-220,-155,16,0x161a16,2);
+  road(-450,155,-220,155,16,0x161a16,2);
+
+  // Tech Park belső
+  road(-220,-155,-220,155,14,0x161a16,2);
+  road( 220,-155, 220,155,14,0x161a16,2);
+  road(-220,-155, 220,-155,14,0x161a16,2);
+  road(-220, 155, 220, 155,14,0x161a16,2);
+
+  // Ipari park
+  road(-280,155,-280,420,18,0x181818,2);
+  road( 280,155, 280,420,18,0x181818,2);
+  road(-280,280, 280,280,18,0x181818,2);
+
+  // Kiss Ernő út
+  road(420,-380,420,420,22,0x1a201a,2);
+
+  setP(52,'VASÚT...');
+
+  // ── VASÚT ─────────────────────────────────────────────────
+  const railMain=[[-560,360],[-380,360],[-180,345],[-60,335],[60,335],[200,345],[380,360],[560,360]];
+  const railSpur1=[[-60,335],[-60,200],[-170,185],[-280,185]];
+  const railSpur2=[[ 60,335],[ 60,200],[ 170,185],[ 280,185]];
+  rail(railMain);rail(railSpur1);rail(railSpur2);
+
+  setP(58,'ÉPÜLETEK...');
+
+  // ── ÉPÜLETEK – box alapú, szép színekkel ─────────────────
+
+  // MAKERS DISTRICT – GLB-vel ahol van, különben bld()
+  bld(-430,-80,130,32,12,0x4a1a77,'makers','KONZUMSOR – KULTURÁLIS HUB');
+  bld(-430, 72,130,32,10,0x4a1a77,'makers','KONZUMSOR – GALÉRIÁK');
+  // MAKERS TOWER: csak GLB, nincs alatta bld doboz
+  glb(M.sky,-360,-10,90,0,'makers','MAKERS TOWER');
+  bld(-295,-82, 58,36,14,0x3d1d66,'makers','SÖRFŐZDE – KÁVÉPÖRKÖLŐ');
+  bld(-295, 50, 58,36,11,0x3d1d66,'makers','DESIGN MŰHELYEK – FABLAB');
+  bld(-465,-28, 28,88,10,0x2a1244,'makers','IPARTÖRTÉNETI MÚZEUM');
+  bld(-480, 50, 22,60,8, 0x2a1244,'makers','MAKERS ANNEX');
+
+  // TECHNOLÓGIAI PARK
+  bld(  0,-62,112,58,22,0x0044aa,'tech','KÖZÉPHENGERMŰ – TECHNOLÓGIAI PARK');
+  // IRODATORONY: csak GLB, nincs alatta bld doboz
+  glb(M.sky, 92,-112,110,0.3,'tech','DAM IRODATORONY – 22 EMELET');
+  bld(-94,-112, 28,28, 95,0x003388,'tech','DAM IRODATORONY B – 18 EMELET');
+  bld(152,-88,  24,24, 80,0x002266,'tech','STARTUP INKUBÁTOR TORONY');
+  bld( 62,  66, 58,42, 16,0x002244,'tech','FABLAB – GYÁRTÓCELLÁK');
+  bld(-82,  86, 52,36, 14,0x003355,'tech','KFI LABOR – MISKOLCI EGYETEM');
+  bld(148,  46, 42,36, 12,0x002233,'tech','CO-WORKING CENTER');
+  bld(172,-132, 72,52,18,0x665500,'orokség','VOLT KELETI ERŐMŰ – KULTURÁLIS HUB');
+
+  // REKREÁCIÓ – DAM ARÉNA: csak GLB, nincs alatta bld doboz
+  glb(M.bld,0,-262,95,0,'rekr','DAM ARÉNA – 1000 fős konferencia');
+  bld(-122,-282, 62,42,14,0x883300,'rekr','JÉGCSARNOK – FITNESZ');
+  bld( 132,-262, 58,42,13,0x883300,'rekr','USZODA – WELLNESS');
+  bld( -62,-326, 28,28,60,0xaa5500,'rekr','REKREÁCIÓ TORONY');
+
+  // Vasgyári fürdő
+  bld(-202,  86, 52,36,14,0x886600,'fürdő','VASGYÁRI FÜRDŐ – SPA (1897)');
+
+  // KERESKEDELEM
+  bld(332,-182, 56,46,24,0xaa7700,'keres','IRODAHÁZ – KISS ERNŐ ÚT');
+  bld(332,-102, 52,42,18,0x886600,'keres','KERESKEDELMI CENTRUM');
+  bld(332, -20, 52,42,15,0x775500,'keres','ÉTTEREM – SHOWROOM');
+  bld(332,  62, 56,46,20,0x886600,'keres','EV TÖLTŐ – PARKOLÓ HÁZ');
+
+  // Vasúti állomás
+  bld(422, 340, 58,30,14,0x334422,'vasutallomas','VASGYÁRI VASÚTÁLLOMÁS');
+
+  // IPARI PARK – GLB modellekkel
+  [[-205,228],[-78,228],[62,228],[185,228],[-205,328],[-78,328],[62,328],[185,328]].forEach(([x,z],i)=>{
+    glb(M.ind,x,z,68,i%2===0?0:Math.PI*0.5,'ipari',['DRÓNGYÁRTÓ CSARNOK','EV ALKATRÉSZ ÜZEM','VILLAMOSGYÁRTÁS','NAPELEMGYÁRTÁS','MIKROELEKTRONIKA','GÉPGYÁRTÓ CSARNOK','ENERGETIKAI ÜZEM','ÉLELMISZERIPARI CSARNOK'][i]);
+  });
+
+  // HŰTŐTORNYOK (hengerek, ikonikus)
+  [[272,182],[322,182],[297,228]].forEach(([cx,cz],i)=>{
+    const cyl=new THREE.Mesh(new THREE.CylinderGeometry(12,16,52,14),getMat(0x225544));
+    cyl.position.set(cx,26,cz);scene.add(cyl);
+    const eg=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CylinderGeometry(12,16,52,14)),new THREE.LineBasicMaterial({color:0x00ffcc,transparent:true,opacity:0.4}));
+    eg.position.set(cx,26,cz);scene.add(eg);
+    cyl.userData={zKey:'infra',name:'HŰTŐTORONY – GEOTERMIKUS HUB'};clickable.push(cyl);
+    steam(cx,cz,52);
+  });
+
+  // NAPELEM FARM
+  for(let i=0;i<5;i++)for(let j=0;j<4;j++)solar(248+i*17,252+j*14);
+
+  setP(70,'FÁK...');
+
+  // ── FÁK (instanced) ────────────────────────────────────────
+  for(let x=-520;x<=520;x+=26){tree(x,-19);tree(x,19);}  // sétány mentén
+  for(let i=0;i<60;i++)tree(-180+Math.random()*150,-360+Math.random()*120); // rekreáció
+  for(let i=0;i<35;i++)tree(-485+Math.random()*210,-150+Math.random()*290); // makers
+  for(let i=0;i<25;i++)tree(-210+Math.random()*400,-130+Math.random()*150); // tech park
+  flushTrees();
+
+  setP(80,'JÁRMŰVEK...');
+
+  // ── AUTÓK – pontosan az utakon ────────────────────────────
+  // Főút K-NY (sétány, z=0 ± sáveltolás)
+  const rH1=[[-540,-8],[540,-8]];   // jobbos sáv keletre
+  const rH2=[[540,8],[-540,8]];     // visszafele
+  // Főút É-D (x=0)
+  const rV1=[[8,-360],[8,420]];
+  const rV2=[[-8,420],[-8,-360]];
+  // Kiss Ernő út (x=420)
+  const rE1=[[420,-360],[420,420]];
+  const rE2=[[420,420],[420,-360]];
+  // Makers belső loop
+  const rMakers=[[-450,-155],[-450,155],[-220,155],[-220,-155],[-450,-155]];
+  // Tech park kerület
+  const rTech=[[-220,-155],[220,-155],[220,155],[-220,155],[-220,-155]];
+  // Ipari bekötő
+  const rIpari=[[-280,155],[-280,420],[280,420],[280,155]];
+
+  // [útvonal, szín, sebesség, méret]
+  const carDefs=[
+    [rH1,0x44aaff,0.55,18,M.car],
+    [rH2,0xff6644,0.50,18,M.suv],
+    [rH1,0xffcc00,0.62,16,M.taxi],
+    [rV1,0x44dd88,0.48,18,M.car],
+    [rV2,0xdddddd,0.52,16,M.suv],
+    [rE1,0xff8844,0.45,18,M.van],
+    [rE2,0x8866ff,0.50,16,M.car],
+    [rMakers,0x44ccff,0.42,16,M.taxi],
+    [rTech,0xffaacc,0.46,16,M.suv],
+    [rIpari,0xaaffaa,0.38,20,M.van],
+  ];
+  carDefs.forEach(([pts,col,spd,sz,proto],i)=>{
+    if(proto){
+      mover(proto,pts,sz,spd,0.6,0,col);
+    } else {
+      // Egyszerű szép doboz fallback
+      const g=new THREE.Group();
+      const body=new THREE.Mesh(new THREE.BoxGeometry(sz,sz*0.28,sz*0.44),getMat(col));
+      body.position.y=sz*0.14;g.add(body);
+      const top=new THREE.Mesh(new THREE.BoxGeometry(sz*0.6,sz*0.22,sz*0.38),getMat(new THREE.Color(col).multiplyScalar(0.7).getHex()));
+      top.position.set(0,sz*0.28,0);g.add(top);
+      const{l,t}=pathMeta(pts);
+      scene.add(g);movers.push({m:g,pts,l,t,cur:Math.random()*t,spd,yOff:0.5,rotOff:0});
     }
-  }
-  if(roadSegs.length){
-    addBand(roadSegs,{col:0x2a3a2a,op:0.9,w:0.0018,y:0.003});
-    // Fehér vonalak az utakon (átlátszó)
-    addBand(roadSegs,{col:0x3a5a3a,op:0.3,w:0.0005,y:0.0035});
-  }
+  });
 
-  // Vasút — csak a 2 fővonat
-  const sortedRail=railways.slice().sort((a,b)=>(b.length_m||0)-(a.length_m||0));
-  for(let ri=0;ri<Math.min(3,sortedRail.length);ri++){
-    const r=sortedRail[ri],pts=r.path;
-    const rPts=path2pts(pts);
-    if(ri===1)mainRailPts.push(...rPts); // 2. leghosszabb = fővonal a területen
-    for(let i=0;i<pts.length-1;i++){
-      const[x0,z0]=ll2s(pts[i].lat,pts[i].lng),[x1,z1]=ll2s(pts[i+1].lat,pts[i+1].lng);
-      railSegs.push([x0,z0,x1,z1,1.0]);
+  // ── ZÖLD BUSZOK – főúton ──────────────────────────────────
+  const busCol=0x226633;
+  const busDefs=[
+    [[[-540,-4],[540,-4]], busCol, 0.30, 26],
+    [[[540,4],[-540,4]],  busCol, 0.28, 26],
+    [[[8,-360],[8,155],[220,155],[220,0]], 0x116633, 0.25, 26],
+  ];
+  busDefs.forEach(([pts,col,spd,sz])=>{
+    const proto=M.van;
+    if(proto){
+      mover(proto,pts,sz,spd,1.2,0,col);
+    } else {
+      const g=new THREE.Group();
+      const bm=new THREE.Mesh(new THREE.BoxGeometry(sz,sz*0.3,sz*0.5),getMat(col));bm.position.y=sz*0.15;g.add(bm);
+      const{l,t}=pathMeta(pts);
+      scene.add(g);movers.push({m:g,pts,l,t,cur:Math.random()*t,spd,yOff:0.8,rotOff:0});
     }
-  }
-  if(railSegs.length){
-    addBand(railSegs,{col:0x111827,op:0.97,w:0.0028,y:0.005});
-    addBand(railSegs,{col:0xee3333,op:0.88,w:0.0008,y:0.006});
-  }
+  });
 
-  // Utcai fények a főutak mentén (ritkásan)
-  for(const r of roads){
-    if(['tertiary','service'].includes(r.kind)){
-      const pts=r.path;
-      for(let i=0;i<pts.length;i+=4){
-        const[x,z]=ll2s(pts[i].lat,pts[i].lng);addStreetLight(x,z);
+  // ── VASÚTSÍN – látható sínek a talajon ───────────────────
+  // (road() Z tengelyen fekteti, rail() is ezzel – de vizuálisan
+  //  kell egy kis emelt sáv hogy látsszon)
+  // rail() már meghívva fentebb, csak kell egy extra kiemelés:
+  // vörös sáv a sínen (már meghívva), de adjunk szürke kavicságyat
+  // (már a rail() megcsinálja 0x111827 + 0x222222 + 0xaa2222)
+
+  // ── VONATOK – a vasútsíneken ──────────────────────────────
+  // Vagonok Z tengelyen sorakoznak (menetirány = az animáció rotation.y állítja be)
+  const trainColors=[[0xcc2222,0x991111],[0x334488,0x223366],[0x226633,0x115522]];
+  for(let v=0;v<3;v++){
+    const g=new THREE.Group();
+    const[bodyCol,roofCol]=trainColors[v%trainColors.length];
+    // 3 vagon Z irányban sorban (Z = menetirány, rotation.y igazítja majd)
+    [-30,0,30].forEach(oz=>{
+      const vag=new THREE.Mesh(new THREE.BoxGeometry(8,7,24),getMat(bodyCol));
+      vag.position.set(0,3.5,oz);g.add(vag);
+      const roof=new THREE.Mesh(new THREE.BoxGeometry(7,1.5,22),getMat(roofCol));
+      roof.position.set(0,7.3,oz);g.add(roof);
+      // Ablaksor az oldalon (X irány)
+      const wm=getMat(0x88ccff);
+      for(let wz=-9;wz<=9;wz+=5){
+        const w=new THREE.Mesh(new THREE.BoxGeometry(0.4,2.5,3),wm);
+        w.position.set(4.1,4.2,oz+wz);g.add(w);
+        const w2=w.clone();w2.position.x=-4.1;g.add(w2);
       }
-    }
-  }
-  setP(40);
+      // Összekötő
+      const conn=new THREE.Mesh(new THREE.BoxGeometry(5,2,2),getMat(0x111111));
+      conn.position.set(0,2,oz+12);g.add(conn);
+    });
+    // Mozdony elöl (Z+ irány)
+    const loco=new THREE.Mesh(new THREE.BoxGeometry(8,9,26),getMat(bodyCol));
+    loco.position.set(0,4.5,-52);g.add(loco);
+    const locoNose=new THREE.Mesh(new THREE.BoxGeometry(6,7,8),getMat(roofCol));
+    locoNose.position.set(0,4,-65);g.add(locoNose);
+    const light=new THREE.Mesh(new THREE.SphereGeometry(1.2,5,4),getMat(0xffffaa));
+    light.position.set(0,5,-69);g.add(light);
 
-  // ── MEGLÉVŐ ÉPÜLETEK ──────────────────────────────────────────
-  for(const b of bs) addBuilding(b);
-  setP(60);
-
-  // ── TALAJZÓNA FOLTOK (2050-ben látszanak) ──────────────────────
-  // Park északi rész
-  const parkN=addGPSZone([[48.0985,20.7370],[48.0985,20.7460],[48.0965,20.7460],[48.0965,20.7370]],0x1a5a1a,0.004,0);
-  parkN._maxOp=0.75;zonePatches.push(parkN);
-
-  // Park középső sétány
-  const parkMid=addGPSZone([[48.0960,20.7320],[48.0960,20.7550],[48.0950,20.7550],[48.0950,20.7320]],0x1e6e1e,0.004,0);
-  parkMid._maxOp=0.6;zonePatches.push(parkMid);
-
-  // Tó / víztározó (kelet)
-  const lake=addGPSZone([[48.0958,20.7510],[48.0958,20.7545],[48.0940,20.7545],[48.0940,20.7510]],0x1565c0,0.004,0);
-  lake._maxOp=0.82;zonePatches.push(lake);
-
-  // Naperőmű zóna (déli-nyugat)
-  const solar=addGPSZone([[48.0910,20.7290],[48.0910,20.7380],[48.0895,20.7380],[48.0895,20.7290]],0x263238,0.004,0);
-  solar._maxOp=0.7;zonePatches.push(solar);
-  // Naperőmű fény-tükrök (kék fény a lapon)
-  const solar2=addGPSZone([[48.0910,20.7290],[48.0910,20.7380],[48.0895,20.7380],[48.0895,20.7290]],0x1565c0,0.005,0);
-  solar2._maxOp=0.25;zonePatches.push(solar2);
-
-  // Főtér / piactér (közép-nyugat)
-  const plaza=addGPSZone([[48.0968,20.7310],[48.0968,20.7380],[48.0955,20.7380],[48.0955,20.7310]],0x424242,0.004,0);
-  plaza._maxOp=0.65;zonePatches.push(plaza);
-
-  // Ipari zóna déli
-  const ind=addGPSZone([[48.0920,20.7390],[48.0920,20.7510],[48.0895,20.7510],[48.0895,20.7390]],0x3e2723,0.004,0);
-  ind._maxOp=0.5;zonePatches.push(ind);
-
-  setP(70);
-
-  // ── ÚJ 2050-ES ÉPÜLETEK ───────────────────────────────────────
-  // Irodatorony (bontott terület közepén, déli rész)
-  const[tx1,tz1]=ll2s(48.0925,20.7440);
-  addNewBuilding(tx1,tz1,0.018,0.018,0.055,'torony','DAM Irodatorony','24 emeletes vegyes funkcióú torony — irodák, lakások, tetőterasz kilátóval. A DAM szimbóluma 2050-ben.');
-
-  // Második torony
-  const[tx2,tz2]=ll2s(48.0930,20.7480);
-  addNewBuilding(tx2,tz2,0.015,0.015,0.040,'torony','DAM Torony 2','18 emeletes lakótorony zöldtetővel, napelemekkel fedett homlokzattal.');
-
-  // Kórház (északi rész, bontott területen)
-  const[hx,hz]=ll2s(48.0978,20.7420);
-  addNewBuilding(hx,hz,0.030,0.022,0.016,'korhaz','DAM Egészségügyi Centrum','Modern kórház Da Vinci robotsebészettel, járóbeteg-rendelővel, sürgősségi osztállyal és helikopter leszállóval a tetőn.');
-  const[hx2,hz2]=ll2s(48.0978,20.7455);
-  addNewBuilding(hx2,hz2,0.015,0.018,0.010,'korhaz','Kórházi szárny — laborok, diagnosztika','Molekuláris diagnosztika, CT/MRI center, gyógyszertár, mentőállomás.');
-
-  // Iskola / oktatás
-  const[ex,ez]=ll2s(48.0972,20.7360);
-  addNewBuilding(ex,ez,0.025,0.018,0.012,'oktat','DAM Oktatási Centrum','Általános iskola, gimnázium és technikum — a digitális acélváros saját oktatási intézménye. Kapcsolódik a Technológiai Parkhoz.');
-
-  // Modern sportcsarnok (bontott területre)
-  const[sx,sz]=ll2s(48.0945,20.7340);
-  addNewBuilding(sx,sz,0.030,0.024,0.010,'sport','DAM Aréna','Modern multifunkciós sportcsarnok — 3000 fő, indoor tenisz, kézilabda, esport terem, konditerem.');
-
-  // Bevásárlóközpont
-  const[mx,mz]=ll2s(48.0938,20.7390);
-  addNewBuilding(mx,mz,0.035,0.020,0.009,'ker','DAM Market','Kereskedelmi centrum — helyi termelők piaca, éttermek, kávézók, bevásárló utca.');
-
-  // Kisebb lakóépületek
-  const lakoPts=[[48.0960,20.7290],[48.0963,20.7305],[48.0957,20.7320],[48.0961,20.7335]];
-  lakoPts.forEach((ll,i)=>{
-    const[lx2,lz2]=ll2s(ll[0],ll[1]);
-    addNewBuilding(lx2,lz2,0.012,0.012,0.016+(i%3)*0.006,'tech','DAM Lakóépület '+(i+1),'Modern lakóépület — zöldtetőkert, közösségi terek, EV töltők, IoT otthonautomatizálás.');
-  });
-
-  setP(80);
-
-  // ── JÁRMŰVEK ─────────────────────────────────────────────────
-  // Vonat a fővonalon (területen belüli 2. leghosszabb)
-  if(mainRailPts.length>3){
-    spawnVehicle(mainRailPts,0xcc2222,0.007,0.010,0.009,'train');
-    spawnVehicle(mainRailPts,0xaa1111,0.007,0.010,0.007,'train');
-  }
-  // Ha nincs mainRail, az összes vasút első pontjait használjuk
-  if(mainRailPts.length===0&&sortedRail.length>0){
-    const fallback=path2pts(sortedRail[0].path);
-    if(fallback.length>3){spawnVehicle(fallback,0xcc2222,0.007,0.010,0.009,'train');spawnVehicle(fallback,0xaa1111,0.007,0.010,0.007,'train');}
+    const{l,t}=pathMeta(railMain);
+    scene.add(g);
+    movers.push({m:g,pts:railMain,l,t,cur:(v/3)*t,spd:0.55+v*0.05,yOff:0,rotOff:0});
   }
 
-  // Buszok az utakon
-  const tertRoads=(infra.roads||[]).filter(r=>r.kind==='tertiary'&&r.path.length>5);
-  const svcRoads=(infra.roads||[]).filter(r=>r.kind==='service'&&(r.length_m||0)>400);
-  const busRoutes=[...tertRoads,...svcRoads.slice(0,4)];
-  busRoutes.forEach((r,i)=>{
-    const pts=path2pts(r.path);
-    const cols=[0x2e7d32,0x388e3c,0x1b5e20,0x43a047];
-    spawnVehicle(pts,cols[i%4],0.0045,0.0065,0.014+i*0.002,'bus');
-  });
+  setP(90,'EMBEREK...');
 
-  // Személyautók
-  const carRoads=(infra.roads||[]).filter(r=>(r.length_m||0)>200).slice(0,8);
-  carRoads.forEach((r,i)=>{
-    const pts=path2pts(r.path);
-    const cols=[0x78909c,0xb0bec5,0x546e7a,0x90a4ae,0xffffff,0xe0e0e0];
-    spawnVehicle(pts,cols[i%6],0.0038,0.0048,0.020+i*0.003,'car');
-  });
+  // ── EMBEREK (instanced) ────────────────────────────────────
+  // Sétány K-NY – a zöld kerékpárút mentén (z=±19 körül)
+  const sétPts1=[[-500,-22],[500,-22]];
+  const sétPts2=[[-500,22],[500,22]];
+  // Makers negyed gyalogút loop
+  const makersPts=[[-460,-130],[-460,120],[-220,120],[-220,-130],[-460,-130]];
+  // Tech park gyalogút loop
+  const techPts=[[-200,-130],[200,-130],[200,130],[-200,130],[-200,-130]];
+  // Rekreáció esplanade
+  const rekrPts=[[-100,-230],[100,-230],[100,-310],[-100,-310],[-100,-230]];
+  addPeople(sétPts1,20);
+  addPeople(sétPts2,16);
+  addPeople(makersPts,14);
+  addPeople(techPts,12);
+  addPeople(rekrPts,8);
+  peopleIM.count=peopleData.length;
+  headIM.count=peopleData.length;
 
-  // Sétáló emberek (a park/tér területen)
-  const walkerPts=[];
-  for(let i=0;i<8;i++){
-    const la=48.0958+Math.random()*0.003,lo=20.7360+Math.random()*0.008;
-    const[wx,wz]=ll2s(la,lo);
-    walkerPts.push([[wx,wz],[wx+(Math.random()-.5)*0.04,wz+(Math.random()-.5)*0.04]]);
-  }
-  walkerPts.forEach(wpt=>{spawnVehicle(wpt,0xffd54f,0.0020,0.0030,0.003+(Math.random()*0.003),'person');});
+  // ── PARTICLES ──────────────────────────────────────────────
+  particles();
 
-  setP(100);
+  setP(100,'⬡ KÉSZ! ⬡');
+  setTimeout(()=>{
+    const el=document.getElementById('loading');
+    el.style.opacity='0';setTimeout(()=>el.style.display='none',600);
+  },400);
+  animate();
+}
 
-  // Kezdő állapot: 2050
-  applyYear(1.0);
-  document.getElementById('loading').style.display='none';
-  animate(0);
-});
+function setP(p,t){document.getElementById('lb').style.width=p+'%';if(t)document.getElementById('lt').textContent=t;}
+main().catch(e=>{console.error(e);document.getElementById('lt').textContent='HIBA: '+e.message;animate();});
 </script>
 </body>
 </html>
