@@ -2229,11 +2229,13 @@ function findPic(key, cb) {
   let i = 0;
   function next() {
     if (i >= EXTS.length) return cb(null);
-    const src = FOLDER + key + '.' + EXTS[i++];
+    const raw = FOLDER + key + '.' + EXTS[i++];
+    // URL encode: szóközök és ékezetek miatt szükséges
+    const encoded = raw.split('/').map((seg, idx) => idx === 0 ? seg : encodeURIComponent(seg)).join('/');
     const img = new Image();
-    img.onload = () => cb(src);
+    img.onload = () => cb(encoded);
     img.onerror = next;
-    img.src = src;
+    img.src = encoded;
   }
   next();
 }
@@ -2397,21 +2399,34 @@ document.addEventListener('keydown', e => {
 });
 
 // ── ZÓNA TÉRKÉP ──
+// Koordináták a valós épület GPS pontok alapján (dam_buildings2.json + warpPoint)
+// Középhengermű: 48.0954,20.7382 | Hűtőtornyok: 48.0969,20.7411
+// Fürdő: 48.0949,20.7331 | Mozdonyszín: 48.0916,20.7338
+// Konzumsor: 48.0940,20.7302 | Hivatalház: 48.0946,20.7309
+// Keleti Erőmű: 48.0939,20.7421 | Vasútállomás: 48.0910,20.7505
+// Turbókompresszor: 48.0926,20.7346
 const ZONE_DATA = [
-  { id:'INF', label:'INF\nInfrastruktúra',    color:'#00ff99',
-    coords:[[48.0985,20.733],[48.0985,20.748],[48.0955,20.748],[48.0955,20.738],[48.0963,20.733]] },
-  { id:'TP',  label:'TP\nTechnológiai Park',  color:'#00c8ff',
-    coords:[[48.0963,20.733],[48.0963,20.742],[48.0935,20.742],[48.0935,20.733]] },
-  { id:'K',   label:'K\nKultúra & Kreatív',   color:'#cc88ff',
-    coords:[[48.0955,20.728],[48.0955,20.733],[48.0900,20.733],[48.0900,20.728]] },
-  { id:'KSZ', label:'KSZ\nKereskedelmi',      color:'#ffaa00',
-    coords:[[48.0955,20.748],[48.0955,20.758],[48.0900,20.758],[48.0900,20.748]] },
-  { id:'I',   label:'I\nIpari Park',          color:'#ff4444',
-    coords:[[48.0935,20.733],[48.0935,20.748],[48.0888,20.748],[48.0888,20.733]] },
-  { id:'R',   label:'R\nRekreáció',           color:'#f0b429',
-    coords:[[48.1001,20.728],[48.1001,20.733],[48.0963,20.733],[48.0963,20.728]] },
-  { id:'Z',   label:'Z\nZöldfelület',         color:'#44dd66',
-    coords:[[48.0957,20.728],[48.0958,20.758],[48.0954,20.758],[48.0953,20.728]] },
+  { id:'R', label:'R\nRekreáció', color:'#f0b429',
+    // Észak-Nyugati sarok: Fürdő (48.0949,20.7331) körül
+    coords:[[48.0975,20.7285],[48.0975,20.7360],[48.0945,20.7360],[48.0945,20.7285]] },
+  { id:'INF', label:'INF\nInfrastruktúra', color:'#00ff99',
+    // Északi sáv: Hűtőtornyok (48.0969,20.7411) + naperőmű terület
+    coords:[[48.0985,20.7360],[48.0985,20.7490],[48.0950,20.7490],[48.0950,20.7360]] },
+  { id:'K', label:'K\nKultúra & Kreatív', color:'#cc88ff',
+    // Nyugati rész: Konzumsor (20.7302), Hivatalház (20.7309), Mozdonyszín (20.7338)
+    coords:[[48.0955,20.7285],[48.0955,20.7360],[48.0900,20.7360],[48.0900,20.7285]] },
+  { id:'TP', label:'TP\nTechnológiai Park', color:'#00c8ff',
+    // Közép: Középhengermű (48.0954,20.7382), Turbókompresszor (48.0926,20.7346), Keleti Erőmű (48.0939,20.7421)
+    coords:[[48.0960,20.7360],[48.0960,20.7450],[48.0920,20.7450],[48.0920,20.7360]] },
+  { id:'I', label:'I\nIpari Park', color:'#ff4444',
+    // Déli nagy ipari terület
+    coords:[[48.0920,20.7340],[48.0920,20.7490],[48.0885,20.7490],[48.0885,20.7340]] },
+  { id:'KSZ', label:'KSZ\nKereskedelmi', color:'#ffaa00',
+    // Keleti szél: Vasútállomás (48.0910,20.7505), Kiss Ernő út mente
+    coords:[[48.0960,20.7490],[48.0960,20.7570],[48.0885,20.7570],[48.0885,20.7490]] },
+  { id:'Z', label:'Z\nZöldfelület\n& Sétány', color:'#44dd66',
+    // DAM Sétány: K-Ny tengely kb. 48.0948 szélességi fokon átmenő sáv
+    coords:[[48.0952,20.7285],[48.0954,20.7570],[48.0946,20.7570],[48.0944,20.7285]] },
 ];
 
 let zoneMap = null;
