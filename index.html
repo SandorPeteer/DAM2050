@@ -77,7 +77,9 @@ body::after {
   cursor:pointer; text-decoration:none; color:inherit;
   transition:border-color .3s, box-shadow .3s, transform .25s;
   position:relative; overflow:hidden;
+  height:320px;
 }
+.card-desc { flex:1; }
 .card::before {
   content:''; position:absolute; inset:0;
   background:radial-gradient(ellipse at 50% 0%, rgba(0,255,255,0.06), transparent 70%);
@@ -148,7 +150,6 @@ body::after {
       <div class="card-year">2026</div>
       <div class="card-title">PREZENTÁCIÓS TÉRKÉP<br>PDF KATEGÓRIÁK</div>
       <div class="card-desc">Google műholdas háttér.<br>453 PDF épületkeret.<br>Nagy kontrasztú vetítéshez.</div>
-      <button class="card-btn">MEGNYITÁS →</button>
     </a>
 
     <a href="dam_3d.html" class="card d3">
@@ -156,7 +157,6 @@ body::after {
       <div class="card-year">3D</div>
       <div class="card-title">TÉRBELI MAKETT<br>JELENLEGI ÉPÜLETEK</div>
       <div class="card-desc">Forgatható 3D modell.<br>Valódi épület-footprintök.<br>Magasságok kategória szerint.</div>
-      <button class="card-btn">MEGNYITÁS →</button>
     </a>
 
     <a href="dam_2050.html" class="card future">
@@ -164,7 +164,6 @@ body::after {
       <div class="card-year">2050</div>
       <div class="card-title">JÖVŐBELI VÁROSMAG<br>REVITALIZÁCIÓS TERV</div>
       <div class="card-desc">Bontandók eltűnnek.<br>Új épületek felépülnek.<br>Smart city vizualizáció.</div>
-      <button class="card-btn">MEGNYITÁS →</button>
     </a>
 
     <a href="vizualizacio.html" class="card" style="--acc:#00ff99">
@@ -172,7 +171,6 @@ body::after {
       <div class="card-year" style="color:#00ff99;text-shadow:0 0 12px #00ff9966">2050</div>
       <div class="card-title">SMART CITY<br>ÖTLETEK & VIZUALIZÁCIÓ</div>
       <div class="card-desc">Épületek, energia, logisztika.<br>Hűtőtorony akkumulátor.<br>Robot, drón, autonóm közlekedés.</div>
-      <button class="card-btn" style="color:#00ff99;border-color:#00ff9944">MEGNYITÁS →</button>
     </a>
 
     <a href="dam_prezentacio.html" class="card" style="--acc:#ffaa00">
@@ -180,7 +178,6 @@ body::after {
       <div class="card-year" style="color:#ffaa00;text-shadow:0 0 12px #ffaa0066">PREZ</div>
       <div class="card-title">BEFEKTETŐI<br>ÖSSZEFOGLALÓ</div>
       <div class="card-desc">7 zóna, 14 védett épület.<br>3 ütem, 30 éves program.<br>Adatok és kockázatok.</div>
-      <button class="card-btn" style="color:#ffaa00;border-color:#ffaa0044">MEGNYITÁS →</button>
     </a>
 
   </div>
