@@ -2296,34 +2296,7 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 
-// ── GOOGLE MAPS SATELLITE TÉRKÉP ──
-function initGMap(lat, lng, polyData) {
-  if (isNaN(lat) || isNaN(lng)) return;
-  const mapEl = document.getElementById('prez-map');
-
-  if (window.google && window.google.maps) {
-    renderGMap(mapEl, lat, lng, polyData);
-  } else {
-    pendingMapArgs = [mapEl, lat, lng, polyData];
-    if (!window.GOOGLE_MAPS_API_KEY) return;
-    if (document.getElementById('gmaps-script')) {
-      const wait = setInterval(() => {
-        if (window.google && window.google.maps) {
-          clearInterval(wait);
-          if (pendingMapArgs) { renderGMap(...pendingMapArgs); pendingMapArgs = null; }
-        }
-      }, 100);
-      return;
-    }
-    window._gmapCallback = () => {
-      if (pendingMapArgs) { renderGMap(...pendingMapArgs); pendingMapArgs = null; }
-    };
-    const s = document.createElement('script');
-    s.id = 'gmaps-script';
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(window.GOOGLE_MAPS_API_KEY)}&callback=_gmapCallback&v=weekly&loading=async`;
-    document.head.appendChild(s);
-  }
-}
+// ── GOOGLE MAPS SATELLITE TÉRKÉP (modal) ──
 
 function renderGMap(mapEl, lat, lng, polyData) {
   const pos = { lat, lng };
@@ -2500,35 +2473,36 @@ function initZoneMap() {
   zoneMap.fitBounds(bounds, 30);
 }
 
-// Zóna térkép IntersectionObserver — csak akkor töltjük be amikor látható
-const zoneObserver = new IntersectionObserver(entries => {
-  if (entries[0].isIntersecting) {
-    zoneObserver.disconnect();
-    if (window.google && window.google.maps) {
-      initZoneMap();
-    } else {
-      const wait = setInterval(() => {
-        if (window.google && window.google.maps) {
-          clearInterval(wait);
-          initZoneMap();
-        }
-      }, 200);
-    }
-  }
-}, { threshold: 0.1 });
+// ── GOOGLE MAPS API betöltés (kulcs + script együtt) ──
+function loadGoogleMapsAPI(cb) {
+  if (window.google && window.google.maps) { cb(); return; }
+  if (window._gmapCallbacks) { window._gmapCallbacks.push(cb); return; }
+  window._gmapCallbacks = [cb];
+  window._gmapReady = () => { (window._gmapCallbacks || []).forEach(f => f()); };
 
+  const keyScript = document.createElement('script');
+  keyScript.src = 'google_maps_key_public.js';
+  keyScript.onload = () => {
+    if (!window.GOOGLE_MAPS_API_KEY) return;
+    const s = document.createElement('script');
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(window.GOOGLE_MAPS_API_KEY)}&callback=_gmapReady&v=weekly&loading=async`;
+    document.head.appendChild(s);
+  };
+  document.head.appendChild(keyScript);
+}
+
+// initGMap frissítése: loadGoogleMapsAPI-t használja
+function initGMap(lat, lng, polyData) {
+  if (isNaN(lat) || isNaN(lng)) return;
+  const mapEl = document.getElementById('prez-map');
+  loadGoogleMapsAPI(() => renderGMap(mapEl, lat, lng, polyData));
+}
+
+// Zóna térkép: DOMContentLoaded után azonnal töltjük
 document.addEventListener('DOMContentLoaded', () => {
-  const zEl = document.getElementById('zone-map');
-  if (zEl) zoneObserver.observe(zEl);
+  setupCards();
+  loadGoogleMapsAPI(() => initZoneMap());
 });
-
-// Google Maps API kulcs betöltése (az oldal már tartalmazza)
-const _gkScript = document.createElement('script');
-_gkScript.src = 'google_maps_key_public.js';
-_gkScript.onload = () => {};
-document.head.appendChild(_gkScript);
-
-document.addEventListener('DOMContentLoaded', setupCards);
 </script>
 </body>
 </html>
