@@ -2395,56 +2395,6 @@ function addCostBadges() {
   });
 }
 
-// ── HÁTTÉRKÉP betöltése feature-cell és building-visual elemekre ──
-function loadBgPics() {
-  // building-visual-ok amelyeknek van data-pic
-  document.querySelectorAll('[data-pic]').forEach(el => {
-    const key = el.dataset.pic;
-    if (!key) return;
-    // Ne töltse be újra ha már van háttérkép URL-el
-    if (el.style.backgroundImage && el.style.backgroundImage.includes('url(')) return;
-    findPic(key, src => {
-      if (src) {
-        el.style.backgroundImage = `url('${src}')`;
-        el.style.backgroundSize = 'cover';
-        el.style.backgroundPosition = 'center';
-      }
-    });
-  });
-  // feature-cell-ek: title alapján egyező data-pic a szülő feature-card-on
-  document.querySelectorAll('.feature-cell').forEach(cell => {
-    const title = cell.querySelector('.feature-title')?.textContent?.trim();
-    if (!title) return;
-    const picMap = {
-      'Bifaciális napelemek':           'Bifaciális napelemek',
-      'Urban Wind Turbines':            'Urban Wind Turbines',
-      'Geotermikus hőszivattyú':        'Geotermikus hőszivattyú',
-      'Üvegszálas fényvezetés':         'Üvegszálas fényvezetés',
-      'Vehicle-to-Grid (V2G)':          'Vehicle-to-Grid (V2G)',
-      'Hidrogén energiatárolás':        'Hidrogén energiatárolás',
-      'RFID-sávos okos utak':           'RFID-sávos okos utak',
-      'Autonóm elektromos buszok':      'Autonóm elektromos buszok',
-      'Robotaxi / pod-flotta':          'Robotaxi  pod-flotta',
-      'AI forgalomirányítás':           'AI forgalomirányítás',
-      'Kisvasút / ipari örökség':       'Kisvasút  ipari örökség',
-      'Drón folyosók':                  'Drón folyosók',
-      'Vertikális farm → élelmiszertár':'Vertikális Farm',
-    };
-    const pic = picMap[title];
-    if (!pic) return;
-    findPic(pic, src => {
-      if (src) {
-        cell.style.backgroundImage = `url('${src}')`;
-        cell.style.backgroundSize = 'cover';
-        cell.style.backgroundPosition = 'center';
-        cell.style.position = 'relative';
-        // Sötétítő réteg hogy a szöveg olvasható maradjon
-        cell.style.setProperty('--cell-overlay', 'rgba(6,8,15,0.65)');
-      }
-    });
-  });
-}
-
 // ── SETUP ──
 function setupCards() {
   allCards = Array.from(document.querySelectorAll('[data-modal="1"]'));
@@ -2452,7 +2402,6 @@ function setupCards() {
     card.addEventListener('click', () => openModal(card, idx));
   });
   addCostBadges();
-  loadBgPics();
 }
 
 document.getElementById('prez-prev').addEventListener('click', e => {
