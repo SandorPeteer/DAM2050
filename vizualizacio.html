@@ -506,6 +506,203 @@ footer strong { color: var(--accent); }
   pointer-events: none;
 }
 
+/* ── MODAL / PREZENTÁCIÓ NÉZŐ ── */
+#prez-modal {
+  display: none;
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.92);
+  backdrop-filter: blur(6px);
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+#prez-modal.open { display: flex; }
+
+#prez-inner {
+  background: var(--surface);
+  border: 1px solid rgba(0,200,255,0.25);
+  border-radius: 10px;
+  width: 100%;
+  max-width: 1100px;
+  max-height: 92vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 80px rgba(0,200,255,0.1);
+  animation: modalIn 0.2s ease;
+}
+@keyframes modalIn { from { opacity:0; transform:scale(0.97); } to { opacity:1; transform:scale(1); } }
+
+#prez-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#prez-tag {
+  font-size: 0.65rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 2px;
+}
+#prez-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 1rem;
+  flex: 1;
+}
+#prez-close {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  width: 36px; height: 36px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+#prez-close:hover { border-color: var(--accent); color: var(--accent); }
+
+#prez-body {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 0;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+#prez-img-wrap {
+  position: relative;
+  background: #000;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+#prez-img-wrap img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  max-height: 70vh;
+}
+#prez-no-img {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  height: 100%;
+  min-height: 300px;
+}
+#prez-no-img svg { opacity: 0.15; }
+
+#prez-side {
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+#prez-desc-box {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+#prez-use {
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+#prez-desc {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  line-height: 1.65;
+}
+
+#prez-map-box {
+  flex: 1;
+  min-height: 220px;
+  position: relative;
+}
+#prez-map-label {
+  position: absolute;
+  top: 8px; left: 8px;
+  z-index: 1000;
+  background: rgba(6,8,15,0.85);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+#prez-map { width: 100%; height: 100%; min-height: 220px; }
+
+#prez-footer {
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  gap: 1rem;
+}
+#prez-hint { letter-spacing: 1px; }
+.prez-nav-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.prez-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Klikkelhetőség jelzése a kártyákon */
+.building-card { cursor: pointer; }
+.city-card { cursor: pointer; }
+.building-card .building-visual::after {
+  content: '▶  MEGNYITÁS';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.0);
+  background: rgba(0,200,255,0);
+  transition: color 0.2s, background 0.2s;
+}
+.building-card:hover .building-visual::after {
+  color: rgba(255,255,255,0.9);
+  background: rgba(0,0,0,0.45);
+}
+
+@media (max-width: 700px) {
+  #prez-body { grid-template-columns: 1fr; }
+  #prez-side { border-left: none; border-top: 1px solid var(--border); max-height: 300px; }
+}
+
 /* ── VÁROSKÖZPONT SZEKCIÓ ── */
 .city-grid {
   display: grid;
@@ -556,6 +753,42 @@ footer strong { color: var(--accent); }
 </style>
 </head>
 <body>
+
+<!-- ═══════════════════ PREZENTÁCIÓ MODAL ═══════════════════ -->
+<div id="prez-modal" role="dialog" aria-modal="true">
+  <div id="prez-inner">
+    <div id="prez-header">
+      <span id="prez-tag" class="building-tag"></span>
+      <div id="prez-title">—</div>
+      <button id="prez-close" aria-label="Bezárás">✕</button>
+    </div>
+    <div id="prez-body">
+      <div id="prez-img-wrap">
+        <div id="prez-no-img">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="4" y="10" width="40" height="28" rx="3" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="20" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M4 34l10-8 8 6 8-10 14 12" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <span>Kép hamarosan</span>
+        </div>
+      </div>
+      <div id="prez-side">
+        <div id="prez-desc-box">
+          <div id="prez-use"></div>
+          <div id="prez-desc"></div>
+        </div>
+        <div id="prez-map-box">
+          <div id="prez-map-label">ELHELYEZKEDÉS A DAM-BAN</div>
+          <div id="prez-map"></div>
+        </div>
+      </div>
+    </div>
+    <div id="prez-footer">
+      <span id="prez-hint">ESC · kattintás a háttérre = bezár</span>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="prez-nav-btn" id="prez-prev">← ELŐZŐ</button>
+        <button class="prez-nav-btn" id="prez-next">KÖVETKEZŐ →</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════ HERO ═══════════════════════════════════ -->
 <section id="hero">
@@ -616,7 +849,13 @@ footer strong { color: var(--accent); }
   <div class="buildings-grid">
 
     <!-- KÖZÉPHENGERMŰ -->
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Volt Középhengermű"
+      data-tag="Helyi védett" data-tagclass="tag-protected"
+      data-use="Automatizált logisztikai megaközpont — AS/RS · Robot · Drón"
+      data-desc="A legnagyobb és legértékesebb védett épület. Alza.hu-stílusú robotizált raktár: AS/RS automatikus polcrendszer, daru-robotok, önjáró AGV-targoncák. A kiszállítást a területen belül drónok és járdai robotok végzik. A meglévő vasúti iparvágányon keresztül utánpótlás és elszállítás."
+      data-pic="DAM_NEXUS_AutomatizáltLogisztika"
+      data-lat="48.095400" data-lng="20.737500">
       <div class="building-visual viz-kozephengermű" data-pic="DAM_NEXUS_AutomatizáltLogisztika">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Épület sziluett -->
@@ -649,7 +888,12 @@ footer strong { color: var(--accent); }
     </div>
 
     <!-- HŰTŐTORNYOK -->
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Hűtőtornyok"
+      data-tag="Helyi védett" data-tagclass="tag-protected"
+      data-use="Gravitációs energiatároló + geotermikus rendszer"
+      data-desc="Az ikonikus tornyok megmaradnak — de új szerepet kapnak. Napelemes felesleg esetén vizet pumpálunk a tornyokba (energia tárolása potenciális energiaként). Csúcsidőben a víz turbinán át folyik le → áramtermelés (Pumped Hydro Storage). Ezen felül geotermikus hőszivattyú-rendszer az egész terület fűtéséhez-hűtéséhez."
+      data-lat="48.096800" data-lng="20.741000">
       <div class="building-visual viz-hutotornyok">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Tornyok sziluett -->
@@ -685,7 +929,12 @@ footer strong { color: var(--accent); }
     </div>
 
     <!-- KELETI ERŐMŰ -->
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Volt Keleti Erőmű"
+      data-tag="Helyi védett" data-tagclass="tag-protected"
+      data-use="Ipar 4.0 gyártóközpont — CNC · Lézervágó · 3D nyomtató"
+      data-desc="A revitalizációs tanulmány szerint raktározásra és egyedi alkatrészgyártásra alkalmas. FabLab + digitális gyár: KKV-k bérelnek gyártási kapacitást. CNC marás, lézervágás, fémnyomtatás, robotizált hegesztőcellák. Az egyetemmel közös kutatási labor."
+      data-lat="48.093600" data-lng="20.742000">
       <div class="building-visual viz-keletierőmű">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Épület -->
@@ -716,7 +965,12 @@ footer strong { color: var(--accent); }
     </div>
 
     <!-- VASÚTI ÁLLOMÁS -->
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Vasgyári Vasútállomás"
+      data-tag="Helyi védett" data-tagclass="tag-protected"
+      data-use="Logisztikai hub + hulladékszállítás vasúton"
+      data-desc="A területet behálózó iparvágány egyedülálló lehetőség. A megújított állomásról hulladék-konténereket, ipari alapanyagokat és termékeket szállítunk el vasúton — kamion nélkül. Turisztikai kisvasút a területen belüli közlekedéshez (ipari örökség-élmény)."
+      data-lat="48.091010" data-lng="20.750500">
       <div class="building-visual viz-vasutallomas">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Állomásépület -->
@@ -758,7 +1012,12 @@ footer strong { color: var(--accent); }
     </div>
 
     <!-- VASGYÁRI FÜRDŐ -->
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Vasgyári Fürdő"
+      data-tag="Helyi védett" data-tagclass="tag-protected"
+      data-use="Wellness center + telemedicina hub"
+      data-desc="Az egykori gyári fürdő rehabilitálva wellness és egészségközponttá válik. Geotermikus energiával fűtött medencék, fizioterápia, prevenciós vizsgálatok. Belső telemedicina fülkék: szakorvosi konzultáció 5G-s videókapcsolattal, wearable integráció, AI-alapú korai diagnosztika."
+      data-lat="48.094700" data-lng="20.733200">
       <div class="building-visual viz-furdő">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Főépület -->
@@ -786,7 +1045,12 @@ footer strong { color: var(--accent); }
     </div>
 
     <!-- NAPELEM + SZÉLERŐMŰ — BONTOTT TERÜLETEK -->
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Naperőmű + Szélerőmű Park"
+      data-tag="Bontott területek" data-tagclass="tag-demo"
+      data-use="Megújuló energiatermelés a lebontott csarnokok helyén"
+      data-desc="A fémszerkezetes, lebontott csarnokok helyén ground-mounted bifaciális napelempark épül. Urban wind turbines a szabad területeken. A felesleges energiát a hűtőtornyok pumpált vizes rendszere tárolja. A terület energiamérlegét egy AI-vezérelt Smart Grid optimalizálja valós időben."
+      data-lat="48.094000" data-lng="20.736000">
       <div class="building-visual viz-napelem">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Nap -->
@@ -828,7 +1092,12 @@ footer strong { color: var(--accent); }
     </div>
 
     <!-- VERTIKÁLIS FARM -->
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Vertikális Farm"
+      data-tag="Új funkció" data-tagclass="tag-infra"
+      data-use="Automatizált beltéri termesztés — 365 nap/év"
+      data-desc="Egykori ipari csarnokban (pl. Tűzállótéglagyár) AeroFarms/Plenty technológiájú vertikális farm. LED-es növekedési sorok, aeroponika (95%-kal kevesebb víz mint a hagyományos termesztésnél). Robotizált ültetés, metszés, szüret. A termést önjáró robotok szállítják az automatizált élelmiszerraktárba."
+      data-lat="48.092500" data-lng="20.730500">
       <div class="building-visual viz-gepeszet">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Csarnok -->
@@ -859,7 +1128,12 @@ footer strong { color: var(--accent); }
     </div>
 
     <!-- ORVOSI CENTRUM -->
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Egészségügyi Centrum"
+      data-tag="Új funkció" data-tagclass="tag-infra"
+      data-use="DaVinci robot sebészet · AI diagnosztika · Drón-mentő"
+      data-desc="Csúcstechnológiás orvosi létesítmény: DaVinci robot minimálisan invazív műtétekhez, AI-alapú MRI/CT leletértékelés, telemedicina fülkék, wearable integráció. Drón-mentőszolgálat: AED defibrillátor 90 másodpercen belül bárhova a területen. Automatizált gyógyszerkiadó automata receptre."
+      data-lat="48.094500" data-lng="20.735000">
       <div class="building-visual" style="background: linear-gradient(160deg, #001522 0%, #002035 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Épület -->
@@ -1123,7 +1397,12 @@ footer strong { color: var(--accent); }
 
   <div class="buildings-grid">
 
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Görkori Aréna + Diszkó"
+      data-tag="Rekreáció" data-tagclass="tag-infra"
+      data-use="Ipari csarnokban — smart fény &amp; hang"
+      data-desc="Nagy fedett görkori pálya programozható RGB LED mennyezettel és professzionális hangrendszerrel. Estébe nyúló bulizós görkorcsolyázás. Smart belépő: arcfelismerés vagy NFC karkötő. Automatikus pálya-fertőtlenítés, IoT látogatottság-mérés."
+      data-lat="48.094000" data-lng="20.733000">
       <div class="building-visual" data-pic="gorkorizo" style="background: linear-gradient(160deg, #0a0a2e 0%, #1a0a40 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <ellipse cx="140" cy="130" rx="110" ry="20" fill="rgba(150,0,255,0.1)" stroke="rgba(150,0,255,0.2)" stroke-width="1"/>
@@ -1150,7 +1429,12 @@ footer strong { color: var(--accent); }
       </div>
     </div>
 
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Smart Sportpályák"
+      data-tag="Rekreáció" data-tagclass="tag-infra"
+      data-use="Tenisz · Padel · Pingpong · Kosár · Futsal"
+      data-desc="Minden pálya appból foglalható. Beépített szenzor-hálózat méri az ütések sebességét, pörgetését, a labda pattanási helyét. AI edző valós idejű visszajelzést ad. Automatikus LED-világítás, napenergiával töltött. Foglaláskor arcfelismerés azonosít."
+      data-lat="48.095000" data-lng="20.734000">
       <div class="building-visual" data-pic="sportpalya" style="background: linear-gradient(160deg, #001a10 0%, #002a18 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Teniszpálya -->
@@ -1178,7 +1462,12 @@ footer strong { color: var(--accent); }
       </div>
     </div>
 
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Okos Uszoda"
+      data-tag="Rekreáció" data-tagclass="tag-infra"
+      data-use="Geotermikus fűtés · IoT vízminőség · AI úszóedző"
+      data-desc="Geotermikus energiával fűtött medence — télen sem drága. IoT szenzorok folyamatosan mérik a pH-t, hőmérsékletet, klórt, automatikusan adagolják a vegyszert. AI kamerarendszer elemzi az úszók technikáját és valós idejű tanácsot küld. Okos kapacitásjelző az appban."
+      data-lat="48.095500" data-lng="20.735000">
       <div class="building-visual" data-pic="uszouszoda" style="background: linear-gradient(160deg, #001525 0%, #002540 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Medence -->
@@ -1206,7 +1495,12 @@ footer strong { color: var(--accent); }
       </div>
     </div>
 
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="E-sport Aréna"
+      data-tag="Rekreáció" data-tagclass="tag-infra"
+      data-use="Ipari csarnokban · 5G · Streaming stúdió"
+      data-desc="Professzionális e-sport versenyközpont egy egykori ipari csarnokban. 5G ultra-low latency hálózat, 500+ PC/konzol állomás, livestream stúdió. Nézőtér 1000+ főnek. Helyi és regionális bajnokságok otthona. Napenergiával táplált, hővisszanyerős klímarendszerrel."
+      data-lat="48.093000" data-lng="20.732000">
       <div class="building-visual" data-pic="esport" style="background: linear-gradient(160deg, #0a001a 0%, #150030 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Monitorok -->
@@ -1233,7 +1527,12 @@ footer strong { color: var(--accent); }
       </div>
     </div>
 
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Ipartörténeti Múzeum"
+      data-tag="Helyi védett" data-tagclass="tag-protected"
+      data-use="I. Hivatalház · Mozdonyszín · Konzumsor"
+      data-desc="A védett épületekben sétálható ipari örökség-múzeum. AR-appban a látogató telefonjával virtuálisan látja, hogyan dolgoztak az acélmű fénykorában. Interaktív kiállítás, hanginstallációk, eredeti gépek. QR-kódos önvezető túra. Digitális archívum 1868-tól napjainkig."
+      data-lat="48.094400" data-lng="20.730900">
       <div class="building-visual" data-pic="muzeum" style="background: linear-gradient(160deg, #1a1000 0%, #2a1800 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Épület homlokzat -->
@@ -1258,7 +1557,12 @@ footer strong { color: var(--accent); }
       </div>
     </div>
 
-    <div class="building-card">
+    <div class="building-card" data-modal="1"
+      data-name="Makers District"
+      data-tag="Helyi védett" data-tagclass="tag-protected"
+      data-use="Sörfőzde · Kávézó · Alkotóközösség · Kisüzemek"
+      data-desc="A volt ipari épületek kreatív negyeddé alakulnak — Ruhr-vidék mintájára. Kézműves sörfőzde, specialty kávézó, alkotóközösségek, kisüzemek. Kulturális rendezvények, koncertek a csarnokban. Smart belépő, appban program-értesítők, cashless fizetés."
+      data-lat="48.093500" data-lng="20.730000">
       <div class="building-visual" data-pic="makersdistrict" style="background: linear-gradient(160deg, #1a0800 0%, #2a1000 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Téglaépület stílus -->
@@ -1589,62 +1893,138 @@ footer strong { color: var(--accent); }
 </footer>
 
 <script>
-// ── KÉPBETÖLTŐ ──
-// Ha a DAM_PIC/<kulcsszó>.jpg (vagy .png, .webp) létezik, betölti a kártyába.
-// Ha nem létezik, marad az SVG vizualizáció változatlanul.
-// Elnevezési konvenció: DAM_PIC/<data-pic érték>.<kiterjesztés>
-// Pl.: DAM_PIC/gorkorizo.jpg  →  a görkori kártyában jelenik meg
+// ── LEAFLET TÉRKÉP BETÖLTÉS ──
+(function(){
+  const link = document.createElement('link');
+  link.rel = 'stylesheet'; link.href = 'leaflet.css';
+  document.head.appendChild(link);
+  const s = document.createElement('script');
+  s.src = 'leaflet.js';
+  document.head.appendChild(s);
+})();
 
-const exts = ['jpg','jpeg','png','webp','avif'];
+const EXTS = ['jpg','jpeg','png','webp','avif'];
+const FOLDER = 'DAM_PIC/';
 
-function tryLoadPic(el, key) {
-  const folder = 'DAM_PIC/';
-  let idx = 0;
+// Megkeresi az első létező képet, callback(src) vagy callback(null)
+function findPic(key, cb) {
+  if (!key) return cb(null);
+  let i = 0;
   function next() {
-    if (idx >= exts.length) return; // egyik sem létezik → marad az SVG
-    const src = folder + key + '.' + exts[idx++];
+    if (i >= EXTS.length) return cb(null);
+    const src = FOLDER + key + '.' + EXTS[i++];
     const img = new Image();
-    img.onload = () => {
-      // Kép létezik: lecseréljük a tartalmát
-      el.classList.add('has-pic');
-      el.innerHTML = '<img src="' + src + '" alt="' + key + '" loading="lazy">';
-    };
-    img.onerror = next; // próbáljuk a következő kiterjesztéssel
+    img.onload = () => cb(src);
+    img.onerror = next;
     img.src = src;
   }
   next();
 }
 
-// building-card .building-visual elemek (data-pic attribútummal)
-document.querySelectorAll('.building-visual[data-pic]').forEach(el => {
-  tryLoadPic(el, el.dataset.pic);
+// ── MODAL ──
+const modal   = document.getElementById('prez-modal');
+const imgWrap = document.getElementById('prez-img-wrap');
+const noImg   = document.getElementById('prez-no-img');
+const mTitle  = document.getElementById('prez-title');
+const mTag    = document.getElementById('prez-tag');
+const mUse    = document.getElementById('prez-use');
+const mDesc   = document.getElementById('prez-desc');
+
+let miniMap = null;
+let miniMarker = null;
+let allCards = [];
+let currentIdx = 0;
+
+function openModal(card, idx) {
+  currentIdx = idx;
+  const d = card.dataset;
+
+  mTitle.textContent = d.name || '—';
+  mTag.textContent   = d.tag  || '';
+  mTag.className     = 'building-tag ' + (d.tagclass || '');
+  mUse.textContent   = d.use  || '';
+  mDesc.textContent  = d.desc || '';
+
+  // Kép
+  imgWrap.querySelectorAll('img').forEach(e => e.remove());
+  noImg.style.display = 'flex';
+  findPic(d.pic, src => {
+    if (src) {
+      noImg.style.display = 'none';
+      const img = document.createElement('img');
+      img.src = src; img.alt = d.name || '';
+      imgWrap.appendChild(img);
+    }
+  });
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Térkép — kis késleltetés hogy a modal már látható legyen
+  const lat = parseFloat(d.lat);
+  const lng = parseFloat(d.lng);
+  setTimeout(() => initMiniMap(lat, lng), 80);
+}
+
+function closeModal() {
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function initMiniMap(lat, lng) {
+  if (isNaN(lat) || isNaN(lng)) return;
+  if (!window.L) return;
+  const mapEl = document.getElementById('prez-map');
+  if (!miniMap) {
+    miniMap = L.map(mapEl, { zoomControl: true, attributionControl: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(miniMap);
+    // Sötét overlay réteg az OSM felett
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19, opacity: 0.7
+    }).addTo(miniMap);
+  }
+  miniMap.setView([lat, lng], 17);
+  if (miniMarker) miniMarker.remove();
+  const icon = L.divIcon({
+    className: '',
+    html: '<div style="width:18px;height:18px;background:#00c8ff;border:3px solid #fff;border-radius:50%;box-shadow:0 0 12px #00c8ff88;"></div>',
+    iconSize: [18, 18], iconAnchor: [9, 9]
+  });
+  miniMarker = L.marker([lat, lng], { icon }).addTo(miniMap);
+  miniMap.invalidateSize();
+}
+
+// Kártya kattintás
+function setupCards() {
+  allCards = Array.from(document.querySelectorAll('[data-modal="1"]'));
+  allCards.forEach((card, idx) => {
+    card.addEventListener('click', () => openModal(card, idx));
+  });
+}
+
+// Navigáció
+document.getElementById('prez-prev').addEventListener('click', e => {
+  e.stopPropagation();
+  currentIdx = (currentIdx - 1 + allCards.length) % allCards.length;
+  openModal(allCards[currentIdx], currentIdx);
+});
+document.getElementById('prez-next').addEventListener('click', e => {
+  e.stopPropagation();
+  currentIdx = (currentIdx + 1) % allCards.length;
+  openModal(allCards[currentIdx], currentIdx);
+});
+document.getElementById('prez-close').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+document.addEventListener('keydown', e => {
+  if (!modal.classList.contains('open')) return;
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowRight') document.getElementById('prez-next').click();
+  if (e.key === 'ArrowLeft')  document.getElementById('prez-prev').click();
 });
 
-// city-card-header elemek (data-pic attribútummal)
-document.querySelectorAll('.city-card-header[data-pic]').forEach(el => {
-  const key = el.dataset.pic;
-  const folder = 'DAM_PIC/';
-  let idx = 0;
-  function next() {
-    if (idx >= exts.length) return;
-    const src = folder + key + '.' + exts[idx++];
-    const img = new Image();
-    img.onload = () => {
-      el.style.backgroundImage = 'url(' + src + ')';
-      el.style.backgroundSize = 'cover';
-      el.style.backgroundPosition = 'center';
-      // Az emoji marad felette, de halvány overlay-jel
-      el.style.textShadow = '0 0 8px rgba(0,0,0,0.9)';
-      el.style.position = 'relative';
-      const ov = document.createElement('div');
-      ov.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.35);';
-      el.prepend(ov);
-    };
-    img.onerror = next;
-    img.src = src;
-  }
-  next();
-});
+document.addEventListener('DOMContentLoaded', setupCards);
 </script>
 </body>
 </html>
