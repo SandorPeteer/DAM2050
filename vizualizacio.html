@@ -255,7 +255,12 @@ nav a:hover { color: var(--accent); border-color: var(--accent); }
 
 .tag-protected { background: rgba(240,180,41,0.15); color: var(--gold); border: 1px solid rgba(240,180,41,0.3); }
 .tag-demo { background: rgba(255,60,60,0.12); color: #ff6b6b; border: 1px solid rgba(255,60,60,0.25); }
-.tag-infra { background: rgba(0,255,153,0.1); color: var(--accent2); border: 1px solid rgba(0,255,153,0.25); }
+.tag-infra    { background: rgba(0,255,153,0.1);  color: var(--accent2);  border: 1px solid rgba(0,255,153,0.25); }
+.tag-vedett   { background: rgba(0,200,255,0.1);  color: var(--accent);   border: 1px solid rgba(0,200,255,0.25); }
+.tag-hasznosit{ background: rgba(240,180,41,0.1); color: var(--gold);     border: 1px solid rgba(240,180,41,0.25); }
+.tag-auto     { background: rgba(160,100,255,0.1);color: #a064ff;         border: 1px solid rgba(160,100,255,0.25); }
+.tag-sport    { background: rgba(255,100,100,0.1);color: #ff6464;         border: 1px solid rgba(255,100,100,0.25); }
+.tag-smart    { background: rgba(0,220,200,0.1);  color: #00dcc8;         border: 1px solid rgba(0,220,200,0.25); }
 
 .building-name {
   font-size: 1.1rem;
@@ -872,6 +877,8 @@ footer strong { color: var(--accent); }
   <a href="#sport">Sport & Közösség</a>
   <a href="#varos">Városközpont</a>
   <a href="#oktatas">Oktatás</a>
+  <a href="#kultura">Kultúra</a>
+  <a href="#zold">Zöld & Sétány</a>
   <a href="#zonazas">Zónák</a>
   <a href="#utemezés">Ütemezés</a>
 </nav>
@@ -1824,6 +1831,188 @@ footer strong { color: var(--accent); }
         <div class="city-card-sub">Gyerekeknek · Interaktív · Ipari örökség játékosan</div>
         <div class="city-card-desc">Kültéri interaktív kalandpark gyerekeknek, ahol az ipari örökség és a tudomány találkozik. Megmászható acél szerkezetek, fizika-kísérletek a szabadban, mini napelem-készlet összerakás, programozható LED játékok. Minden érzékszervet megmozgat — tanulás a játékon át.</div>
       </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════ KULTÚRA ══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="kultura">
+  <div class="section-header">
+    <div class="section-label">Kultúra & Rendezvények</div>
+    <h2 class="section-title">Fesztivál, mozi, közösség —<br>az ipari örökség új élete</h2>
+    <p class="section-desc">A DAM hatalmas csarnokai és szabadterei páratlan helyszínt kínálnak. Ahol egykor acélt öntöttek, ott most koncerteket, fesztiválokat, kiállításokat rendeznek — megtartva az ipari karakter nyers szépségét.</p>
+  </div>
+  <div class="card-grid">
+
+    <div class="feature-card" data-modal="1"
+      data-name="DAM Fesztivál Aréna"
+      data-tag="Új funkció" data-tagclass="tag-infra"
+      data-use="Szabadtéri nagyszínpad · 5 000–15 000 fő"
+      data-desc="A lebontott csarnokok helyén kialakított szabadtéri rendezvénytér. Moduláris színpad, fedett nézőtér-szektorok, LED-falak. Zenei fesztiválok, open-air filmvetítések, városi ünnepek. A terület iparvasútján érkező látogatók tömegközlekedéssel jutnak be — nincs parkolókáosz."
+      data-cost="~4–8 Mrd Ft"
+      data-cost-detail="Tereprendezés, csapadékvíz kezelés: 1,5 Mrd · Moduláris színpad+hang+fény: 1,5 Mrd · Közönséginfrastruktúra: 1 Mrd · Hálózat, biztonság: 0,5 Mrd">
+      <div class="feature-icon">🎪</div>
+      <div class="feature-title">DAM Fesztivál Aréna</div>
+      <span class="building-tag tag-infra">Új funkció</span>
+      <div class="building-desc">Szabadtéri nagyszínpad 5–15 000 főnek. Fesztiválok, open-air filmek, városi ünnepek — az ipari táj mint díszlet.</div>
+    </div>
+
+    <div class="feature-card" data-modal="1"
+      data-name="Acél Kultúrközpont"
+      data-tag="Védett épület" data-tagclass="tag-vedett"
+      data-use="Konferenciaközpont · Kiállítótér · 1 000 fő"
+      data-desc="A Keleti Erőmű vagy Középhengermű valamelyik szárnyában kialakított multifunkciós kulturális centrum. Konferenciaterem 500 főnek, három kisebb szekciós terem, állandó ipartörténeti kiállítás, mozgóképtár. A nyerstégla falak és vas tartószerkezetek megmaradnak — ez az esztétika a brand."
+      data-cost="~6–10 Mrd Ft"
+      data-cost-detail="Épület felújítás+szigetelés: 3 Mrd · Belső kialakítás, akusztika: 2 Mrd · AV rendszer, kiállítás: 1,5 Mrd · Akadálymentesítés: 0,5 Mrd">
+      <div class="feature-icon">🏛️</div>
+      <div class="feature-title">Acél Kultúrközpont</div>
+      <span class="building-tag tag-vedett">Védett épület</span>
+      <div class="building-desc">Konferencia, kiállítás, ipartörténet — nyerstégla és vastartók között, 1 000 főnek.</div>
+    </div>
+
+    <div class="feature-card" data-modal="1"
+      data-name="DAM Mozi & Médiaközpont"
+      data-tag="Új funkció" data-tagclass="tag-infra"
+      data-use="8 termes multiplex · Podcast & streaming studio"
+      data-desc="Modern 8 termes multiplex mozi VIP szektorral, 4DX teremmel és gyerekmozival. Mellette médiaközpont: podcast stúdiók, YouTube-creator terek, gaming zóna — bérelhető óránként. Az épület tetején drive-in vetítő a parkolóból nézhető filmekhez nyáron."
+      data-cost="~5–9 Mrd Ft"
+      data-cost-detail="Mozitermek kialakítása: 3,5 Mrd · Projekció, hang, székek: 1,5 Mrd · Médiastúdiók: 1 Mrd · Drive-in tető: 0,5 Mrd">
+      <div class="feature-icon">🎬</div>
+      <div class="feature-title">DAM Mozi & Médiaközpont</div>
+      <span class="building-tag tag-infra">Új funkció</span>
+      <div class="building-desc">8 termes multiplex + médiastúdiók + tetőterasz drive-in mozi. Kultúra és tartalom egy helyen.</div>
+    </div>
+
+    <div class="feature-card" data-modal="1"
+      data-name="Ipartörténeti Múzeum & Makers Space"
+      data-tag="Védett épület" data-tagclass="tag-vedett"
+      data-use="Múzeum · FabLab · Alkotóközpont"
+      data-desc="A Mozdonyszín vagy Turbókompresszor gépház épületében: interaktív ipartörténeti múzeum sétálható AR-applikációval (a régi gyár virtuális rekonstrukciója). Mellette FabLab — 3D nyomtatók, CNC, lézervágó, hegesztő állomások bérelhető műhelyként KKV-knak és alkotóknak."
+      data-cost="~3–6 Mrd Ft"
+      data-cost-detail="Épület felújítás: 1,5 Mrd · Múzeum kiállítás, AR rendszer: 1,5 Mrd · FabLab géppark: 1 Mrd · IT infrastruktúra: 0,5 Mrd">
+      <div class="feature-icon">⚙️</div>
+      <div class="feature-title">Ipartörténeti Múzeum & Makers Space</div>
+      <span class="building-tag tag-vedett">Védett épület</span>
+      <div class="building-desc">Sétálható AR-múzeum a régi acélmű világáról + FabLab alkotóközpont CNC-vel, 3D nyomtatókkal.</div>
+    </div>
+
+    <div class="feature-card" data-modal="1"
+      data-name="E-sport & Gaming Aréna"
+      data-tag="Új funkció" data-tagclass="tag-infra"
+      data-use="500 férőhelyes e-sport aréna · VR zóna"
+      data-desc="Ipari csarnokban kialakított profi e-sport aréna 500 néző befogadására. 5G ultra-low latency kapcsolat, profi stream studio, szponzori boxok. Mellette nyilvános gaming zóna VR headsetekkel, szimulátorokkal — bérelhető óránként. Regionális e-sport bajnokságok állandó helyszíne."
+      data-cost="~2–4 Mrd Ft"
+      data-cost-detail="Csarnok kialakítás: 0,8 Mrd · PC/konzol infrastruktúra: 0,8 Mrd · VR zóna: 0,6 Mrd · Streaming, hang, fény: 0,8 Mrd">
+      <div class="feature-icon">🎮</div>
+      <div class="feature-title">E-sport & Gaming Aréna</div>
+      <span class="building-tag tag-infra">Új funkció</span>
+      <div class="building-desc">500 férőhelyes profi e-sport aréna + VR zóna. 5G, stream stúdió, regionális bajnokságok helyszíne.</div>
+    </div>
+
+    <div class="feature-card" data-modal="1"
+      data-name="DAM Sörfőzde & Gasztro Negyed"
+      data-tag="Hasznosítandó" data-tagclass="tag-hasznosit"
+      data-use="Craft sörfőzde · Étterem sor · Piac"
+      data-desc="A Konzumsor rehabilitált épületeiben craft sörfőzde taproom-mal, 8–10 különböző étterem (helyi, nemzetközi konyhák), heti farmer piac friss DAM vertikális farm termékekkel. Fedett-nyitott belső udvar — télen is élhető, nyáron utcabútor. Az ipari karakter megtartva: csupasz tégla, acél, beton."
+      data-cost="~2–5 Mrd Ft"
+      data-cost-detail="Konzumsor felújítás: 1,5 Mrd · Sörfőzde gépészet: 0,8 Mrd · Belső tér, bútor: 0,8 Mrd · Piac infrastruktúra: 0,4 Mrd">
+      <div class="feature-icon">🍺</div>
+      <div class="feature-title">DAM Sörfőzde & Gasztro Negyed</div>
+      <span class="building-tag tag-hasznosit">Hasznosítandó</span>
+      <div class="building-desc">Craft sörfőzde, 8–10 étterem, heti piac a Konzumsor felújított épületeiben — ipari esztétikával.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════ ZÖLD INFRASTRUKTÚRA ════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="zold">
+  <div class="section-header">
+    <div class="section-label">Zöld infrastruktúra</div>
+    <h2 class="section-title">DAM Sétány, kerékpárutak,<br>parkok és fitness terek</h2>
+    <p class="section-desc">Egy 21. századi városrész nem autóközpontú. A DAM-ban a gyalogos és kerékpáros közlekedés az elsődleges — zöld tengelyek, szabadtéri fitness parkok, sétányok és pihenőhelyek szövik át az egész 130 hektárt.</p>
+  </div>
+  <div class="card-grid">
+
+    <div class="feature-card" data-modal="1"
+      data-name="DAM Sétány — Fő zöld tengely"
+      data-tag="Zöld infrastruktúra" data-tagclass="tag-infra"
+      data-use="K–Ny gyalogos-kerékpáros főtengely · 2,4 km"
+      data-desc="A terület teljes szélességét átszelő, kelet–nyugat irányú zöld főtengely. 6 méter széles kerékpárút, 4 méter sétány, kétoldalt fasor (1 500 új fa). Okos közvilágítás mozgásérzékelővel, padok beépített töltőkkel, ivókutak, kerékpárjavító állomások 500 méterenként. Télen jégpálya egyes szakaszokon."
+      data-cost="~3–5 Mrd Ft"
+      data-cost-detail="Útalap, burkolat: 1,2 Mrd · Fasor, zöldfelület: 0,8 Mrd · Okos világítás: 0,6 Mrd · Bútorok, töltők: 0,4 Mrd · Vízvezeték, ivókút: 0,3 Mrd">
+      <div class="feature-icon">🌳</div>
+      <div class="feature-title">DAM Sétány — Fő zöld tengely</div>
+      <span class="building-tag tag-infra">Zöld infrastruktúra</span>
+      <div class="building-desc">2,4 km-es K–Ny zöld főtengely, 1 500 új fa, kerékpárút, okos világítás, beépített töltők.</div>
+    </div>
+
+    <div class="feature-card" data-modal="1"
+      data-name="Kerékpár hálózat & Sharing"
+      data-tag="Okos mobilitás" data-tagclass="tag-auto"
+      data-use="25 km kerékpárút · 15 dokkoló állomás"
+      data-desc="Az egész területet lefedő, egybefüggő kerékpárút hálózat — elválasztva a gyalogosoktól és az autóktól. 15 dokkoló állomás elektromos és normál kerékpárokkal (sharing), QR-kódos kölcsönzés appból. Kerékpártároló minden épületnél, zárt, kamerás. Javítóállomás pumpával 8 helyen."
+      data-cost="~1,5–3 Mrd Ft"
+      data-cost-detail="Kerékpárút kiépítés: 0,8 Mrd · Dokkolók, sharing rendszer: 0,6 Mrd · Tárolók: 0,4 Mrd · App, szoftver: 0,3 Mrd">
+      <div class="feature-icon">🚴</div>
+      <div class="feature-title">Kerékpár hálózat & Sharing</div>
+      <span class="building-tag tag-auto">Okos mobilitás</span>
+      <div class="building-desc">25 km kerékpárút, 15 sharing állomás appból kölcsönözhető e-bringákkal, zárt tárolókkal.</div>
+    </div>
+
+    <div class="feature-card" data-modal="1"
+      data-name="Szabadtéri Fitness Parkok"
+      data-tag="Sport & Rekreáció" data-tagclass="tag-sport"
+      data-use="6 fitness park · Kinetikus energiatermelés"
+      data-desc="Hat különböző fitness park a terület különböző pontjain, különböző célközönségekre: crossfit zóna, kültéri erőgépek (kinetikus energiatermelőkkel!), street workout, nyugdíjas torna terület, gyerek kaland park, ninja pálya. Az erőgépek pedáljai és karok emberi erőből elektromos energiát termelnek — az okos padok töltik a telefont."
+      data-cost="~0,8–1,5 Mrd Ft"
+      data-cost-detail="Géppark, eszközök: 0,5 Mrd · Burkolat, talajvédelem: 0,3 Mrd · Kinetikus energia rendszer: 0,3 Mrd · Világítás, kamerák: 0,2 Mrd">
+      <div class="feature-icon">💪</div>
+      <div class="feature-title">Szabadtéri Fitness Parkok</div>
+      <span class="building-tag tag-sport">Sport & Rekreáció</span>
+      <div class="building-desc">6 fitness park crossfittől a ninja pályáig — az erőgépek emberi erőből elektromosságot termelnek.</div>
+    </div>
+
+    <div class="feature-card" data-modal="1"
+      data-name="DAM Zöld Parkok & Pihenőterek"
+      data-tag="Zöld infrastruktúra" data-tagclass="tag-infra"
+      data-use="18 ha zöldfelület · Közösségi kertek"
+      data-desc="A lebontott épületek helyén kialakított zöldfelületek: ligetek, füves dombok, tematikus parkok (pillangókert, fűszernövény kert, gyermekjátszóterek). Közösségi kertek bérelhető ágyásokkal lakóknak. Esővízgyűjtő rendszer az öntözéshez. Minden 50 méteren egy pad és kuka — okos szenzorokkal jelzi ha teli."
+      data-cost="~2–4 Mrd Ft"
+      data-cost-detail="Tereprendezés, talaj előkészítés: 0,8 Mrd · Növénytelepítés, fák: 1 Mrd · Öntözőrendszer: 0,5 Mrd · Bútorok, játszóterek: 0,8 Mrd">
+      <div class="feature-icon">🌿</div>
+      <div class="feature-title">DAM Zöld Parkok & Pihenőterek</div>
+      <span class="building-tag tag-infra">Zöld infrastruktúra</span>
+      <div class="building-desc">18 ha park, ligetek, közösségi kertek, pillangókert — a bontott csarnokok helyén visszatér a természet.</div>
+    </div>
+
+    <div class="feature-card" data-modal="1"
+      data-name="Szinva Zöldfolyosó kapcsolat"
+      data-tag="Zöld infrastruktúra" data-tagclass="tag-infra"
+      data-use="Vízparti sétány · Ökológiai folyosó"
+      data-desc="A DAM területét a Szinva-patak völgyéhez összekötő zöld ökológiai folyosó. Vízparti sétány, horgászhelyek, madármegfigyelő pontok. A patak medre renaturalizálva — betonágyból visszakapja természetes mederkanyarulatait. Árvízvédelmi tározó a területen belül, ami száraz időben rekreációs tóként működik."
+      data-cost="~1,5–3 Mrd Ft"
+      data-cost-detail="Meder renaturalizáció: 0,8 Mrd · Vízparti sétány: 0,5 Mrd · Tározó kialakítás: 0,8 Mrd · Ökológiai fejlesztések: 0,4 Mrd">
+      <div class="feature-icon">🏞️</div>
+      <div class="feature-title">Szinva Zöldfolyosó kapcsolat</div>
+      <span class="building-tag tag-infra">Zöld infrastruktúra</span>
+      <div class="building-desc">A Szinva-patak renaturalizálva, vízparti sétánnyal — rekreációs tó és ökológiai folyosó egyben.</div>
+    </div>
+
+    <div class="feature-card" data-modal="1"
+      data-name="Okos Közvilágítás & Smart Bútorok"
+      data-tag="Smart City" data-tagclass="tag-smart"
+      data-use="IoT világítás · Töltők · Szenzorhálózat"
+      data-desc="Az egész terület közterületein okos LED lámpaoszlopok: mozgásérzékelővel 20%-ra sötétítenek, ha senki nincs a közelben. Minden oszlopban WiFi hotspot, levegőminőség szenzor, zajszintmérő. A padokba épített USB és Qi töltők napelemről működnek. Az adatok valós időben láthatók a Citizen App-ban."
+      data-cost="~1–2 Mrd Ft"
+      data-cost-detail="Lámpaoszlopok, vezérlők: 0,6 Mrd · Szenzor hálózat: 0,3 Mrd · WiFi mesh: 0,3 Mrd · Napelemes padok: 0,3 Mrd">
+      <div class="feature-icon">💡</div>
+      <div class="feature-title">Okos Közvilágítás & Smart Bútorok</div>
+      <span class="building-tag tag-smart">Smart City</span>
+      <div class="building-desc">IoT lámpaoszlopok WiFi-val és szenzorokkal, napelemes töltős padok — a közterület maga is adatot gyűjt.</div>
     </div>
 
   </div>
