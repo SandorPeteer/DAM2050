@@ -306,9 +306,21 @@ nav a:hover { color: var(--accent); border-color: var(--accent); }
 .feature-cell {
   background: var(--surface);
   padding: 1.75rem;
+  transition: background 0.2s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.feature-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--cell-overlay, transparent);
+  z-index: 0;
   transition: background 0.2s;
 }
-.feature-cell:hover { background: var(--surface2); }
+.feature-cell > * { position: relative; z-index: 1; }
+.feature-cell:hover { background: var(--surface2); transform: translateY(-2px); }
 
 .feature-icon {
   font-size: 2rem;
@@ -716,8 +728,12 @@ footer strong { color: var(--accent); }
 
 /* Klikkelhetőség jelzése a kártyákon */
 .building-card { cursor: pointer; }
-.city-card { cursor: pointer; }
-.building-card .building-visual::after {
+.city-card     { cursor: pointer; }
+.feature-card  { cursor: pointer; position: relative; overflow: hidden; }
+
+/* Hover overlay: ▶ MEGNYITÁS felirat */
+.building-card .building-visual::after,
+.feature-card::after {
   content: '▶  MEGNYITÁS';
   position: absolute;
   inset: 0;
@@ -726,13 +742,25 @@ footer strong { color: var(--accent); }
   justify-content: center;
   font-size: 0.7rem;
   letter-spacing: 3px;
-  color: rgba(255,255,255,0.0);
+  color: rgba(255,255,255,0);
   background: rgba(0,200,255,0);
-  transition: color 0.2s, background 0.2s;
+  transition: color 0.25s, background 0.25s;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
 }
-.building-card:hover .building-visual::after {
-  color: rgba(255,255,255,0.9);
-  background: rgba(0,0,0,0.45);
+.building-card:hover .building-visual::after,
+.feature-card:hover::after {
+  color: rgba(255,255,255,0.92);
+  background: rgba(0,0,0,0.48);
+}
+/* Scale + glow animáció minden kattintható kártyán */
+.building-card, .feature-card, .city-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.building-card:hover, .feature-card:hover, .city-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 32px rgba(0,200,255,0.18), 0 2px 8px rgba(0,0,0,0.5);
 }
 
 @media (max-width: 900px) {
@@ -941,6 +969,7 @@ footer strong { color: var(--accent); }
       data-tag="Helyi védett" data-tagclass="tag-protected"
       data-use="Gravitációs energiatároló + geotermikus rendszer"
       data-desc="Az ikonikus tornyok megmaradnak — de új szerepet kapnak. Napelemes felesleg esetén vizet pumpálunk a tornyokba (energia tárolása potenciális energiaként). Csúcsidőben a víz turbinán át folyik le → áramtermelés (Pumped Hydro Storage). Ezen felül geotermikus hőszivattyú-rendszer az egész terület fűtéséhez-hűtéséhez."
+      data-pic="Hűtőtornyok"
       data-lat="48.0968604" data-lng="20.7411058" data-polykey="hutotornyok"
       data-cost="~6–10 Mrd Ft"
       data-cost-detail="Torony felújítás + víztározó kialakítás: 2–4 Mrd · Geotermikus fúrás + hőszivattyúk: 2–3 Mrd · Turbina + vezérlés: 1–2 Mrd · Smart Grid integráció: 0,5–1 Mrd. Megtérülés energiamegtakarítással: ~8–12 év">
@@ -984,6 +1013,7 @@ footer strong { color: var(--accent); }
       data-tag="Helyi védett" data-tagclass="tag-protected"
       data-use="Ipar 4.0 gyártóközpont — CNC · Lézervágó · 3D nyomtató"
       data-desc="A revitalizációs tanulmány szerint raktározásra és egyedi alkatrészgyártásra alkalmas. FabLab + digitális gyár: KKV-k bérelnek gyártási kapacitást. CNC marás, lézervágás, fémnyomtatás, robotizált hegesztőcellák. Az egyetemmel közös kutatási labor."
+      data-pic="Volt Keleti Erőmű"
       data-lat="48.0938737" data-lng="20.7420539" data-polykey="keletieromu"
       data-cost="~4–8 Mrd Ft"
       data-cost-detail="Épület felújítás + tűzvédelem: 1,5–3 Mrd · CNC/lézervágó géppark: 1–2 Mrd · 3D fémnyomtató cellák: 0,5–1 Mrd · FabLab berendezés: 0,3–0,5 Mrd · IT infrastruktúra: 0,3–0,5 Mrd. EU Ipar 4.0 pályázattal részben finanszírozható">
@@ -1022,6 +1052,7 @@ footer strong { color: var(--accent); }
       data-tag="Helyi védett" data-tagclass="tag-protected"
       data-use="Logisztikai hub + hulladékszállítás vasúton"
       data-desc="A területet behálózó iparvágány egyedülálló lehetőség. A megújított állomásról hulladék-konténereket, ipari alapanyagokat és termékeket szállítunk el vasúton — kamion nélkül. Turisztikai kisvasút a területen belüli közlekedéshez (ipari örökség-élmény)."
+      data-pic="Vasgyári Vasútállomás"
       data-lat="48.0909978" data-lng="20.7505363" data-polykey="vasutallomas"
       data-cost="~2–4 Mrd Ft"
       data-cost-detail="Állomásépület felújítás: 0,8–1,5 Mrd · Sínfelújítás + váltók: 0,5–1 Mrd · Logisztikai terminál kialakítás: 0,3–0,6 Mrd · Kisvasút szerelvény: 0,2–0,4 Mrd. MÁV-tulajdon miatt állami finanszírozás bevonható">
@@ -1071,6 +1102,7 @@ footer strong { color: var(--accent); }
       data-tag="Helyi védett" data-tagclass="tag-protected"
       data-use="Wellness center + telemedicina hub"
       data-desc="Az egykori gyári fürdő rehabilitálva wellness és egészségközponttá válik. Geotermikus energiával fűtött medencék, fizioterápia, prevenciós vizsgálatok. Belső telemedicina fülkék: szakorvosi konzultáció 5G-s videókapcsolattal, wearable integráció, AI-alapú korai diagnosztika."
+      data-pic="Vasgyári Fürdő"
       data-lat="48.0948673" data-lng="20.7330978" data-polykey="furdo"
       data-cost="~3–6 Mrd Ft"
       data-cost-detail="Épület felújítás + medencék: 1–2 Mrd · Geotermikus fűtésrendszer: 0,5–1 Mrd · Orvosi-telemedicina berendezés: 0,8–1,5 Mrd · Wellness gépészet: 0,5–1 Mrd · IT/5G infrastruktúra: 0,3–0,5 Mrd. NEAK finanszírozás részleges lehetőség">
@@ -1103,6 +1135,7 @@ footer strong { color: var(--accent); }
     <!-- NAPELEM + SZÉLERŐMŰ — BONTOTT TERÜLETEK -->
     <div class="building-card" data-modal="1"
       data-name="Naperőmű + Szélerőmű Park"
+      data-pic="Bifaciális napelemek"
       data-tag="Bontott területek" data-tagclass="tag-demo"
       data-use="Megújuló energiatermelés a lebontott csarnokok helyén"
       data-desc="A fémszerkezetes, lebontott csarnokok helyén ground-mounted bifaciális napelempark épül. Urban wind turbines a szabad területeken. A felesleges energiát a hűtőtornyok pumpált vizes rendszere tárolja. A terület energiamérlegét egy AI-vezérelt Smart Grid optimalizálja valós időben."
@@ -1193,6 +1226,7 @@ footer strong { color: var(--accent); }
       data-tag="Új funkció" data-tagclass="tag-infra"
       data-use="DaVinci robot sebészet · AI diagnosztika · Drón-mentő"
       data-desc="Csúcstechnológiás orvosi létesítmény: DaVinci robot minimálisan invazív műtétekhez, AI-alapú MRI/CT leletértékelés, telemedicina fülkék, wearable integráció. Drón-mentőszolgálat: AED defibrillátor 90 másodpercen belül bárhova a területen. Automatizált gyógyszerkiadó automata receptre."
+      data-pic="Egészségügyi Centrum"
       data-lat="48.094500" data-lng="20.735000"
       data-cost="~12–20 Mrd Ft"
       data-cost-detail="Épület építés: 3–5 Mrd · DaVinci sebészeti robot (1 db): 2–3 Mrd · AI diagnosztikai rendszer: 1–2 Mrd · Műtők + intenzív: 2–4 Mrd · Drón flotta + infrastruktúra: 0,5–1 Mrd · IT/5G: 1–2 Mrd. PPP modellben (köz-magán) finanszírozható">
@@ -2336,6 +2370,56 @@ function addCostBadges() {
   });
 }
 
+// ── HÁTTÉRKÉP betöltése feature-cell és building-visual elemekre ──
+function loadBgPics() {
+  // building-visual-ok amelyeknek van data-pic
+  document.querySelectorAll('[data-pic]').forEach(el => {
+    const key = el.dataset.pic;
+    if (!key) return;
+    // Ne töltse be újra ha már van háttérkép URL-el
+    if (el.style.backgroundImage && el.style.backgroundImage.includes('url(')) return;
+    findPic(key, src => {
+      if (src) {
+        el.style.backgroundImage = `url('${src}')`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+      }
+    });
+  });
+  // feature-cell-ek: title alapján egyező data-pic a szülő feature-card-on
+  document.querySelectorAll('.feature-cell').forEach(cell => {
+    const title = cell.querySelector('.feature-title')?.textContent?.trim();
+    if (!title) return;
+    const picMap = {
+      'Bifaciális napelemek':           'Bifaciális napelemek',
+      'Urban Wind Turbines':            'Urban Wind Turbines',
+      'Geotermikus hőszivattyú':        'Geotermikus hőszivattyú',
+      'Üvegszálas fényvezetés':         'Üvegszálas fényvezetés',
+      'Vehicle-to-Grid (V2G)':          'Vehicle-to-Grid (V2G)',
+      'Hidrogén energiatárolás':        'Hidrogén energiatárolás',
+      'RFID-sávos okos utak':           'RFID-sávos okos utak',
+      'Autonóm elektromos buszok':      'Autonóm elektromos buszok',
+      'Robotaxi / pod-flotta':          'Robotaxi  pod-flotta',
+      'AI forgalomirányítás':           'AI forgalomirányítás',
+      'Kisvasút / ipari örökség':       'Kisvasút  ipari örökség',
+      'Drón folyosók':                  'Drón folyosók',
+      'Vertikális farm → élelmiszertár':'Vertikális Farm',
+    };
+    const pic = picMap[title];
+    if (!pic) return;
+    findPic(pic, src => {
+      if (src) {
+        cell.style.backgroundImage = `url('${src}')`;
+        cell.style.backgroundSize = 'cover';
+        cell.style.backgroundPosition = 'center';
+        cell.style.position = 'relative';
+        // Sötétítő réteg hogy a szöveg olvasható maradjon
+        cell.style.setProperty('--cell-overlay', 'rgba(6,8,15,0.65)');
+      }
+    });
+  });
+}
+
 // ── SETUP ──
 function setupCards() {
   allCards = Array.from(document.querySelectorAll('[data-modal="1"]'));
@@ -2343,6 +2427,7 @@ function setupCards() {
     card.addEventListener('click', () => openModal(card, idx));
   });
   addCostBadges();
+  loadBgPics();
 }
 
 document.getElementById('prez-prev').addEventListener('click', e => {
