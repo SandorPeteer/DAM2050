@@ -306,21 +306,30 @@ nav a:hover { color: var(--accent); border-color: var(--accent); }
 .feature-cell {
   background: var(--surface);
   padding: 1.75rem;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
   position: relative;
   overflow: hidden;
   border-radius: 8px;
 }
-.feature-cell::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--cell-overlay, transparent);
-  z-index: 0;
-  transition: background 0.2s;
+.feature-cell[data-pic] { cursor: pointer; }
+.feature-cell[data-pic]:hover { background: var(--surface2); transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,200,255,0.15); }
+.feature-cell:not([data-pic]):hover { background: var(--surface2); transform: translateY(-2px); }
+.feature-cell-thumb {
+  width: 100%; height: 110px;
+  object-fit: cover; border-radius: 5px;
+  margin-bottom: 0.9rem; display: block;
 }
-.feature-cell > * { position: relative; z-index: 1; }
-.feature-cell:hover { background: var(--surface2); transform: translateY(-2px); }
+
+/* Lightbox */
+#lightbox {
+  display: none; position: fixed; inset: 0; z-index: 99999;
+  background: rgba(0,0,0,0.93);
+  align-items: center; justify-content: center; flex-direction: column;
+  cursor: zoom-out;
+}
+#lightbox.open { display: flex; }
+#lightbox img { max-width: 92vw; max-height: 84vh; object-fit: contain; border-radius: 8px; box-shadow: 0 0 60px rgba(0,0,0,0.8); }
+#lightbox-caption { margin-top: 1rem; color: #fff; font-size: 1rem; font-weight: 700; letter-spacing: 1px; text-align: center; opacity: 0.85; }
 
 .feature-icon {
   font-size: 2rem;
@@ -831,6 +840,11 @@ footer strong { color: var(--accent); }
 <body>
 
 <!-- ═══════════════════ PREZENTÁCIÓ MODAL ═══════════════════ -->
+<div id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-caption"></div>
+</div>
+
 <div id="prez-modal" role="dialog" aria-modal="true">
   <div id="prez-inner">
     <div id="prez-header">
@@ -1327,32 +1341,32 @@ footer strong { color: var(--accent); }
   </div>
 
   <div class="feature-grid" style="margin-top:2rem;">
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Bifaciális napelemek" onclick="openLightbox(this)">
       <span class="feature-icon">🔆</span>
       <div class="feature-title">Bifaciális napelemek</div>
       <div class="feature-text">Elő- és hátlap is termel. Szennyezett, lebontott talajon is telepíthető. Ground-mounted MW-os méretű park.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Urban Wind Turbines" onclick="openLightbox(this)">
       <span class="feature-icon">💨</span>
       <div class="feature-title">Urban Wind Turbines</div>
       <div class="feature-text">Kisméretű, zaj- és árnyéktérképpel tervezett turbinák. Éjszaka és borult időben is termelnek.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Geotermikus hőszivattyú" onclick="openLightbox(this)">
       <span class="feature-icon">🌡️</span>
       <div class="feature-title">Geotermikus hőszivattyú</div>
       <div class="feature-text">A kristálytisztító és hűtőtornyok helyén talajba fúrt szondák. Télen fűtés, nyáron hűtés — az összes épülethez.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Üvegszálas fényvezetés" onclick="openLightbox(this)">
       <span class="feature-icon">🔬</span>
       <div class="feature-title">Üvegszálas fényvezetés</div>
       <div class="feature-text">Parans Solar Lighting típusú rendszer: tetőn gyűjtött napfényt optikai kábelen vezet le a belső terekbe. Villanyáram nélkül.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Vehicle-to-Grid (V2G)" onclick="openLightbox(this)">
       <span class="feature-icon">🚗</span>
       <div class="feature-title">Vehicle-to-Grid (V2G)</div>
       <div class="feature-text">A területen parkolt elektromos autók akkumulátora pufferként funkcionál csúcsfogyasztáskor.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Hidrogén energiatárolás" onclick="openLightbox(this)">
       <span class="feature-icon">🟢</span>
       <div class="feature-title">Hidrogén energiatárolás</div>
       <div class="feature-text">Felesleges napenergiából elektrolízissel zöld hidrogén. Hosszú távú szezonális energiatárolás és ipari felhasználás.</div>
@@ -1370,32 +1384,32 @@ footer strong { color: var(--accent); }
   </div>
 
   <div class="feature-grid">
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="RFID-sávos okos utak" onclick="openLightbox(this)">
       <span class="feature-icon">🛣️</span>
       <div class="feature-title">RFID-sávos okos utak</div>
       <div class="feature-text">Az útburkolatba gyártáskor beépített RFID szalag. Önjáró járművek, buszok, targoncák ezen navigálnak — biztonságos, GPS-független helymeghatározás.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Autonóm elektromos buszok" onclick="openLightbox(this)">
       <span class="feature-icon">🚌</span>
       <div class="feature-title">Autonóm elektromos buszok</div>
       <div class="feature-text">On-demand (menetrend nélküli) buszflotta. Jegyvásárlás arcfelismeréssel, NFC érintéssel vagy QR-kóddal. Zéró emissziós, szezonban napenergiából töltött.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Robotaxi  pod-flotta" onclick="openLightbox(this)">
       <span class="feature-icon">🚖</span>
       <div class="feature-title">Robotaxi / pod-flotta</div>
       <div class="feature-text">4-6 személyes önjáró elektromos kapszulák területen belüli közlekedéshez. Appból hívható, percek alatt ott van.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="AI forgalomirányítás" onclick="openLightbox(this)">
       <span class="feature-icon">🚦</span>
       <div class="feature-title">AI forgalomirányítás</div>
       <div class="feature-text">Pittsburgh SURTRAC-típusú rendszer: minden lámpa valós idejű forgalom alapján dönt. Eredmény: 25%-kal rövidebb menetidő, 40%-kal kevesebb várakozás, 20%-kal alacsonyabb CO₂.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Kisvasút  ipari örökség" onclick="openLightbox(this)">
       <span class="feature-icon">🚂</span>
       <div class="feature-title">Kisvasút / ipari örökség</div>
       <div class="feature-text">A meglévő iparvágányon turisztikai kisvasút a területen belül. Teherszállításhoz konténeres ipari vasút — kamion nélkül.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Drón folyosók" onclick="openLightbox(this)">
       <span class="feature-icon">🛸</span>
       <div class="feature-title">Drón folyosók</div>
       <div class="feature-text">A terület felett kijelölt légi sávok csomag- és orvosi ellátmány szállításhoz. Drón-mentő: AED 90 másodperc alatt bárhova.</div>
@@ -1417,12 +1431,12 @@ footer strong { color: var(--accent); }
   </div>
 
   <div class="feature-grid">
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="DAM_NEXUS_AutomatizáltLogisztika" onclick="openLightbox(this)">
       <span class="feature-icon">🤖</span>
       <div class="feature-title">AS/RS automatikus raktár</div>
       <div class="feature-text">Automated Storage and Retrieval System: daru-robotok és AGV targoncák mozgatják az árukat. Emberi beavatkozás minimális. Középhengermű teljes magasságát kihasználja.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Vertikális Farm" onclick="openLightbox(this)">
       <span class="feature-icon">🌿</span>
       <div class="feature-title">Vertikális farm → élelmiszertár</div>
       <div class="feature-text">Beltéri termesztésből közvetlenül az automatizált élelmiszer-raktárba. Robotok szedik, csomagolják, hűtik. Nulla élelmiszer-pazarlás.</div>
@@ -2374,12 +2388,51 @@ function addCostBadges() {
 }
 
 // ── SETUP ──
+// ── LIGHTBOX (feature-cell képekhez) ──
+function openLightbox(cell) {
+  const pic = cell.dataset.pic;
+  const title = cell.querySelector('.feature-title')?.textContent || '';
+  if (!pic) return;
+  findPic(pic, src => {
+    if (!src) return;
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox-caption').textContent = title;
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+// ── THUMBNAIL betöltés feature-cell-ekbe ──
+function loadCellThumbs() {
+  document.querySelectorAll('.feature-cell[data-pic]').forEach(cell => {
+    const pic = cell.dataset.pic;
+    const title = cell.querySelector('.feature-title');
+    if (!pic || !title) return;
+    findPic(pic, src => {
+      if (!src) return;
+      const thumb = document.createElement('img');
+      thumb.src = src;
+      thumb.className = 'feature-cell-thumb';
+      thumb.alt = title.textContent;
+      cell.insertBefore(thumb, cell.firstChild);
+    });
+  });
+}
+
 function setupCards() {
   allCards = Array.from(document.querySelectorAll('[data-modal="1"]'));
   allCards.forEach((card, idx) => {
     card.addEventListener('click', () => openModal(card, idx));
   });
   addCostBadges();
+  loadCellThumbs();
 }
 
 document.getElementById('prez-prev').addEventListener('click', e => {
