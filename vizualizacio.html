@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAM 2050 — Digitális Acélváros Vizualizáció</title>
+<style>
+:root {
+  --bg: #06080f;
+  --surface: #0d1420;
+  --surface2: #111927;
+  --border: rgba(0,200,255,0.15);
+  --accent: #00c8ff;
+  --accent2: #00ff99;
+  --accent3: #ff6b35;
+  --text: #c8dde8;
+  --text-dim: #5a7a8a;
+  --gold: #f0b429;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── HERO ── */
+#hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+#hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,100,255,0.08) 0%, transparent 70%),
+    linear-gradient(rgba(0,200,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,0.02) 1px, transparent 1px);
+  background-size: auto, 60px 60px, 60px 60px;
+  animation: gridmove 25s linear infinite;
+}
+@keyframes gridmove { to { background-position: auto, 60px 60px, 60px 60px; } }
+
+.hero-badge {
+  display: inline-block;
+  background: rgba(0,200,255,0.1);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  padding: 6px 18px;
+  border-radius: 2px;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  position: relative;
+}
+
+.hero-title {
+  font-size: clamp(2.4rem, 7vw, 5.5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent) 50%, #0088ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  font-size: clamp(1rem, 2.5vw, 1.35rem);
+  color: var(--text-dim);
+  margin-top: 1rem;
+  letter-spacing: 1px;
+  position: relative;
+}
+
+.hero-tagline {
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  color: var(--accent2);
+  margin-top: 0.5rem;
+  letter-spacing: 2px;
+  font-style: italic;
+  position: relative;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 3rem;
+  margin-top: 3rem;
+  position: relative;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hero-stat { text-align: center; }
+.hero-stat .num {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--accent);
+  display: block;
+}
+.hero-stat .lbl {
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  animation: bounce 2s infinite;
+}
+.scroll-hint svg { opacity: 0.5; }
+@keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
+
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(6,8,15,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+nav::-webkit-scrollbar { display: none; }
+
+nav a {
+  display: inline-block;
+  padding: 1rem 1.2rem;
+  font-size: 0.78rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+}
+nav a:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── SECTION WRAPPER ── */
+.section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 5rem 2rem;
+}
+
+.section-header {
+  margin-bottom: 3rem;
+}
+
+.section-label {
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.section-desc {
+  font-size: 1.05rem;
+  color: var(--text-dim);
+  max-width: 680px;
+  margin-top: 0.75rem;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 0;
+}
+
+/* ── ÉPÜLETEK KÁRTYA GRID ── */
+.buildings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+.building-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+}
+.building-card:hover {
+  border-color: rgba(0,200,255,0.4);
+  transform: translateY(-3px);
+}
+
+.building-visual {
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.building-card-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.building-tag {
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-bottom: 0.6rem;
+}
+
+.tag-protected { background: rgba(240,180,41,0.15); color: var(--gold); border: 1px solid rgba(240,180,41,0.3); }
+.tag-demo { background: rgba(255,60,60,0.12); color: #ff6b6b; border: 1px solid rgba(255,60,60,0.25); }
+.tag-infra { background: rgba(0,255,153,0.1); color: var(--accent2); border: 1px solid rgba(0,255,153,0.25); }
+
+.building-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.4rem;
+}
+
+.building-use {
+  font-size: 0.88rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.building-desc {
+  font-size: 0.84rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+
+/* ── SVG VIZUALIZÁCIÓK ── */
+.viz-kozephengermű { background: linear-gradient(160deg, #0a1a2e 0%, #0d2540 60%, #071520 100%); }
+.viz-hutotornyok { background: linear-gradient(160deg, #0a1f15 0%, #0d2a1a 60%, #061510 100%); }
+.viz-keletierőmű { background: linear-gradient(160deg, #1a0a2e 0%, #220d40 60%, #0f0720 100%); }
+.viz-vasutallomas { background: linear-gradient(160deg, #1a1500 0%, #2a2000 60%, #151000 100%); }
+.viz-napelem { background: linear-gradient(160deg, #0a1520 0%, #0a2030 60%, #050f18 100%); }
+.viz-logisztika { background: linear-gradient(160deg, #1a0d00 0%, #2a1500 60%, #150800 100%); }
+.viz-gepeszet { background: linear-gradient(160deg, #060f20 0%, #0a1830 100%); }
+.viz-furdő { background: linear-gradient(160deg, #001a2a 0%, #002a40 100%); }
+
+/* ── FEATURE GRID ── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.feature-cell {
+  background: var(--surface);
+  padding: 1.75rem;
+  transition: background 0.2s;
+}
+.feature-cell:hover { background: var(--surface2); }
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.feature-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.4rem;
+}
+
+.feature-text {
+  font-size: 0.84rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+
+/* ── TIMELINE ── */
+.timeline {
+  position: relative;
+  padding-left: 2.5rem;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 9px; top: 8px; bottom: 8px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent), var(--accent2), var(--accent3));
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 2.5rem;
+}
+.timeline-dot {
+  position: absolute;
+  left: -2.5rem;
+  top: 4px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+.timeline-dot span { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: block; }
+
+.timeline-phase {
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+.timeline-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+.timeline-body {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.timeline-body ul { margin-left: 1.2rem; margin-top: 0.4rem; }
+.timeline-body li { margin-bottom: 0.25rem; }
+
+/* ── ENERGY DIAGRAM ── */
+.energy-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.energy-flow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.energy-node {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  text-align: center;
+  flex: 1;
+  min-width: 130px;
+}
+.energy-node .en-icon { font-size: 1.75rem; display: block; margin-bottom: 0.4rem; }
+.energy-node .en-label { font-size: 0.78rem; color: var(--text-dim); letter-spacing: 1px; }
+.energy-node .en-val { font-size: 0.95rem; font-weight: 700; color: var(--accent2); }
+
+.energy-arrow {
+  font-size: 1.5rem;
+  color: var(--border);
+  flex-shrink: 0;
+}
+
+/* ── QUOTE ── */
+.quote-block {
+  background: var(--surface);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 1.5rem 2rem;
+  margin: 2rem 0;
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  text-align: center;
+  padding: 2.5rem 2rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+footer strong { color: var(--accent); }
+
+/* ── ZONE TABLE ── */
+.zone-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+.zone-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+}
+.zone-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(0,200,255,0.06);
+  color: var(--text);
+  vertical-align: top;
+}
+.zone-table tr:hover td { background: var(--surface2); }
+.zone-table td:first-child { color: var(--accent); font-weight: 700; white-space: nowrap; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── IMAGE PLACEHOLDER ── */
+.img-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.15);
+  text-transform: uppercase;
+}
+.img-placeholder svg { opacity: 0.2; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ HERO ═══════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-badge">Miskolc · 130 hektár · 1868–2050</div>
+  <h1 class="hero-title">Digitális<br>Acélváros 2050</h1>
+  <p class="hero-sub">Diósgyőri Acélmű · Rozsdaövezetből intelligens városrész</p>
+  <p class="hero-tagline">„Technológia az emberek szolgálatában"</p>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="num">130</span>
+      <span class="lbl">hektár</span>
+    </div>
+    <div class="hero-stat">
+      <span class="num">14</span>
+      <span class="lbl">védett épület</span>
+    </div>
+    <div class="hero-stat">
+      <span class="num">2050</span>
+      <span class="lbl">céléve</span>
+    </div>
+    <div class="hero-stat">
+      <span class="num">0</span>
+      <span class="lbl">CO₂ cél</span>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span>GÖRGESS</span>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M10 14l-6-6h12z"/>
+    </svg>
+  </div>
+</section>
+
+<nav>
+  <a href="#epuletek">Épületek</a>
+  <a href="#energia">Energia</a>
+  <a href="#kozlekedes">Közlekedés</a>
+  <a href="#logisztika">Logisztika</a>
+  <a href="#egeszseg">Egészségügy</a>
+  <a href="#sport">Sport & Közösség</a>
+  <a href="#zonazas">Zónák</a>
+  <a href="#utemezés">Ütemezés</a>
+</nav>
+
+<!-- ═══════════════════════════════════ ÉPÜLETEK ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="epuletek">
+  <div class="section-header">
+    <div class="section-label">Épített örökség</div>
+    <h2 class="section-title">Mit bontunk, mit mentünk,<br>mit alakítunk át?</h2>
+    <p class="section-desc">A 130 hektáros területen 14 helyi védettségű épület áll. Ezeket nem bontjuk le — hanem újjáélesztjük, és a 21. század legmodernebb funkcióival töltjük meg.</p>
+  </div>
+
+  <div class="buildings-grid">
+
+    <!-- KÖZÉPHENGERMŰ -->
+    <div class="building-card">
+      <div class="building-visual viz-kozephengermű">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Épület sziluett -->
+          <rect x="20" y="60" width="240" height="90" fill="rgba(0,200,255,0.06)" stroke="rgba(0,200,255,0.3)" stroke-width="1"/>
+          <!-- Belső robotkar animáció sugallat -->
+          <line x1="60" y1="60" x2="60" y2="150" stroke="rgba(0,200,255,0.2)" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="110" y1="60" x2="110" y2="150" stroke="rgba(0,200,255,0.2)" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="160" y1="60" x2="160" y2="150" stroke="rgba(0,200,255,0.2)" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="210" y1="60" x2="210" y2="150" stroke="rgba(0,200,255,0.2)" stroke-width="1" stroke-dasharray="4 4"/>
+          <!-- Raktárbotok / polcok -->
+          <rect x="35" y="80" width="12" height="60" fill="rgba(255,107,53,0.4)" rx="1"/>
+          <rect x="85" y="70" width="12" height="70" fill="rgba(255,107,53,0.5)" rx="1"/>
+          <rect x="135" y="85" width="12" height="55" fill="rgba(255,107,53,0.35)" rx="1"/>
+          <rect x="185" y="75" width="12" height="65" fill="rgba(255,107,53,0.45)" rx="1"/>
+          <rect x="235" y="90" width="12" height="50" fill="rgba(255,107,53,0.3)" rx="1"/>
+          <!-- Crane / daru vonal -->
+          <line x1="20" y1="70" x2="260" y2="70" stroke="rgba(0,200,255,0.5)" stroke-width="2"/>
+          <circle cx="80" cy="70" r="4" fill="rgba(0,200,255,0.8)"/>
+          <!-- Label -->
+          <text x="140" y="30" text-anchor="middle" fill="rgba(0,200,255,0.5)" font-size="10" letter-spacing="2" font-family="monospace">AUTOMATIZÁLT RAKTÁR</text>
+          <text x="140" y="46" text-anchor="middle" fill="rgba(0,200,255,0.3)" font-size="8" letter-spacing="1" font-family="monospace">AS/RS · ROBOT-KISZÁLLÍTÁS · ALZA-MODELL</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-protected">Helyi védett</span>
+        <div class="building-name">Volt Középhengermű</div>
+        <div class="building-use">Automatizált logisztikai megaközpont</div>
+        <div class="building-desc">A legnagyobb és legértékesebb védett épület. Alza.hu-stílusú robotizált raktár: AS/RS automatikus polcrendszer, daru-robotok, önjáró AGV-targoncák. A kiszállítást a területen belül drónok és járdai robotok végzik. A meglévő vasúti iparvágányon keresztül utánpótlás és elszállítás.</div>
+      </div>
+    </div>
+
+    <!-- HŰTŐTORNYOK -->
+    <div class="building-card">
+      <div class="building-visual viz-hutotornyok">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Tornyok sziluett -->
+          <ellipse cx="90" cy="155" rx="40" ry="6" fill="rgba(0,255,100,0.1)"/>
+          <ellipse cx="190" cy="155" rx="40" ry="6" fill="rgba(0,255,100,0.1)"/>
+          <!-- Bal torony -->
+          <path d="M55,155 L65,40 Q90,20 115,40 L125,155 Z" fill="rgba(0,255,100,0.08)" stroke="rgba(0,255,100,0.3)" stroke-width="1"/>
+          <!-- Jobb torony -->
+          <path d="M155,155 L165,40 Q190,20 215,40 L225,155 Z" fill="rgba(0,255,100,0.08)" stroke="rgba(0,255,100,0.3)" stroke-width="1"/>
+          <!-- Víz felszín a toronyban -->
+          <ellipse cx="90" cy="120" rx="30" ry="8" fill="rgba(0,150,255,0.3)" stroke="rgba(0,150,255,0.5)" stroke-width="1"/>
+          <ellipse cx="190" cy="100" rx="30" ry="8" fill="rgba(0,150,255,0.5)" stroke="rgba(0,150,255,0.7)" stroke-width="1"/>
+          <!-- Turbina nyíl -->
+          <path d="M130,130 L150,130" stroke="rgba(0,255,100,0.6)" stroke-width="2" marker-end="url(#arr)"/>
+          <circle cx="140" cy="130" r="8" fill="none" stroke="rgba(0,255,100,0.4)" stroke-width="1.5"/>
+          <!-- Villám szimbólum -->
+          <path d="M137,124 L133,131 L139,131 L135,137" stroke="rgba(0,255,100,0.8)" stroke-width="1.5" fill="none"/>
+          <!-- Nap fent -->
+          <circle cx="140" cy="18" r="6" fill="rgba(255,200,0,0.4)"/>
+          <line x1="140" y1="6" x2="140" y2="2" stroke="rgba(255,200,0,0.3)" stroke-width="1"/>
+          <line x1="148" y1="10" x2="151" y2="7" stroke="rgba(255,200,0,0.3)" stroke-width="1"/>
+          <line x1="130" y1="10" x2="127" y2="7" stroke="rgba(255,200,0,0.3)" stroke-width="1"/>
+          <!-- Label -->
+          <text x="140" y="155" text-anchor="middle" fill="rgba(0,255,100,0.4)" font-size="8" letter-spacing="1" font-family="monospace">PUMPÁLT VIZES ENERGIATÁROLÓ</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-protected">Helyi védett</span>
+        <div class="building-name">Hűtőtornyok</div>
+        <div class="building-use">Gravitációs energiatároló + geotermikus rendszer</div>
+        <div class="building-desc">Az ikonikus tornyok megmaradnak — de új szerepet kapnak. Napelemes felesleg esetén vizet pumpálunk a tornyokba (energia tárolása potenciális energiaként). Csúcsidőben a víz turbinán át folyik le → áramtermelés. Ezen felül geotermikus hőszivattyú-rendszer telepítése az egész terület fűtéséhez-hűtéséhez.</div>
+      </div>
+    </div>
+
+    <!-- KELETI ERŐMŰ -->
+    <div class="building-card">
+      <div class="building-visual viz-keletierőmű">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Épület -->
+          <rect x="30" y="40" width="220" height="110" fill="rgba(150,0,255,0.06)" stroke="rgba(150,0,255,0.25)" stroke-width="1"/>
+          <!-- Füstkürtő -->
+          <rect x="55" y="10" width="16" height="32" fill="rgba(150,0,255,0.15)" stroke="rgba(150,0,255,0.3)" stroke-width="1"/>
+          <rect x="80" y="20" width="12" height="22" fill="rgba(150,0,255,0.12)" stroke="rgba(150,0,255,0.25)" stroke-width="1"/>
+          <!-- CNC gép szimbólum -->
+          <rect x="60" y="80" width="50" height="40" fill="rgba(150,0,255,0.12)" stroke="rgba(150,0,255,0.3)" stroke-width="1" rx="2"/>
+          <circle cx="85" cy="100" r="12" fill="none" stroke="rgba(150,0,255,0.5)" stroke-width="1.5"/>
+          <circle cx="85" cy="100" r="4" fill="rgba(150,0,255,0.4)"/>
+          <!-- Lézer szimbólum -->
+          <line x1="160" y1="70" x2="220" y2="110" stroke="rgba(255,50,50,0.6)" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <circle cx="160" cy="70" r="4" fill="rgba(255,50,50,0.5)"/>
+          <!-- 3D nyomtató -->
+          <rect x="155" y="75" width="55" height="55" fill="rgba(150,0,255,0.08)" stroke="rgba(150,0,255,0.2)" stroke-width="1" rx="2"/>
+          <rect x="165" y="105" width="35" height="20" fill="rgba(150,0,255,0.15)" rx="1"/>
+          <!-- Label -->
+          <text x="140" y="25" text-anchor="middle" fill="rgba(150,0,255,0.4)" font-size="9" letter-spacing="2" font-family="monospace">IPAR 4.0 GYÁRTÓKÖZPONT</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-protected">Helyi védett</span>
+        <div class="building-name">Volt Keleti Erőmű</div>
+        <div class="building-use">Ipar 4.0 gyártóközpont — CNC, lézervágó, 3D nyomtató</div>
+        <div class="building-desc">A revitalizációs tanulmány szerint raktározásra és egyedi alkatrészgyártásra alkalmas. Mi továbblépünk: FabLab + digitális gyár, ahol KKV-k bérelnek gyártási kapacitást. CNC marás, lézervágás, fémnyomtatás, robotizált hegesztőcellák. Az egyetemmel közös kutatási labor.</div>
+      </div>
+    </div>
+
+    <!-- VASÚTI ÁLLOMÁS -->
+    <div class="building-card">
+      <div class="building-visual viz-vasutallomas">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Állomásépület -->
+          <rect x="40" y="55" width="200" height="90" fill="rgba(240,180,41,0.05)" stroke="rgba(240,180,41,0.25)" stroke-width="1"/>
+          <!-- Tető -->
+          <path d="M30,55 L140,20 L250,55" fill="rgba(240,180,41,0.08)" stroke="rgba(240,180,41,0.3)" stroke-width="1"/>
+          <!-- Ablakok -->
+          <rect x="60" y="70" width="20" height="25" fill="rgba(240,180,41,0.12)" rx="2"/>
+          <rect x="95" y="70" width="20" height="25" fill="rgba(240,180,41,0.12)" rx="2"/>
+          <rect x="130" y="70" width="20" height="25" fill="rgba(240,180,41,0.12)" rx="2"/>
+          <rect x="165" y="70" width="20" height="25" fill="rgba(240,180,41,0.12)" rx="2"/>
+          <rect x="200" y="70" width="20" height="25" fill="rgba(240,180,41,0.12)" rx="2"/>
+          <!-- Sín -->
+          <line x1="0" y1="148" x2="280" y2="148" stroke="rgba(240,180,41,0.4)" stroke-width="2"/>
+          <line x1="0" y1="155" x2="280" y2="155" stroke="rgba(240,180,41,0.4)" stroke-width="2"/>
+          <!-- Talpfák -->
+          <line x1="20" y1="148" x2="20" y2="155" stroke="rgba(240,180,41,0.2)" stroke-width="4"/>
+          <line x1="50" y1="148" x2="50" y2="155" stroke="rgba(240,180,41,0.2)" stroke-width="4"/>
+          <line x1="80" y1="148" x2="80" y2="155" stroke="rgba(240,180,41,0.2)" stroke-width="4"/>
+          <line x1="110" y1="148" x2="110" y2="155" stroke="rgba(240,180,41,0.2)" stroke-width="4"/>
+          <line x1="140" y1="148" x2="140" y2="155" stroke="rgba(240,180,41,0.2)" stroke-width="4"/>
+          <line x1="170" y1="148" x2="170" y2="155" stroke="rgba(240,180,41,0.2)" stroke-width="4"/>
+          <line x1="200" y1="148" x2="200" y2="155" stroke="rgba(240,180,41,0.2)" stroke-width="4"/>
+          <line x1="230" y1="148" x2="230" y2="155" stroke="rgba(240,180,41,0.2)" stroke-width="4"/>
+          <line x1="260" y1="148" x2="260" y2="155" stroke="rgba(240,180,41,0.2)" stroke-width="4"/>
+          <!-- Hulladék konténer szimbólum -->
+          <rect x="100" y="120" width="80" height="24" fill="rgba(240,180,41,0.1)" stroke="rgba(240,180,41,0.3)" stroke-width="1" rx="2"/>
+          <text x="140" y="136" text-anchor="middle" fill="rgba(240,180,41,0.5)" font-size="9" font-family="monospace">♻ VASÚTI SZÁLLÍTÁS</text>
+          <!-- Label -->
+          <text x="140" y="42" text-anchor="middle" fill="rgba(240,180,41,0.4)" font-size="9" letter-spacing="2" font-family="monospace">VASGYÁRI VASÚTÁLLOMÁS</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-protected">Helyi védett</span>
+        <div class="building-name">Vasgyári Vasútállomás</div>
+        <div class="building-use">Logisztikai hub + hulladékszállítás vasúton</div>
+        <div class="building-desc">A területet behálózó iparvágány egyedülálló lehetőség. A megújított állomásról hulladék-konténereket, ipari alapanyagokat és termékeket szállítunk el vasúton — kamion nélkül. Turisztikai szempontból kisvasút a területen belüli közlekedéshez (ipari örökség-élmény). Megőrzött iparhistóriai látványosság.</div>
+      </div>
+    </div>
+
+    <!-- VASGYÁRI FÜRDŐ -->
+    <div class="building-card">
+      <div class="building-visual viz-furdő">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Főépület -->
+          <rect x="30" y="50" width="220" height="100" fill="rgba(0,150,255,0.05)" stroke="rgba(0,150,255,0.2)" stroke-width="1"/>
+          <!-- Kupola/tető részlet -->
+          <path d="M90,50 Q140,15 190,50" fill="rgba(0,150,255,0.08)" stroke="rgba(0,150,255,0.3)" stroke-width="1"/>
+          <!-- Medence szimbólum -->
+          <rect x="60" y="95" width="160" height="40" fill="rgba(0,150,255,0.12)" stroke="rgba(0,150,255,0.3)" stroke-width="1" rx="4"/>
+          <!-- Vízhullámok -->
+          <path d="M70,110 Q90,104 110,110 Q130,116 150,110 Q170,104 190,110 Q210,116 210,110" fill="none" stroke="rgba(0,200,255,0.4)" stroke-width="1.5"/>
+          <path d="M70,118 Q90,112 110,118 Q130,124 150,118 Q170,112 190,118 Q210,124 210,118" fill="none" stroke="rgba(0,200,255,0.25)" stroke-width="1"/>
+          <!-- Gyógyulás szimbólum -->
+          <line x1="138" y1="62" x2="142" y2="82" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <line x1="130" y1="72" x2="150" y2="72" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <!-- Label -->
+          <text x="140" y="35" text-anchor="middle" fill="rgba(0,150,255,0.4)" font-size="9" letter-spacing="2" font-family="monospace">WELLNESS &amp; TELEMEDICINA</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-protected">Helyi védett</span>
+        <div class="building-name">Vasgyári Fürdő</div>
+        <div class="building-use">Wellness center + telemedicina hub</div>
+        <div class="building-desc">Az egykori gyári fürdő rehabilitálva wellness és egészségközponttá válik. Geotermikus energiával fűtött medencék, fizioterápia, prevenciós vizsgálatok. Belső telemedicina fülkék: szakorvosi konzultáció 5G-s videókapcsolattal, wearable integráció, AI-alapú korai diagnosztika.</div>
+      </div>
+    </div>
+
+    <!-- NAPELEM + SZÉLERŐMŰ — BONTOTT TERÜLETEK -->
+    <div class="building-card">
+      <div class="building-visual viz-napelem">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Nap -->
+          <circle cx="140" cy="45" r="22" fill="rgba(255,200,0,0.15)" stroke="rgba(255,200,0,0.4)" stroke-width="1.5"/>
+          <circle cx="140" cy="45" r="12" fill="rgba(255,200,0,0.25)"/>
+          <!-- Napenergia sugarak -->
+          <line x1="140" y1="16" x2="140" y2="8" stroke="rgba(255,200,0,0.3)" stroke-width="1.5"/>
+          <line x1="161" y1="24" x2="167" y2="18" stroke="rgba(255,200,0,0.3)" stroke-width="1.5"/>
+          <line x1="119" y1="24" x2="113" y2="18" stroke="rgba(255,200,0,0.3)" stroke-width="1.5"/>
+          <!-- Napelem panelek sorban -->
+          <rect x="10" y="100" width="30" height="20" fill="rgba(0,100,200,0.3)" stroke="rgba(0,150,255,0.4)" stroke-width="1" rx="1"/>
+          <rect x="45" y="95" width="30" height="20" fill="rgba(0,100,200,0.3)" stroke="rgba(0,150,255,0.4)" stroke-width="1" rx="1"/>
+          <rect x="80" y="100" width="30" height="20" fill="rgba(0,100,200,0.3)" stroke="rgba(0,150,255,0.4)" stroke-width="1" rx="1"/>
+          <rect x="115" y="95" width="30" height="20" fill="rgba(0,100,200,0.3)" stroke="rgba(0,150,255,0.4)" stroke-width="1" rx="1"/>
+          <rect x="150" y="100" width="30" height="20" fill="rgba(0,100,200,0.3)" stroke="rgba(0,150,255,0.4)" stroke-width="1" rx="1"/>
+          <rect x="185" y="95" width="30" height="20" fill="rgba(0,100,200,0.3)" stroke="rgba(0,150,255,0.4)" stroke-width="1" rx="1"/>
+          <rect x="220" y="100" width="30" height="20" fill="rgba(0,100,200,0.3)" stroke="rgba(0,150,255,0.4)" stroke-width="1" rx="1"/>
+          <!-- Alap talpak -->
+          <line x1="25" y1="120" x2="25" y2="140" stroke="rgba(0,150,255,0.2)" stroke-width="2"/>
+          <line x1="60" y1="115" x2="60" y2="140" stroke="rgba(0,150,255,0.2)" stroke-width="2"/>
+          <line x1="95" y1="120" x2="95" y2="140" stroke="rgba(0,150,255,0.2)" stroke-width="2"/>
+          <line x1="130" y1="115" x2="130" y2="140" stroke="rgba(0,150,255,0.2)" stroke-width="2"/>
+          <line x1="165" y1="120" x2="165" y2="140" stroke="rgba(0,150,255,0.2)" stroke-width="2"/>
+          <line x1="200" y1="115" x2="200" y2="140" stroke="rgba(0,150,255,0.2)" stroke-width="2"/>
+          <line x1="235" y1="120" x2="235" y2="140" stroke="rgba(0,150,255,0.2)" stroke-width="2"/>
+          <!-- Szélturbina -->
+          <line x1="240" y1="55" x2="240" y2="95" stroke="rgba(0,255,153,0.5)" stroke-width="2"/>
+          <ellipse cx="240" cy="55" rx="18" ry="6" fill="none" stroke="rgba(0,255,153,0.4)" stroke-width="1.5" transform="rotate(-20 240 55)"/>
+          <!-- Label -->
+          <text x="140" y="155" text-anchor="middle" fill="rgba(0,150,255,0.4)" font-size="8" letter-spacing="1" font-family="monospace">BONTOTT TERÜLETEK → NAPERŐMŰ + SZÉLERŐMŰ PARK</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-demo">Bontott területek</span>
+        <div class="building-name">Naperőmű + Szélerőmű Park</div>
+        <div class="building-use">Megújuló energiatermelés a lebontott csarnokok helyén</div>
+        <div class="building-desc">A fémszerkezetes, lebontott csarnokok helyén ground-mounted bifaciális napelempark épül. Urban wind turbines a szabad területeken. A felesleges energiát a hűtőtornyok pumpált vizes rendszere tárolja. A terület energiamérlegét egy AI-vezérelt Smart Grid optimalizálja valós időben.</div>
+      </div>
+    </div>
+
+    <!-- VERTIKÁLIS FARM -->
+    <div class="building-card">
+      <div class="building-visual viz-gepeszet">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Csarnok -->
+          <rect x="20" y="30" width="240" height="120" fill="rgba(0,255,100,0.04)" stroke="rgba(0,255,100,0.2)" stroke-width="1"/>
+          <!-- LED sorok -->
+          <rect x="30" y="45" width="220" height="6" fill="rgba(255,50,50,0.2)" stroke="rgba(255,50,50,0.4)" stroke-width="0.5" rx="2"/>
+          <rect x="30" y="67" width="220" height="6" fill="rgba(100,50,255,0.2)" stroke="rgba(100,50,255,0.4)" stroke-width="0.5" rx="2"/>
+          <rect x="30" y="89" width="220" height="6" fill="rgba(255,50,50,0.15)" stroke="rgba(255,50,50,0.35)" stroke-width="0.5" rx="2"/>
+          <rect x="30" y="111" width="220" height="6" fill="rgba(100,50,255,0.15)" stroke="rgba(100,50,255,0.35)" stroke-width="0.5" rx="2"/>
+          <rect x="30" y="133" width="220" height="6" fill="rgba(255,50,50,0.12)" stroke="rgba(255,50,50,0.3)" stroke-width="0.5" rx="2"/>
+          <!-- Növények szimbólum -->
+          <path d="M50,65 Q55,50 60,65" fill="rgba(0,255,100,0.3)" stroke="rgba(0,255,100,0.5)" stroke-width="1"/>
+          <path d="M80,65 Q85,48 90,65" fill="rgba(0,255,100,0.3)" stroke="rgba(0,255,100,0.5)" stroke-width="1"/>
+          <path d="M110,65 Q115,52 120,65" fill="rgba(0,255,100,0.25)" stroke="rgba(0,255,100,0.4)" stroke-width="1"/>
+          <path d="M50,87 Q55,72 60,87" fill="rgba(0,255,100,0.25)" stroke="rgba(0,255,100,0.4)" stroke-width="1"/>
+          <path d="M80,87 Q85,70 90,87" fill="rgba(0,255,100,0.3)" stroke="rgba(0,255,100,0.5)" stroke-width="1"/>
+          <path d="M140,87 Q145,70 150,87" fill="rgba(0,255,100,0.25)" stroke="rgba(0,255,100,0.4)" stroke-width="1"/>
+          <!-- Label -->
+          <text x="140" y="20" text-anchor="middle" fill="rgba(0,255,100,0.4)" font-size="9" letter-spacing="2" font-family="monospace">VERTIKÁLIS FARM — IPARI CSARNOK</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-infra">Új funkcció</span>
+        <div class="building-name">Vertikális Farm</div>
+        <div class="building-use">Automatizált beltéri termesztés — 365 nap/év</div>
+        <div class="building-desc">Egykori ipari csarnokban (pl. Tűzállótéglagyár) AeroFarms/Plenty technológiájú vertikális farm. LED-es növekedési sorok, aeroponika (95%-kal kevesebb víz mint a hagyományos termesztésnél). Robotizált ültetés, metszés, szüret. A termést önjáró robotok szállítják az automatizált élelmiszerraktárba, onnan drónok házhozszállítással.</div>
+      </div>
+    </div>
+
+    <!-- ORVOSI CENTRUM -->
+    <div class="building-card">
+      <div class="building-visual" style="background: linear-gradient(160deg, #001522 0%, #002035 100%);">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Épület -->
+          <rect x="50" y="40" width="180" height="110" fill="rgba(0,200,255,0.04)" stroke="rgba(0,200,255,0.2)" stroke-width="1"/>
+          <!-- DaVinci robot szimbólum — karok -->
+          <circle cx="140" cy="90" r="25" fill="none" stroke="rgba(0,200,255,0.3)" stroke-width="1.5"/>
+          <line x1="140" y1="65" x2="140" y2="50" stroke="rgba(0,200,255,0.5)" stroke-width="2"/>
+          <line x1="140" y1="115" x2="140" y2="130" stroke="rgba(0,200,255,0.4)" stroke-width="1.5"/>
+          <line x1="115" y1="90" x2="95" y2="80" stroke="rgba(0,200,255,0.5)" stroke-width="2"/>
+          <line x1="165" y1="90" x2="185" y2="80" stroke="rgba(0,200,255,0.4)" stroke-width="2"/>
+          <line x1="115" y1="90" x2="95" y2="105" stroke="rgba(0,200,255,0.3)" stroke-width="1.5"/>
+          <line x1="165" y1="90" x2="185" y2="105" stroke="rgba(0,200,255,0.3)" stroke-width="1.5"/>
+          <!-- Robot végpontok -->
+          <circle cx="95" cy="80" r="4" fill="rgba(0,200,255,0.5)"/>
+          <circle cx="185" cy="80" r="4" fill="rgba(0,200,255,0.5)"/>
+          <circle cx="95" cy="105" r="3" fill="rgba(0,200,255,0.3)"/>
+          <circle cx="185" cy="105" r="3" fill="rgba(0,200,255,0.3)"/>
+          <!-- Drón fent -->
+          <circle cx="140" cy="20" r="5" fill="rgba(255,50,50,0.4)"/>
+          <line x1="130" y1="20" x2="120" y2="15" stroke="rgba(255,50,50,0.4)" stroke-width="1.5"/>
+          <line x1="150" y1="20" x2="160" y2="15" stroke="rgba(255,50,50,0.4)" stroke-width="1.5"/>
+          <circle cx="118" cy="14" r="3" fill="rgba(255,50,50,0.3)"/>
+          <circle cx="162" cy="14" r="3" fill="rgba(255,50,50,0.3)"/>
+          <!-- Label -->
+          <text x="140" y="152" text-anchor="middle" fill="rgba(0,200,255,0.4)" font-size="8" letter-spacing="1" font-family="monospace">DaVINCI ROBOT · AI DIAGNÓZIS · DRÓN-MENTŐ</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-infra">Új funkcció</span>
+        <div class="building-name">Egészségügyi Centrum</div>
+        <div class="building-use">DaVinci robot sebészet · AI diagnosztika · drón-mentő</div>
+        <div class="building-desc">Csúcstechnológiás orvosi létesítmény: DaVinci robot minimálisan invazív műtétekhez, AI-alapú MRI/CT leletértékelés, telemedicina fülkék, wearable integráció. Drón-mentőszolgálat: AED defibrillátor 90 másodpercen belül bárhova a területen. Automatizált gyógyszerkiadó automata receptre.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ ENERGIA ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="energia">
+  <div class="section-header">
+    <div class="section-label">Energiarendszer</div>
+    <h2 class="section-title">Zéró emissziós, önellátó<br>energiarendszer</h2>
+    <p class="section-desc">A terület saját mikrogridként működik. Termelés, tárolás, elosztás — minden AI-vezérelten, valós időben optimalizálva.</p>
+  </div>
+
+  <div class="energy-diagram">
+    <div style="font-size:0.78rem; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-bottom:1rem;">Energiaáramlás — napi ciklus</div>
+    <div class="energy-flow">
+      <div class="energy-node">
+        <span class="en-icon">☀️</span>
+        <div class="en-val">Nap + Szél</div>
+        <div class="en-label">Termelés</div>
+      </div>
+      <div class="energy-arrow">→</div>
+      <div class="energy-node">
+        <span class="en-icon">⚡</span>
+        <div class="en-val">Smart Grid</div>
+        <div class="en-label">AI elosztás</div>
+      </div>
+      <div class="energy-arrow">→</div>
+      <div class="energy-node">
+        <span class="en-icon">🗼</span>
+        <div class="en-val">Hűtőtorony</div>
+        <div class="en-label">Pumpált víz tároló</div>
+      </div>
+      <div class="energy-arrow">→</div>
+      <div class="energy-node">
+        <span class="en-icon">💧</span>
+        <div class="en-val">Turbina</div>
+        <div class="en-label">Visszatermelés</div>
+      </div>
+      <div class="energy-arrow">→</div>
+      <div class="energy-node">
+        <span class="en-icon">🏙️</span>
+        <div class="en-val">Fogyasztók</div>
+        <div class="en-label">Épületek · Járművek</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-block" style="margin-top:2rem;">
+    A hűtőtornyok nem bontandók le — hanem <strong>gravitációs akkumulátorrá</strong> alakítjuk őket. Nappal felesleges napenergiával vizet pumpálunk fel, éjjel és csúcsidőben a víz turbinán át folyik le és áramot termel. Ez a <em>pumpált tározós energiatárolás</em> (Pumped Hydro Storage) elve — megbízható, vegyszermentes, évtizedekig üzemel.
+  </div>
+
+  <div class="feature-grid" style="margin-top:2rem;">
+    <div class="feature-cell">
+      <span class="feature-icon">🔆</span>
+      <div class="feature-title">Bifaciális napelemek</div>
+      <div class="feature-text">Elő- és hátlap is termel. Szennyezett, lebontott talajon is telepíthető. Ground-mounted MW-os méretű park.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">💨</span>
+      <div class="feature-title">Urban Wind Turbines</div>
+      <div class="feature-text">Kisméretű, zaj- és árnyéktérképpel tervezett turbinák. Éjszaka és borult időben is termelnek.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🌡️</span>
+      <div class="feature-title">Geotermikus hőszivattyú</div>
+      <div class="feature-text">A kristálytisztító és hűtőtornyok helyén talajba fúrt szondák. Télen fűtés, nyáron hűtés — az összes épülethez.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🔬</span>
+      <div class="feature-title">Üvegszálas fényvezetés</div>
+      <div class="feature-text">Parans Solar Lighting típusú rendszer: tetőn gyűjtött napfényt optikai kábelen vezet le a belső terekbe. Villanyáram nélkül.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🚗</span>
+      <div class="feature-title">Vehicle-to-Grid (V2G)</div>
+      <div class="feature-text">A területen parkolt elektromos autók akkumulátora pufferként funkcionál csúcsfogyasztáskor.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🟢</span>
+      <div class="feature-title">Hidrogén energiatárolás</div>
+      <div class="feature-text">Felesleges napenergiából elektrolízissel zöld hidrogén. Hosszú távú szezonális energiatárolás és ipari felhasználás.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ KÖZLEKEDÉS ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="kozlekedes">
+  <div class="section-header">
+    <div class="section-label">Autonóm mobilitás</div>
+    <h2 class="section-title">Zöld, önvezető közlekedés —<br>az autó nem az úr</h2>
+    <p class="section-desc">A DAM Sétány K–Ny zöldtengelye gyalogos és kerékpáros prioritású. Az útburkolatba RFID sávot gyártanak be, amin az autonóm járművek GPS nélkül is centiméteres pontossággal navigálnak.</p>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-cell">
+      <span class="feature-icon">🛣️</span>
+      <div class="feature-title">RFID-sávos okos utak</div>
+      <div class="feature-text">Az útburkolatba gyártáskor beépített RFID szalag. Önjáró járművek, buszok, targoncák ezen navigálnak — biztonságos, GPS-független helymeghatározás.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🚌</span>
+      <div class="feature-title">Autonóm elektromos buszok</div>
+      <div class="feature-text">On-demand (menetrend nélküli) buszflotta. Jegyvásárlás arcfelismeréssel, NFC érintéssel vagy QR-kóddal. Zéró emissziós, szezonban napenergiából töltött.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🚖</span>
+      <div class="feature-title">Robotaxi / pod-flotta</div>
+      <div class="feature-text">4-6 személyes önjáró elektromos kapszulák területen belüli közlekedéshez. Appból hívható, percek alatt ott van.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🚦</span>
+      <div class="feature-title">AI forgalomirányítás</div>
+      <div class="feature-text">Pittsburgh SURTRAC-típusú rendszer: minden lámpa valós idejű forgalom alapján dönt. Eredmény: 25%-kal rövidebb menetidő, 40%-kal kevesebb várakozás, 20%-kal alacsonyabb CO₂.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🚂</span>
+      <div class="feature-title">Kisvasút / ipari örökség</div>
+      <div class="feature-text">A meglévő iparvágányon turisztikai kisvasút a területen belül. Teherszállításhoz konténeres ipari vasút — kamion nélkül.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🛸</span>
+      <div class="feature-title">Drón folyosók</div>
+      <div class="feature-text">A terület felett kijelölt légi sávok csomag- és orvosi ellátmány szállításhoz. Drón-mentő: AED 90 másodperc alatt bárhova.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ LOGISZTIKA ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="logisztika">
+  <div class="section-header">
+    <div class="section-label">Automatizált logisztika</div>
+    <h2 class="section-title">Az ALZA-modell a DAM-ban —<br>és ami azon is túlmutat</h2>
+    <p class="section-desc">A volt Középhengermű — a terület legnagyobb védett épülete — automatizált logisztikai megaközponttá válik. Robotok rendszereznek, válogatnak, csomagolnak. Emberek csak felügyelnek.</p>
+  </div>
+
+  <div class="quote-block">
+    Az Alza.hu prágai raktárában robotok mozgatják az árut emberek helyett. A DAM-ban ugyanez, de továbblépünk: a kiszállítás is automatizált — <strong>járdai robotok és drónok</strong> viszik a csomagot házig. A vasúti iparvágány az utánpótlást oldja meg kamion nélkül.
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-cell">
+      <span class="feature-icon">🤖</span>
+      <div class="feature-title">AS/RS automatikus raktár</div>
+      <div class="feature-text">Automated Storage and Retrieval System: daru-robotok és AGV targoncák mozgatják az árukat. Emberi beavatkozás minimális. Középhengermű teljes magasságát kihasználja.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🌿</span>
+      <div class="feature-title">Vertikális farm → élelmiszertár</div>
+      <div class="feature-text">Beltéri termesztésből közvetlenül az automatizált élelmiszer-raktárba. Robotok szedik, csomagolják, hűtik. Nulla élelmiszer-pazarlás.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">📦</span>
+      <div class="feature-title">Robot házhozszállítás</div>
+      <div class="feature-text">Starship Technologies-típusú járdai robotok + drónok. QR-alapú digitális cím minden lakásnak. Nincs futár, nincs forgalmi torlódás.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🗑️</span>
+      <div class="feature-title">Pneumatikus hulladékrendszer</div>
+      <div class="feature-text">Envac típusú: a szemét vákuumcsöveken fut a gyűjtőközpontba. Nincs kukásautó a közterületen. 90%-kal kevesebb gyűjtőjárat.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">♻️</span>
+      <div class="feature-title">Robot-hulladékválogató</div>
+      <div class="feature-text">Multiszpektrális kamera + robotkar: 99%-os tisztaságú újrahasznosítható anyagválogatás. AI azonosítja az anyagtípust, a robot szétválogatja.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🚃</span>
+      <div class="feature-title">Vasúti hulladékelszállítás</div>
+      <div class="feature-text">A nem újrahasznosítható hulladékot konténerben a meglévő iparvágányon szállítják el. Nincs kamion a városban ezért sem.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ EGÉSZSÉGÜGY ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="egeszseg">
+  <div class="section-header">
+    <div class="section-label">Egészségügy & jólét</div>
+    <h2 class="section-title">Csúcstechnológiás egészségügyi<br>ellátás mindenkinek</h2>
+    <p class="section-desc">Nem csak a gazdagoknak. A DAM Egészségügyi Centruma megfizethető, automatizált, és megelőzés-fókuszú.</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-cell">
+      <span class="feature-icon">🦾</span>
+      <div class="feature-title">DaVinci robot sebészet</div>
+      <div class="feature-text">Minimálisan invazív műtétek precíziós robot asszisztenciával. Kisebb seb, rövidebb gyógyulás, kevesebb kórházi nap.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🧠</span>
+      <div class="feature-title">AI diagnosztika</div>
+      <div class="feature-text">MRI, CT, röntgen leletek AI értékelése percek alatt. Radiológus felügyelettel, de a szoftver nem hagy ki apró eltéréseket.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">📱</span>
+      <div class="feature-title">Telemedicina hub</div>
+      <div class="feature-text">5G-s videókonsultációs fülkék a területen: szakorvos érhető el Miskolcon kívül is. Wearable integráció: okosóra adatai bekerülnek a kórházi rendszerbe.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🚁</span>
+      <div class="feature-title">Drón-mentőszolgálat</div>
+      <div class="feature-text">AED defibrillátor drónnal 90 másodperc alatt bárhova a területen. Már ma is üzemel Svédországban, életeket ment.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">💊</span>
+      <div class="feature-title">Automata gyógyszerkiadó</div>
+      <div class="feature-text">Recept alapján automatikusan kiadja a gyógyszereket. Appban nyomon követhető, nincs sor, nincs várakozás.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">♨️</span>
+      <div class="feature-title">Wellness + geotermikus fürdő</div>
+      <div class="feature-text">A Vasgyári Fürdő geotermikus energiával fűtött medencékkel, fizioterápiával és prevenciós szűrővizsgálatokkal éled újjá.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ SPORT ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="sport">
+  <div class="section-header">
+    <div class="section-label">Sport & Közösség</div>
+    <h2 class="section-title">Aktív városrész —<br>ahol élni jó</h2>
+    <p class="section-desc">Nem csak dolgozni jön ide az ember. A DAM rekreációs zónája sportolásra, szórakozásra, közösségi életre szól.</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-cell">
+      <span class="feature-icon">🛼</span>
+      <div class="feature-title">Görkori pálya + diszkó</div>
+      <div class="feature-text">Nagy fedett görkori pálya programozható LED-fényrendszerrel és hangrendszerrel. Estébe nyúló bulizós görkorcsolyázás — smart belépőrendszerrel.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🎾</span>
+      <div class="feature-title">Smart sportpályák</div>
+      <div class="feature-text">Tenisz, padel, pingpong — appból foglalható. Szenzorok mérik az ütéseket, AI edző visszajelzést ad valós időben.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">💪</span>
+      <div class="feature-title">Kinetikus fitnesz park</div>
+      <div class="feature-text">Kültéri gépek, ahol az emberi mozgás energiát termel (kinetikus padok, spinning generátor). Edzés = áramtermelés.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🎮</span>
+      <div class="feature-title">E-sport aréna</div>
+      <div class="feature-text">Ipari csarnokban kialakítva. 5G ultra-low latency kapcsolat, professzionális versenypálya-felszereltség, streaming stúdió.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🏛️</span>
+      <div class="feature-title">Ipartörténeti múzeum</div>
+      <div class="feature-text">A védett épületek (I. Hivatalház, Mozdonyszín, Konzumsor) sétálható ipari örökség-múzeummá alakulnak. AR-appban virtuálisan rekonstruált gyár.</div>
+    </div>
+    <div class="feature-cell">
+      <span class="feature-icon">🍺</span>
+      <div class="feature-title">Makers District</div>
+      <div class="feature-text">Sörfőzde, kávézó, kisüzemek, alkotóközösség. Kulturális rendezvények, koncertek a volt ipari csarnokokban — Ruhr-vidék mintájára.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ ZÓNÁK ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="zonazas">
+  <div class="section-header">
+    <div class="section-label">Területhasználat</div>
+    <h2 class="section-title">7 zóna — minden terület<br>megkapja a szerepét</h2>
+    <p class="section-desc">A „C" verzió ajánlott funkciómix: délen ipar, északon közösség, nyugaton kultúra, mindenhol zöld.</p>
+  </div>
+
+  <table class="zone-table">
+    <thead>
+      <tr>
+        <th>Zóna</th>
+        <th>Tartalom</th>
+        <th>Smart technológia</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>INF — Infrastruktúra</td>
+        <td>Vízmű, hűtőtornyok, naperőmű, biogáz, tűzivíztározó</td>
+        <td>Geotermikus rendszer, pumpált víztározó, Smart Grid, AI energiaoptimalizálás</td>
+      </tr>
+      <tr>
+        <td>TP — Technológiai Park</td>
+        <td>Középhengermű: KFI laborok, startup inkubátor, gyártócellák</td>
+        <td>Digital Twin, FabLab, 5G, IoT sensor hálózat, automatizált gyártás</td>
+      </tr>
+      <tr>
+        <td>K — Kultúra & Kreatív</td>
+        <td>Makers District, ipartörténeti múzeum, sörfőzde, kisüzemek</td>
+        <td>AR ipartörténeti app, smart belépő, programozható LED rendszer</td>
+      </tr>
+      <tr>
+        <td>KSZ — Kereskedelmi</td>
+        <td>Áruházak, éttermek, irodák, automatizált logisztika</td>
+        <td>Robot kiszállítás, pneumatikus hulladék, arcfelismeréses fizetés</td>
+      </tr>
+      <tr>
+        <td>I — Ipari Park</td>
+        <td>Élelmiszeripar, mikroelektronika, drón- és vagongyártás, energetikai berendezések</td>
+        <td>Vasúti kapcsolat, AGV targoncák, vertikális farm, robotizált feldolgozás</td>
+      </tr>
+      <tr>
+        <td>R — Rekreáció</td>
+        <td>Sport, görkori, e-sport, konferenciaközpont (1000 fő), P+R</td>
+        <td>Smart pályák, AI edző, kinetikus energiatermelés, okos medence</td>
+      </tr>
+      <tr>
+        <td>Z — Zöldfelület</td>
+        <td>DAM Sétány, fasoros gyűjtőút, Szinva-zöldfolyosó, biodiverz parkok</td>
+        <td>Légszenzorok, zajmonitor, öntözőrobot, okos közvilágítás, pollinátorsávok</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════ ÜTEMEZÉS ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="utemezés">
+  <div class="section-header">
+    <div class="section-label">Megvalósítás</div>
+    <h2 class="section-title">Három ütem —<br>2025-től 2050-ig</h2>
+    <p class="section-desc">Nem egy csapásra, hanem akupunktúra-fejlesztéssel. Minden ütem önmagában is értéket teremt.</p>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot"><span></span></div>
+      <div class="timeline-phase">1. ütem · 2025–2028</div>
+      <div class="timeline-title">Jogi rendezés és első beavatkozások</div>
+      <div class="timeline-body">
+        <ul>
+          <li>144 tulajdonos koordinálása — közös fejlesztési szervezet (nonprofit Zrt.)</li>
+          <li>Ideiglenes naperőmű az INF területeken (azonnali energiatermelés + imázs)</li>
+          <li>Makers District aktiválása — Konzumsor rehabilitálása</li>
+          <li>Védett épületek sürgős állagmegóvása (I. Hivatalház, Középhengermű tető)</li>
+          <li>DAM Sétány K–Ny tengely alapja, közmű gerinc kiépítése</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot" style="border-color: var(--accent2);"><span style="background: var(--accent2);"></span></div>
+      <div class="timeline-phase" style="color:var(--accent2);">2. ütem · 2028–2035</div>
+      <div class="timeline-title">Gazdasági mag és közösségi tér</div>
+      <div class="timeline-body">
+        <ul>
+          <li>Középhengermű: AS/RS logisztikai megaközpont + Technológiai Park megnyitása</li>
+          <li>Hűtőtornyok: pumpált víztározó energiatároló rendszer üzembe helyezése</li>
+          <li>Geotermikus rendszer kiépítése az északi épületekhez</li>
+          <li>DAM Sétány teljes kiépítése, kerékpárút-hálózat</li>
+          <li>Vasgyári Fürdő wellness centerré rehabilitálva</li>
+          <li>AI forgalomirányítás, RFID úthálózat első szakasza</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot" style="border-color: var(--accent3);"><span style="background: var(--accent3);"></span></div>
+      <div class="timeline-phase" style="color:var(--accent3);">3. ütem · 2035–2050</div>
+      <div class="timeline-title">Teljes Digitális Acélváros</div>
+      <div class="timeline-body">
+        <ul>
+          <li>Déli ipari park teljessége — vasúti kapcsolat visszaállítása</li>
+          <li>Rekreációs zóna: görkori, e-sport aréna, konferenciaközpont</li>
+          <li>Egészségügyi centrum: DaVinci, AI diagnosztika, drón-mentő</li>
+          <li>Vertikális farm + automatizált élelmiszer logisztika</li>
+          <li>Digital Twin platformon az egész 130 hektár valós időben kezelhető</li>
+          <li>Teljes zöld energiaönellátás — nettó zéró kibocsátás elérése</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ FOOTER ═══════════════════════════════════ -->
+<div class="divider"></div>
+<footer>
+  <div style="margin-bottom:0.5rem;">
+    <strong>Digitális Acélváros 2050</strong> · Diósgyőri Acélmű, Miskolc · 130 hektár
+  </div>
+  <div>
+    Technológia az emberek szolgálatában &nbsp;·&nbsp; Prezentáció: 2026 június
+  </div>
+  <div style="margin-top:0.75rem; font-size:0.7rem; opacity:0.5;">
+    Forrás: Ex Ante–DANU–EX-ACT revitalizációs tanulmány 2024 · Miskolci Fejlesztési Központ · StartUs Insights Smart City Report 2026
+  </div>
+</footer>
+
+</body>
+</html>
