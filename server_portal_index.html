@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SP szerver · Főoldal</title>
+<style>
+* { box-sizing:border-box; }
+body {
+  margin:0; min-height:100vh; font-family:Arial, Helvetica, sans-serif;
+  background:#eef2f7; color:#111827;
+}
+main {
+  width:min(1180px, calc(100% - 36px)); margin:0 auto; padding:42px 0;
+}
+header {
+  display:flex; justify-content:space-between; align-items:flex-end; gap:20px;
+  padding-bottom:22px; border-bottom:3px solid #cbd5e1;
+}
+h1 { margin:0; font-size:38px; letter-spacing:.08em; font-weight:950; }
+.sub { margin-top:8px; color:#475569; font-size:15px; font-weight:800; }
+.badge {
+  padding:9px 12px; border:2px solid #111827; border-radius:8px;
+  background:#fff; font-size:13px; font-weight:950;
+}
+.grid {
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  gap:16px; margin-top:26px;
+}
+a.card {
+  display:block; min-height:150px; padding:20px; border-radius:10px;
+  background:#fff; border:2px solid #cbd5e1; color:#111827;
+  text-decoration:none; box-shadow:0 8px 28px rgba(15,23,42,.1);
+}
+a.card:hover { border-color:#111827; transform:translateY(-1px); }
+.icon { font-size:32px; margin-bottom:16px; }
+.title { font-size:20px; font-weight:950; letter-spacing:.04em; }
+.desc { margin-top:8px; color:#475569; font-size:14px; line-height:1.45; font-weight:700; }
+.url { margin-top:12px; font-family:Menlo, Consolas, monospace; font-size:12px; color:#2563eb; overflow-wrap:anywhere; }
+footer { margin-top:28px; color:#64748b; font-size:13px; font-weight:700; }
+@media (max-width:700px) {
+  header { align-items:flex-start; flex-direction:column; }
+  h1 { font-size:28px; }
+}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>SP SZERVER</h1>
+      <div class="sub">Helyi és távoli szolgáltatások központi indítóoldala</div>
+    </div>
+    <div class="badge">sp.myddns.me · 192.168.0.22</div>
+  </header>
+
+  <section class="grid">
+    <a class="card" href="/dam2050/">
+      <div class="icon">▣</div>
+      <div class="title">DAM 2050</div>
+      <div class="desc">Diósgyőri Acélmű prezentációs térkép és PDF épületkategóriák.</div>
+      <div class="url">/dam2050/</div>
+    </a>
+
+    <a class="card" href="http://sp.myddns.me:8073/">
+      <div class="icon">♪</div>
+      <div class="title">Webrádió</div>
+      <div class="desc">A meglévő rádiós szolgáltatás külön porton.</div>
+      <div class="url">sp.myddns.me:8073</div>
+    </a>
+
+    <a class="card" href="https://app.plex.tv/">
+      <div class="icon">▶</div>
+      <div class="title">Plex</div>
+      <div class="desc">Plex web app, belépés után eléred a szerveredet.</div>
+      <div class="url">app.plex.tv</div>
+    </a>
+  </section>
+
+  <footer>
+    A főoldal csak linkel. A meglévő szolgáltatások külön portokon futnak, azok konfigurációja nem módosult.
+  </footer>
+</main>
+</body>
+</html>

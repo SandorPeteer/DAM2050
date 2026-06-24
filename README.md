@@ -3,6 +3,21 @@
 
 ---
 
+## Google Maps API kulcs
+
+A GitHub Pages működéshez a projekt tartalmaz egy publikus böngészős kulcsfájlt: `google_maps_key_public.js`.
+Ez csak obfuszkált, nem titkosított megoldás: böngészőben futó Maps JavaScript API kulcs mindig kinyerhető.
+
+A kulcs védelmét a Google Cloud Console-ban kell beállítani:
+
+- Application restrictions: `Websites`
+- API restrictions: csak `Maps JavaScript API`
+- engedélyezett referrerek például:
+  - `http://localhost:8080/*`
+  - `http://127.0.0.1:8080/*`
+  - `http://sp.myddns.me:8080/*`
+  - `https://sandorpeteer.github.io/DAM2050/*`
+
 ## A terület alapadatai
 
 - **Helyszín:** Miskolc városközpont, Diósgyőri Acélmű (DAM) – 23365/43 hrsz.
