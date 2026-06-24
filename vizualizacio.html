@@ -478,6 +478,81 @@ footer strong { color: var(--accent); }
   text-transform: uppercase;
 }
 .img-placeholder svg { opacity: 0.2; }
+
+/* ── KÉPTÁMOGATÁS ── */
+.building-visual.has-pic {
+  background: #000 !important;
+}
+.building-visual.has-pic img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  transition: opacity 0.3s;
+}
+.building-visual.has-pic:hover img { opacity: 1; }
+
+/* ── PIC BADGE ── */
+.pic-badge {
+  position: absolute;
+  top: 8px; right: 8px;
+  background: rgba(0,200,255,0.15);
+  border: 1px solid rgba(0,200,255,0.4);
+  color: var(--accent);
+  font-size: 0.6rem;
+  letter-spacing: 1.5px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* ── VÁROSKÖZPONT SZEKCIÓ ── */
+.city-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.city-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.city-card:hover {
+  border-color: rgba(0,200,255,0.4);
+  transform: translateY(-3px);
+}
+.city-card-header {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  position: relative;
+}
+.city-card-body {
+  padding: 1.1rem 1.4rem 1.4rem;
+}
+.city-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.35rem;
+}
+.city-card-sub {
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+.city-card-desc {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
 </style>
 </head>
 <body>
@@ -523,6 +598,8 @@ footer strong { color: var(--accent); }
   <a href="#logisztika">Logisztika</a>
   <a href="#egeszseg">Egészségügy</a>
   <a href="#sport">Sport & Közösség</a>
+  <a href="#varos">Városközpont</a>
+  <a href="#oktatas">Oktatás</a>
   <a href="#zonazas">Zónák</a>
   <a href="#utemezés">Ütemezés</a>
 </nav>
@@ -1041,39 +1118,343 @@ footer strong { color: var(--accent); }
   <div class="section-header">
     <div class="section-label">Sport & Közösség</div>
     <h2 class="section-title">Aktív városrész —<br>ahol élni jó</h2>
-    <p class="section-desc">Nem csak dolgozni jön ide az ember. A DAM rekreációs zónája sportolásra, szórakozásra, közösségi életre szól.</p>
+    <p class="section-desc">Nem csak dolgozni jön ide az ember. A DAM rekreációs zónája sportolásra, szórakozásra, közösségi életre szól — és mindenütt ott van az okos technológia.</p>
   </div>
-  <div class="feature-grid">
-    <div class="feature-cell">
-      <span class="feature-icon">🛼</span>
-      <div class="feature-title">Görkori pálya + diszkó</div>
-      <div class="feature-text">Nagy fedett görkori pálya programozható LED-fényrendszerrel és hangrendszerrel. Estébe nyúló bulizós görkorcsolyázás — smart belépőrendszerrel.</div>
+
+  <div class="buildings-grid">
+
+    <div class="building-card">
+      <div class="building-visual" data-pic="gorkorizo" style="background: linear-gradient(160deg, #0a0a2e 0%, #1a0a40 100%);">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <ellipse cx="140" cy="130" rx="110" ry="20" fill="rgba(150,0,255,0.1)" stroke="rgba(150,0,255,0.2)" stroke-width="1"/>
+          <ellipse cx="140" cy="130" rx="80" ry="14" fill="rgba(150,0,255,0.08)"/>
+          <line x1="30" y1="130" x2="250" y2="130" stroke="rgba(150,0,255,0.3)" stroke-width="1"/>
+          <!-- LED sávok -->
+          <line x1="30" y1="30" x2="250" y2="30" stroke="rgba(255,0,200,0.5)" stroke-width="2"/>
+          <line x1="30" y1="55" x2="250" y2="55" stroke="rgba(0,200,255,0.4)" stroke-width="1.5"/>
+          <line x1="30" y1="80" x2="250" y2="80" stroke="rgba(255,100,0,0.4)" stroke-width="1.5"/>
+          <!-- Görkori alak -->
+          <circle cx="140" cy="95" r="10" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+          <line x1="140" y1="105" x2="135" y2="125" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+          <line x1="140" y1="105" x2="145" y2="125" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+          <line x1="135" y1="125" x2="128" y2="130" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <line x1="145" y1="125" x2="152" y2="130" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <text x="140" y="20" text-anchor="middle" fill="rgba(255,0,200,0.4)" font-size="8" letter-spacing="2" font-family="monospace">SMART GÖRKORI · DISZKÓ · LED</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-infra">Rekreáció</span>
+        <div class="building-name">Görkori Aréna + Diszkó</div>
+        <div class="building-use">Ipari csarnokban — smart fény &amp; hang</div>
+        <div class="building-desc">Nagy fedett görkori pálya programozható RGB LED mennyezettel és professzionális hangrendszerrel. Estébe nyúló bulizós görkorcsolyázás. Smart belépő: arcfelismerés vagy NFC karkötő. Automatikus pálya-fertőtlenítés, IoT látogatottság-mérés.</div>
+      </div>
     </div>
-    <div class="feature-cell">
-      <span class="feature-icon">🎾</span>
-      <div class="feature-title">Smart sportpályák</div>
-      <div class="feature-text">Tenisz, padel, pingpong — appból foglalható. Szenzorok mérik az ütéseket, AI edző visszajelzést ad valós időben.</div>
+
+    <div class="building-card">
+      <div class="building-visual" data-pic="sportpalya" style="background: linear-gradient(160deg, #001a10 0%, #002a18 100%);">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Teniszpálya -->
+          <rect x="30" y="50" width="220" height="100" fill="rgba(0,180,80,0.08)" stroke="rgba(0,255,100,0.3)" stroke-width="1"/>
+          <line x1="140" y1="50" x2="140" y2="150" stroke="rgba(0,255,100,0.4)" stroke-width="1"/>
+          <line x1="30" y1="100" x2="250" y2="100" stroke="rgba(0,255,100,0.25)" stroke-width="1" stroke-dasharray="4 4"/>
+          <!-- Net -->
+          <line x1="140" y1="68" x2="140" y2="132" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+          <!-- Szenzor pontok -->
+          <circle cx="60" cy="65" r="4" fill="rgba(0,255,100,0.5)"/>
+          <circle cx="220" cy="65" r="4" fill="rgba(0,255,100,0.5)"/>
+          <circle cx="60" cy="135" r="4" fill="rgba(0,255,100,0.5)"/>
+          <circle cx="220" cy="135" r="4" fill="rgba(0,255,100,0.5)"/>
+          <!-- AI adat overlay -->
+          <text x="80" y="88" fill="rgba(0,255,100,0.35)" font-size="8" font-family="monospace">175 km/h</text>
+          <text x="170" y="120" fill="rgba(0,255,100,0.35)" font-size="8" font-family="monospace">spin: 2800</text>
+          <text x="140" y="35" text-anchor="middle" fill="rgba(0,255,100,0.4)" font-size="8" letter-spacing="2" font-family="monospace">SMART PÁLYÁK · AI EDZŐ · SZENZOR</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-infra">Rekreáció</span>
+        <div class="building-name">Smart Sportpályák</div>
+        <div class="building-use">Tenisz · Padel · Pingpong · Kosár · Futsal</div>
+        <div class="building-desc">Minden pálya appból foglalható. Beépített szenzor-hálózat méri az ütések sebességét, pörgetését, a labda pattanási helyét. AI edző valós idejű visszajelzést ad. Automatikus LED-világítás, napenergiával töltött. Foglaláskor arcfelismerés azonosít.</div>
+      </div>
     </div>
-    <div class="feature-cell">
-      <span class="feature-icon">💪</span>
-      <div class="feature-title">Kinetikus fitnesz park</div>
-      <div class="feature-text">Kültéri gépek, ahol az emberi mozgás energiát termel (kinetikus padok, spinning generátor). Edzés = áramtermelés.</div>
+
+    <div class="building-card">
+      <div class="building-visual" data-pic="uszouszoda" style="background: linear-gradient(160deg, #001525 0%, #002540 100%);">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Medence -->
+          <rect x="20" y="60" width="240" height="80" rx="4" fill="rgba(0,150,255,0.1)" stroke="rgba(0,150,255,0.35)" stroke-width="1"/>
+          <!-- Sávok -->
+          <line x1="60" y1="60" x2="60" y2="140" stroke="rgba(0,150,255,0.2)" stroke-width="1"/>
+          <line x1="100" y1="60" x2="100" y2="140" stroke="rgba(0,150,255,0.2)" stroke-width="1"/>
+          <line x1="140" y1="60" x2="140" y2="140" stroke="rgba(0,150,255,0.2)" stroke-width="1"/>
+          <line x1="180" y1="60" x2="180" y2="140" stroke="rgba(0,150,255,0.2)" stroke-width="1"/>
+          <line x1="220" y1="60" x2="220" y2="140" stroke="rgba(0,150,255,0.2)" stroke-width="1"/>
+          <!-- Vízhullámok -->
+          <path d="M25,90 Q55,82 85,90 Q115,98 145,90 Q175,82 205,90 Q235,98 255,90" fill="none" stroke="rgba(0,200,255,0.4)" stroke-width="1.5"/>
+          <path d="M25,105 Q55,97 85,105 Q115,113 145,105 Q175,97 205,105 Q235,113 255,105" fill="none" stroke="rgba(0,200,255,0.25)" stroke-width="1"/>
+          <!-- IoT szenzor -->
+          <circle cx="30" cy="70" r="5" fill="rgba(0,255,150,0.5)" stroke="rgba(0,255,150,0.8)" stroke-width="1"/>
+          <text x="42" y="73" fill="rgba(0,255,150,0.5)" font-size="7" font-family="monospace">pH 7.2 · 26°C</text>
+          <text x="140" y="40" text-anchor="middle" fill="rgba(0,150,255,0.4)" font-size="8" letter-spacing="2" font-family="monospace">OKOS USZODA · GEOTERMIKUS · IOT</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-infra">Rekreáció</span>
+        <div class="building-name">Okos Uszoda</div>
+        <div class="building-use">Geotermikus fűtés · IoT vízminőség · AI úszóedző</div>
+        <div class="building-desc">Geotermikus energiával fűtött medence — télen sem drága. IoT szenzorok folyamatosan mérik a pH-t, hőmérsékletet, klórt, automatikusan adagolják a vegyszert. AI kamerarend­szer elemzi az úszók technikáját és valós idejű tanácsot küld. Okos kapacitásjelző az appban.</div>
+      </div>
     </div>
-    <div class="feature-cell">
-      <span class="feature-icon">🎮</span>
-      <div class="feature-title">E-sport aréna</div>
-      <div class="feature-text">Ipari csarnokban kialakítva. 5G ultra-low latency kapcsolat, professzionális versenypálya-felszereltség, streaming stúdió.</div>
+
+    <div class="building-card">
+      <div class="building-visual" data-pic="esport" style="background: linear-gradient(160deg, #0a001a 0%, #150030 100%);">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Monitorok -->
+          <rect x="25" y="50" width="70" height="45" rx="3" fill="rgba(100,0,255,0.15)" stroke="rgba(150,0,255,0.4)" stroke-width="1"/>
+          <rect x="105" y="40" width="70" height="55" rx="3" fill="rgba(100,0,255,0.2)" stroke="rgba(150,0,255,0.5)" stroke-width="1.5"/>
+          <rect x="185" y="50" width="70" height="45" rx="3" fill="rgba(100,0,255,0.15)" stroke="rgba(150,0,255,0.4)" stroke-width="1"/>
+          <!-- Képernyő tartalom -->
+          <rect x="30" y="55" width="60" height="35" rx="1" fill="rgba(0,200,255,0.08)"/>
+          <rect x="110" y="45" width="60" height="45" rx="1" fill="rgba(0,200,255,0.1)"/>
+          <rect x="190" y="55" width="60" height="35" rx="1" fill="rgba(0,200,255,0.08)"/>
+          <!-- Gaming szék szimbólum -->
+          <rect x="120" y="105" width="40" height="30" rx="3" fill="rgba(150,0,255,0.2)" stroke="rgba(150,0,255,0.3)" stroke-width="1"/>
+          <!-- 5G ikon -->
+          <text x="230" y="30" fill="rgba(0,255,200,0.5)" font-size="11" font-weight="bold" font-family="monospace">5G</text>
+          <text x="140" y="25" text-anchor="middle" fill="rgba(150,0,255,0.4)" font-size="8" letter-spacing="2" font-family="monospace">E-SPORT ARÉNA · 5G · STREAMING</text>
+          <text x="140" y="155" text-anchor="middle" fill="rgba(150,0,255,0.3)" font-size="7" font-family="monospace">IPARI CSARNOKBAN · MISKOLC</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-infra">Rekreáció</span>
+        <div class="building-name">E-sport Aréna</div>
+        <div class="building-use">Ipari csarnokban · 5G · Streaming stúdió</div>
+        <div class="building-desc">Professzionális e-sport versenyközpont egy egykori ipari csarnokban. 5G ultra-low latency hálózat, 500+ PC/konzol állomás, livestream stúdió. Nézőtér 1000+ főnek. Helyi és regionális bajnokságok otthona. Napenergiával táplált, hővisszanyerős klímarendszerrel.</div>
+      </div>
     </div>
-    <div class="feature-cell">
-      <span class="feature-icon">🏛️</span>
-      <div class="feature-title">Ipartörténeti múzeum</div>
-      <div class="feature-text">A védett épületek (I. Hivatalház, Mozdonyszín, Konzumsor) sétálható ipari örökség-múzeummá alakulnak. AR-appban virtuálisan rekonstruált gyár.</div>
+
+    <div class="building-card">
+      <div class="building-visual" data-pic="muzeum" style="background: linear-gradient(160deg, #1a1000 0%, #2a1800 100%);">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Épület homlokzat -->
+          <rect x="30" y="55" width="220" height="95" fill="rgba(240,180,41,0.05)" stroke="rgba(240,180,41,0.25)" stroke-width="1"/>
+          <path d="M20,55 L140,15 L260,55" fill="rgba(240,180,41,0.08)" stroke="rgba(240,180,41,0.3)" stroke-width="1"/>
+          <!-- Oszlopok -->
+          <rect x="55" y="55" width="12" height="95" fill="rgba(240,180,41,0.1)" stroke="rgba(240,180,41,0.2)" stroke-width="0.5"/>
+          <rect x="90" y="55" width="12" height="95" fill="rgba(240,180,41,0.1)" stroke="rgba(240,180,41,0.2)" stroke-width="0.5"/>
+          <rect x="178" y="55" width="12" height="95" fill="rgba(240,180,41,0.1)" stroke="rgba(240,180,41,0.2)" stroke-width="0.5"/>
+          <rect x="213" y="55" width="12" height="95" fill="rgba(240,180,41,0.1)" stroke="rgba(240,180,41,0.2)" stroke-width="0.5"/>
+          <!-- AR szimbólum -->
+          <rect x="110" y="75" width="60" height="50" rx="2" fill="none" stroke="rgba(0,200,255,0.4)" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="140" y="105" text-anchor="middle" fill="rgba(0,200,255,0.4)" font-size="9" font-family="monospace">AR</text>
+          <text x="140" y="35" text-anchor="middle" fill="rgba(240,180,41,0.4)" font-size="8" letter-spacing="2" font-family="monospace">IPARTÖRTÉNETI MÚZEUM · AR APP</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-protected">Helyi védett</span>
+        <div class="building-name">Ipartörténeti Múzeum</div>
+        <div class="building-use">I. Hivatalház · Mozdonyszín · Konzumsor</div>
+        <div class="building-desc">A védett épületekben sétálható ipari örökség-múzeum. AR-appban a látogató telefonjával virtuálisan látja, hogyan dolgoztak az acélmű fénykorában. Interaktív kiállítás, hanginstallációk, eredeti gépek. QR-kódos önvezető túra. Digitális archívum 1868-tól napjainkig.</div>
+      </div>
     </div>
-    <div class="feature-cell">
-      <span class="feature-icon">🍺</span>
-      <div class="feature-title">Makers District</div>
-      <div class="feature-text">Sörfőzde, kávézó, kisüzemek, alkotóközösség. Kulturális rendezvények, koncertek a volt ipari csarnokokban — Ruhr-vidék mintájára.</div>
+
+    <div class="building-card">
+      <div class="building-visual" data-pic="makersdistrict" style="background: linear-gradient(160deg, #1a0800 0%, #2a1000 100%);">
+        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
+          <!-- Téglaépület stílus -->
+          <rect x="20" y="40" width="240" height="110" fill="rgba(255,107,53,0.05)" stroke="rgba(255,107,53,0.2)" stroke-width="1"/>
+          <!-- Ablakok -->
+          <rect x="35" y="55" width="30" height="35" fill="rgba(255,200,0,0.1)" stroke="rgba(255,200,0,0.3)" stroke-width="1" rx="1"/>
+          <rect x="80" y="55" width="30" height="35" fill="rgba(255,200,0,0.1)" stroke="rgba(255,200,0,0.3)" stroke-width="1" rx="1"/>
+          <!-- Sörfőzde tartály -->
+          <ellipse cx="175" cy="85" rx="25" ry="30" fill="rgba(255,200,0,0.08)" stroke="rgba(255,200,0,0.3)" stroke-width="1"/>
+          <ellipse cx="175" cy="60" rx="25" ry="8" fill="rgba(255,200,0,0.12)" stroke="rgba(255,200,0,0.35)" stroke-width="1"/>
+          <ellipse cx="220" cy="90" rx="18" ry="22" fill="rgba(255,200,0,0.06)" stroke="rgba(255,200,0,0.25)" stroke-width="1"/>
+          <!-- Kávé csésze -->
+          <path d="M50,115 Q65,108 80,115 L78,135 Q65,140 52,135 Z" fill="rgba(150,80,0,0.2)" stroke="rgba(255,150,50,0.3)" stroke-width="1"/>
+          <text x="140" y="28" text-anchor="middle" fill="rgba(255,107,53,0.4)" font-size="8" letter-spacing="2" font-family="monospace">MAKERS DISTRICT · SÖRFŐZDE · KÁVÉZÓ</text>
+        </svg>
+      </div>
+      <div class="building-card-body">
+        <span class="building-tag tag-protected">Helyi védett</span>
+        <div class="building-name">Makers District</div>
+        <div class="building-use">Sörfőzde · Kávézó · Alkotóközösség · Kisüzemek</div>
+        <div class="building-desc">A volt ipari épületek kreatív negyeddé alakulnak — Ruhr-vidék mintájára. Kézműves sörfőzde, specialty kávézó, alkotóközösségek, kisüzemek. Kulturális rendezvények, koncertek a csarnokban. Smart belépő, appban program-értesítők, cashless fizetés.</div>
+      </div>
     </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ VÁROSKÖZPONT ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="varos">
+  <div class="section-header">
+    <div class="section-label">Városközpont funkciók</div>
+    <h2 class="section-title">Pláza, mozi, étterem —<br>smart módra</h2>
+    <p class="section-desc">Egy valódi városrészhez kell minden, ami a mindennapokhoz kell. A DAM Kereskedelmi Zónája nem egy átlagos bevásárlóközpont — minden szolgáltatás okos technológiával működik.</p>
+  </div>
+
+  <div class="city-grid">
+
+    <div class="city-card">
+      <div class="city-card-header" data-pic="plaza" style="background: linear-gradient(135deg, #0d1a30 0%, #1a2a40 100%);">
+        🛍️
+        <span class="pic-badge">SMART PLAZA</span>
+      </div>
+      <div class="city-card-body">
+        <div class="city-card-title">DAM Plaza</div>
+        <div class="city-card-sub">Automatizált bevásárlóközpont</div>
+        <div class="city-card-desc">Kasszamentes üzletek (Amazon Go-stílusú): bejössz, elveszed, kisétálsz — az app automatikusan fizet. Arcfelismerés vagy QR belépés. Robot takarítás éjjel. AI-alapú készletkezelés: ritkán fogy ki valami. Napenergiával táplált, zöld tető, esővízgyűjtés.</div>
+      </div>
+    </div>
+
+    <div class="city-card">
+      <div class="city-card-header" data-pic="mozi" style="background: linear-gradient(135deg, #1a0a20 0%, #2a1035 100%);">
+        🎬
+        <span class="pic-badge">SMART MOZI</span>
+      </div>
+      <div class="city-card-body">
+        <div class="city-card-title">DAM Cinema</div>
+        <div class="city-card-sub">4DX · IMAX · VR vetítőterem</div>
+        <div class="city-card-desc">Egykori ipari csarnokban kialakított mozikomplexum. 4DX mozgó székek, IMAX vászon, dedikált VR terem. Jegyvásárlás appból, arcfelismerés a belépésnél. AI ajánló: az app a korábbi nézési szokások alapján javasol. Smart hangrendszer teremről-teremre izolálva.</div>
+      </div>
+    </div>
+
+    <div class="city-card">
+      <div class="city-card-header" data-pic="etterem" style="background: linear-gradient(135deg, #1a0800 0%, #2a1200 100%);">
+        🍽️
+        <span class="pic-badge">FOOD HUB</span>
+      </div>
+      <div class="city-card-body">
+        <div class="city-card-title">DAM Food Hall</div>
+        <div class="city-card-sub">Robot konyha · Vertikális farm farm-to-table</div>
+        <div class="city-card-desc">Ipari étkezőcsarnok — a beltéri vertikális farmról friss alapanyagok. Robot konyha (Miso Robotics-típusú) hamburgerhez, pizzához, wokhoz. Hagyományos éttermek is — de QR menüvel, appból rendeléssel, futárrobot kihozza az asztalhoz. Allergia-nyilvántartás az app profilban.</div>
+      </div>
+    </div>
+
+    <div class="city-card">
+      <div class="city-card-header" data-pic="konyvtar" style="background: linear-gradient(135deg, #001520 0%, #002535 100%);">
+        📚
+        <span class="pic-badge">SMART KÖNYVTÁR</span>
+      </div>
+      <div class="city-card-body">
+        <div class="city-card-title">Digitális Könyvtár</div>
+        <div class="city-card-sub">AI kutatósegéd · Maker Lab · Közösségi tér</div>
+        <div class="city-card-desc">Nem csak polcok és könyvek. AI kutatósegéd chatbot, digitális archívum, 3D nyomtató és forrasztóállomás a Maker Labban. Coworking sarok, csendes olvasóterem, hangos közösségi tér. 24/7 önkiszolgáló könyvkölcsönző automatán digitális tagsággal.</div>
+      </div>
+    </div>
+
+    <div class="city-card">
+      <div class="city-card-header" data-pic="bank_posta" style="background: linear-gradient(135deg, #001a10 0%, #002a18 100%);">
+        🏦
+        <span class="pic-badge">SMART SZOLGÁLTATÁSOK</span>
+      </div>
+      <div class="city-card-body">
+        <div class="city-card-title">Önkormányzati & Pénzügyi Hub</div>
+        <div class="city-card-sub">Drón posta · Robot bankfiók · E-ügyintézés</div>
+        <div class="city-card-desc">Egyablakos ügyintézés: okmányiroda, adóhivatal, szociális ügyek egy helyen digitalizálva. Robot bankfiók: ATM-en túl, személyre szabott pénzügyi tanácsadó AI. Posta: csomag automata 24/7, drón kiszállítás a területre. Mindent intézni lehet az appból otthonról is.</div>
+      </div>
+    </div>
+
+    <div class="city-card">
+      <div class="city-card-header" data-pic="park_plaza" style="background: linear-gradient(135deg, #001510 0%, #002518 100%);">
+        🌳
+        <span class="pic-badge">ZÖLD TETŐ PARK</span>
+      </div>
+      <div class="city-card-body">
+        <div class="city-card-title">Tető-Park & Közösségi Tér</div>
+        <div class="city-card-sub">Plaza tetején · Napelem · Esővíz</div>
+        <div class="city-card-desc">A Plaza és a mozi teteje zöld park: füves pihenők, fák, sétányok. Napelem borítja a nem zöld részeket. Esővíz-gyűjtő rendszer öntözi a tetőkertet és az összes közterületi növényzetet. Smart pad: telefontöltő, WiFi, hőmérséklet-érzékelő, ülőhely-foglaltság jelző az appban.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ OKTATÁS ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="oktatas">
+  <div class="section-header">
+    <div class="section-label">Oktatás & Nevelés</div>
+    <h2 class="section-title">Óvodától egyetemig —<br>a jövő generációjának</h2>
+    <p class="section-desc">A DAM nem csak munka- és szórakozóhely — élhető városrész, ahol a gyerekek is helyben tanulnak, nőnek fel, és a legjobb technológiával találkoznak már óvodás kortól.</p>
+  </div>
+
+  <div class="city-grid">
+
+    <div class="city-card">
+      <div class="city-card-header" data-pic="ovoda" style="background: linear-gradient(135deg, #1a0f00 0%, #2a1800 100%);">
+        🧒
+        <span class="pic-badge">SMART ÓVODA</span>
+      </div>
+      <div class="city-card-body">
+        <div class="city-card-title">DAM Smart Óvoda</div>
+        <div class="city-card-sub">Természetközeli · IoT biztonság · Robot segédek</div>
+        <div class="city-card-desc">Zöld tetőkerttel, játszókerttel és vertikális mini-farmmal — a gyerekek maguk termesztik a zöldséget. IoT beléptetőrendszer: szülő appból látja, mikor érkezett a gyerek. Robot asszisztens (NAO/Pepper típus) fejlesztő játékokat vezet. Levegőminőség és hőmérséklet automatikusan szabályozva.</div>
+      </div>
+    </div>
+
+    <div class="city-card">
+      <div class="city-card-header" data-pic="altalanos" style="background: linear-gradient(135deg, #001525 0%, #002040 100%);">
+        🎒
+        <span class="pic-badge">SMART ÁLTALÁNOS</span>
+      </div>
+      <div class="city-card-body">
+        <div class="city-card-title">Digitális Általános Iskola</div>
+        <div class="city-card-sub">Tablet · VR tanterem · AI személyre szabott oktatás</div>
+        <div class="city-card-desc">Papírmentes iskola: minden diáknak tablet, tananyag felhőből. AI-alapú személyre szabott feladatok — mindenki a saját tempójában halad. VR tanterem: virtuálisan járj be az acélmű 1900-as évekbeli csarnokába, vagy a Naprendszerbe. Robot kódolás szakkör már 1. osztálytól.</div>
+      </div>
+    </div>
+
+    <div class="city-card">
+      <div class="city-card-header" data-pic="gimnazium" style="background: linear-gradient(135deg, #100020 0%, #1a0035 100%);">
+        🎓
+        <span class="pic-badge">SMART GIMNÁZIUM</span>
+      </div>
+      <div class="city-card-body">
+        <div class="city-card-title">Digitális Gimnázium</div>
+        <div class="city-card-sub">STEM fókusz · 3D nyomtató · Startup labor</div>
+        <div class="city-card-desc">STEM (tudomány, technológia, mérnöki, matematika) fókuszú középiskola. Saját FabLab: CNC, lézervágó, 3D nyomtató tanulóknak. Startup szakkör: diákok saját appot, terméket építenek. Miskolci Egyetemmel közös kutatási projektek. Nyílt forráskódú digitális bizonyítvány blockchain alapon.</div>
+      </div>
+    </div>
+
+    <div class="city-card">
+      <div class="city-card-header" data-pic="egyetem_inkubator" style="background: linear-gradient(135deg, #001a1a 0%, #002a2a 100%);">
+        🔬
+        <span class="pic-badge">EGYETEMI LABOR</span>
+      </div>
+      <div class="city-card-body">
+        <div class="city-card-title">Miskolci Egyetem Kihelyezett Labor</div>
+        <div class="city-card-sub">KFI · Startup inkubátor · Ipari együttműködés</div>
+        <div class="city-card-desc">A Középhengermű Technológiai Parkjában a Miskolci Egyetem kutatólabort és startup inkubátort működtet. Hallgatók valós ipari projekteken dolgoznak a területen lévő cégekkel. Spin-off vállalkozásoknak kedvezményes iroda és gyártási kapacitás bérelhető.</div>
+      </div>
+    </div>
+
+    <div class="city-card">
+      <div class="city-card-header" data-pic="atkepezes" style="background: linear-gradient(135deg, #0a1500 0%, #142000 100%);">
+        🔧
+        <span class="pic-badge">ÁTKÉPZŐ CENTRUM</span>
+      </div>
+      <div class="city-card-body">
+        <div class="city-card-title">Ipar 4.0 Átképző Centrum</div>
+        <div class="city-card-sub">VR szimulátor · Robot kezelő képzés · AI tanfolyam</div>
+        <div class="city-card-desc">A DAM-ban dolgozóknak és Miskolc lakóinak: átképzés az ipar 4.0 munkahelyekre. VR-alapú szimulációs oktatás (robot programozás, CNC kezelés veszély nélkül). AI, adatelemzés, kiberbiztonság tanfolyamok. EU-s finanszírozású, ingyenes alapkurzusok.</div>
+      </div>
+    </div>
+
+    <div class="city-card">
+      <div class="city-card-header" data-pic="gyermekpark" style="background: linear-gradient(135deg, #0a1a00 0%, #142800 100%);">
+        🎠
+        <span class="pic-badge">KALANDPARK</span>
+      </div>
+      <div class="city-card-body">
+        <div class="city-card-title">STEAM Kalandpark</div>
+        <div class="city-card-sub">Gyerekeknek · Interaktív · Ipari örökség játékosan</div>
+        <div class="city-card-desc">Kültéri interaktív kalandpark gyerekeknek, ahol az ipari örökség és a tudomány találkozik. Megmászható acél szerkezetek, fizika-kísérletek a szabadban, mini napelem-készlet összerakás, programozható LED játékok. Minden érzékszervet megmozgat — tanulás a játékon át.</div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -1207,5 +1588,63 @@ footer strong { color: var(--accent); }
   </div>
 </footer>
 
+<script>
+// ── KÉPBETÖLTŐ ──
+// Ha a DAM_PIC/<kulcsszó>.jpg (vagy .png, .webp) létezik, betölti a kártyába.
+// Ha nem létezik, marad az SVG vizualizáció változatlanul.
+// Elnevezési konvenció: DAM_PIC/<data-pic érték>.<kiterjesztés>
+// Pl.: DAM_PIC/gorkorizo.jpg  →  a görkori kártyában jelenik meg
+
+const exts = ['jpg','jpeg','png','webp','avif'];
+
+function tryLoadPic(el, key) {
+  const folder = 'DAM_PIC/';
+  let idx = 0;
+  function next() {
+    if (idx >= exts.length) return; // egyik sem létezik → marad az SVG
+    const src = folder + key + '.' + exts[idx++];
+    const img = new Image();
+    img.onload = () => {
+      // Kép létezik: lecseréljük a tartalmát
+      el.classList.add('has-pic');
+      el.innerHTML = '<img src="' + src + '" alt="' + key + '" loading="lazy">';
+    };
+    img.onerror = next; // próbáljuk a következő kiterjesztéssel
+    img.src = src;
+  }
+  next();
+}
+
+// building-card .building-visual elemek (data-pic attribútummal)
+document.querySelectorAll('.building-visual[data-pic]').forEach(el => {
+  tryLoadPic(el, el.dataset.pic);
+});
+
+// city-card-header elemek (data-pic attribútummal)
+document.querySelectorAll('.city-card-header[data-pic]').forEach(el => {
+  const key = el.dataset.pic;
+  const folder = 'DAM_PIC/';
+  let idx = 0;
+  function next() {
+    if (idx >= exts.length) return;
+    const src = folder + key + '.' + exts[idx++];
+    const img = new Image();
+    img.onload = () => {
+      el.style.backgroundImage = 'url(' + src + ')';
+      el.style.backgroundSize = 'cover';
+      el.style.backgroundPosition = 'center';
+      // Az emoji marad felette, de halvány overlay-jel
+      el.style.textShadow = '0 0 8px rgba(0,0,0,0.9)';
+      el.style.position = 'relative';
+      const ov = document.createElement('div');
+      ov.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.35);';
+      el.prepend(ov);
+    };
+    img.onerror = next;
+    img.src = src;
+  }
+  next();
+});
+</script>
 </body>
 </html>
