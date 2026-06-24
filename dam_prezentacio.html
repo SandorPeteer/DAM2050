@@ -6,167 +6,157 @@
 <title>Digitális Acélváros 2050 – Befektetői Prezentáció</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#04080f;--bg2:#07111f;--acc:#00ffcc;--acc2:#0088ff;--acc3:#cc88ff;
-  --warn:#ffaa00;--red:#ff3333;--green:#00ff88;--text:#ccdde8;--dim:#334455;
-}
-html{scroll-behavior:smooth;font-size:16px}
-body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;overflow-x:hidden}
+html{scroll-behavior:smooth}
+body{background:#04080f;color:#d0e4f0;font-family:'Courier New',monospace;overflow-x:hidden;font-size:15px}
 
-/* SCANLINES */
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px)}
 
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;
-  background:rgba(4,8,15,.95);border-bottom:1px solid #00ffcc18;
+  background:rgba(4,8,15,.96);border-bottom:1px solid rgba(0,255,204,.15);
   backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;
-  padding:0 32px;height:54px}
-.nav-logo{font-size:13px;font-weight:900;letter-spacing:5px;color:var(--acc);
-  text-shadow:0 0 14px #00ffcc66}
-.nav-links{display:flex;gap:6px}
-.nav-links a{color:#7799aa;font-size:8px;letter-spacing:2px;padding:5px 10px;
+  padding:0 32px;height:58px}
+.nav-logo{font-size:14px;font-weight:900;letter-spacing:5px;color:#00ffcc;text-shadow:0 0 14px #00ffcc66}
+.nav-links{display:flex;gap:4px}
+.nav-links a{color:#90b0c8;font-size:11px;letter-spacing:2px;padding:6px 12px;
   border-radius:4px;text-decoration:none;transition:all .2s;border:1px solid transparent}
-.nav-links a:hover{color:var(--acc);border-color:#00ffcc22;background:#00ffcc08}
-.nav-back{color:#7799bb;font-size:8px;letter-spacing:2px;padding:5px 12px;
-  border:1px solid #00ffcc22;border-radius:4px;text-decoration:none;
-  transition:all .2s}
-.nav-back:hover{color:var(--acc);background:#00ffcc0a}
+.nav-links a:hover{color:#00ffcc;border-color:rgba(0,255,204,.3);background:rgba(0,255,204,.06)}
+.nav-back{color:#90b0c8;font-size:11px;letter-spacing:2px;padding:6px 14px;
+  border:1px solid rgba(0,255,204,.25);border-radius:4px;text-decoration:none;transition:all .2s}
+.nav-back:hover{color:#00ffcc;background:rgba(0,255,204,.08)}
 
 /* HERO */
 #hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;
   justify-content:center;text-align:center;padding:80px 24px 60px;position:relative;overflow:hidden}
-#hero-bg{position:absolute;inset:0;
-  background:radial-gradient(ellipse 80% 60% at 50% 40%,#001a2e 0%,var(--bg) 70%);
-  z-index:0}
-#hero-grid{position:absolute;inset:0;z-index:0;opacity:.4;
-  background-image:linear-gradient(#00ffcc08 1px,transparent 1px),linear-gradient(90deg,#00ffcc08 1px,transparent 1px);
+#hero-bg{position:absolute;inset:0;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 40%,#001a2e,#04080f 70%)}
+#hero-grid{position:absolute;inset:0;z-index:0;opacity:.35;
+  background-image:linear-gradient(rgba(0,255,204,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,204,.06) 1px,transparent 1px);
   background-size:50px 50px;animation:gridmv 25s linear infinite}
 @keyframes gridmv{from{background-position:0 0}to{background-position:50px 50px}}
 #hero>*{position:relative;z-index:1}
-.hero-tag{font-size:9px;letter-spacing:5px;color:#4499bb;border:1px solid #00ffcc18;
-  padding:5px 14px;border-radius:20px;margin-bottom:28px;display:inline-block}
-.hero-hex{font-size:56px;color:var(--acc);
+.hero-tag{font-size:11px;letter-spacing:4px;color:#7dd0e8;border:1px solid rgba(0,255,204,.25);
+  padding:6px 16px;border-radius:20px;margin-bottom:28px;display:inline-block}
+.hero-hex{font-size:56px;color:#00ffcc;
   text-shadow:0 0 30px #00ffcc,0 0 60px #0088ff;
   animation:hexglow 3s ease-in-out infinite;margin-bottom:4px}
 @keyframes hexglow{0%,100%{text-shadow:0 0 30px #00ffcc,0 0 60px #0088ff}
   50%{text-shadow:0 0 50px #00ffcc,0 0 100px #0055ff,0 0 150px #0022aa}}
-.hero-title{font-size:clamp(28px,5vw,54px);font-weight:900;letter-spacing:8px;
-  color:#fff;line-height:1.1;margin-bottom:10px}
-.hero-sub{font-size:clamp(10px,1.5vw,13px);letter-spacing:4px;color:#3399bb;margin-bottom:36px}
-.hero-lead{max-width:640px;font-size:clamp(12px,1.6vw,15px);line-height:1.85;
-  color:#99bbcc;margin-bottom:44px}
+.hero-title{font-size:clamp(32px,5vw,58px);font-weight:900;letter-spacing:8px;
+  color:#fff;line-height:1.1;margin-bottom:12px}
+.hero-sub{font-size:clamp(12px,1.8vw,16px);letter-spacing:4px;color:#7dd0e8;margin-bottom:36px}
+.hero-lead{max-width:640px;font-size:clamp(14px,1.6vw,17px);line-height:1.85;
+  color:#b8d4e4;margin-bottom:44px}
 .hero-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
-.btn-prim{background:linear-gradient(135deg,#004455,#002233);border:1px solid var(--acc);
-  color:var(--acc);padding:12px 28px;border-radius:8px;font-family:inherit;
-  font-size:9px;letter-spacing:3px;font-weight:900;cursor:pointer;text-decoration:none;
-  transition:all .25s;box-shadow:0 0 20px #00ffcc18}
-.btn-prim:hover{background:linear-gradient(135deg,#006677,#003344);box-shadow:0 0 30px #00ffcc33;transform:translateY(-2px)}
-.btn-sec{background:transparent;border:1px solid #00ffcc22;color:#7799bb;
-  padding:12px 28px;border-radius:8px;font-family:inherit;
-  font-size:9px;letter-spacing:3px;font-weight:900;cursor:pointer;text-decoration:none;transition:all .25s}
-.btn-sec:hover{border-color:#00ffcc99;color:#77aacc;background:#00ffcc08}
-.hero-stats{display:flex;gap:40px;margin-top:56px;flex-wrap:wrap;justify-content:center}
+.btn-prim{background:linear-gradient(135deg,#004455,#002233);border:1px solid #00ffcc;
+  color:#00ffcc;padding:14px 30px;border-radius:8px;font-family:inherit;
+  font-size:12px;letter-spacing:3px;font-weight:900;cursor:pointer;text-decoration:none;
+  transition:all .25s;box-shadow:0 0 20px rgba(0,255,204,.12)}
+.btn-prim:hover{background:linear-gradient(135deg,#006677,#003344);
+  box-shadow:0 0 32px rgba(0,255,204,.25);transform:translateY(-2px)}
+.btn-sec{background:transparent;border:1px solid rgba(0,255,204,.3);color:#a0c8dc;
+  padding:14px 30px;border-radius:8px;font-family:inherit;
+  font-size:12px;letter-spacing:3px;font-weight:900;cursor:pointer;text-decoration:none;transition:all .25s}
+.btn-sec:hover{border-color:rgba(0,255,204,.6);color:#d0e8f4;background:rgba(0,255,204,.06)}
+.hero-stats{display:flex;gap:44px;margin-top:56px;flex-wrap:wrap;justify-content:center;align-items:center}
 .hstat{text-align:center}
-.hstat-v{font-size:clamp(22px,3vw,32px);font-weight:900;color:var(--acc);
-  text-shadow:0 0 12px #00ffcc55}
-.hstat-l{font-size:8px;letter-spacing:2px;color:#99bbcc;margin-top:3px}
-.hstat-div{width:1px;background:linear-gradient(180deg,transparent,#00ffcc22,transparent);align-self:stretch}
+.hstat-v{font-size:clamp(24px,3vw,34px);font-weight:900;color:#00ffcc;text-shadow:0 0 12px rgba(0,255,204,.4)}
+.hstat-l{font-size:11px;letter-spacing:2px;color:#7dd0e8;margin-top:4px}
+.hstat-div{width:1px;height:40px;background:linear-gradient(180deg,transparent,rgba(0,255,204,.25),transparent)}
 
 /* SECTION */
 section{padding:80px 24px;max-width:1100px;margin:0 auto}
-.sec-tag{font-size:8px;letter-spacing:4px;color:#3388aa;margin-bottom:10px}
-.sec-title{font-size:clamp(20px,3vw,30px);font-weight:900;letter-spacing:3px;
-  color:#fff;margin-bottom:8px}
-.sec-desc{font-size:13px;color:#8899aa;line-height:1.8;max-width:620px;margin-bottom:44px}
-.divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,#00ffcc18,transparent);margin:0 0 56px}
+.sec-tag{font-size:11px;letter-spacing:4px;color:#5bc8e8;margin-bottom:12px;font-weight:700}
+.sec-title{font-size:clamp(22px,3vw,34px);font-weight:900;letter-spacing:3px;color:#fff;margin-bottom:10px}
+.sec-desc{font-size:15px;color:#b0ccd8;line-height:1.85;max-width:680px;margin-bottom:44px}
+.divider{width:100%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,204,.2),transparent);margin:0 0 56px}
 
 /* ZÓNA KÁRTYÁK */
-.zones{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
-.zone-card{background:rgba(4,12,28,.9);border:1px solid #00ffcc12;border-radius:10px;
-  padding:22px 20px;transition:all .25s;cursor:default;position:relative;overflow:hidden}
-.zone-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+.zones{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:20px}
+.zone-card{background:rgba(6,16,36,.95);border:1px solid rgba(255,255,255,.08);border-radius:12px;
+  padding:24px 22px;transition:all .25s;position:relative;overflow:hidden}
+.zone-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
   background:linear-gradient(90deg,transparent,var(--zc,#00ffcc),transparent)}
-.zone-card:hover{border-color:#00ffcc22;transform:translateY(-3px);
-  box-shadow:0 8px 32px rgba(0,0,0,.4)}
-.zc-tag{font-size:7px;letter-spacing:3px;font-weight:900;padding:3px 8px;
-  border-radius:4px;display:inline-block;margin-bottom:12px;
-  background:color-mix(in srgb,var(--zc,#00ffcc) 15%,transparent);
-  color:var(--zc,#00ffcc);border:1px solid color-mix(in srgb,var(--zc,#00ffcc) 30%,transparent)}
-.zc-title{font-size:14px;font-weight:900;letter-spacing:1px;color:#fff;margin-bottom:4px}
-.zc-sub{font-size:8px;letter-spacing:2px;color:#7799bb;margin-bottom:12px}
-.zc-desc{font-size:11px;color:#8899aa;line-height:1.75;margin-bottom:14px}
-.zc-features{display:flex;flex-wrap:wrap;gap:5px}
-.zc-feat{font-size:7px;letter-spacing:1px;padding:2px 6px;border-radius:4px;
-  background:#0a1828;border:1px solid #00ffcc0e;color:#7799bb}
-.zc-phase{font-size:7px;letter-spacing:2px;margin-top:12px;padding-top:10px;
-  border-top:1px solid #00ffcc0a;color:#5599bb}
+.zone-card:hover{border-color:rgba(255,255,255,.18);transform:translateY(-3px);
+  box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.zc-tag{font-size:10px;letter-spacing:3px;font-weight:900;padding:4px 10px;
+  border-radius:5px;display:inline-block;margin-bottom:14px;
+  background:rgba(255,255,255,.06);color:var(--zc,#00ffcc);
+  border:1px solid rgba(255,255,255,.12)}
+.zc-title{font-size:16px;font-weight:900;letter-spacing:1px;color:#fff;margin-bottom:5px}
+.zc-sub{font-size:11px;letter-spacing:2px;color:#90b8cc;margin-bottom:14px}
+.zc-desc{font-size:13px;color:#b0ccd8;line-height:1.8;margin-bottom:16px}
+.zc-features{display:flex;flex-wrap:wrap;gap:6px}
+.zc-feat{font-size:10px;letter-spacing:1px;padding:3px 8px;border-radius:4px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#c8dce8}
+.zc-phase{font-size:10px;letter-spacing:2px;margin-top:14px;padding-top:12px;
+  border-top:1px solid rgba(255,255,255,.08);color:#7dd0e8;font-weight:700}
 
-/* IDŐ ÜTEMEZÉS */
-.timeline{display:flex;flex-direction:column;gap:0;position:relative;padding-left:32px}
-.timeline::before{content:'';position:absolute;left:8px;top:12px;bottom:12px;
-  width:1px;background:linear-gradient(180deg,var(--acc),var(--acc2),var(--acc3))}
-.tl-item{position:relative;padding:0 0 40px 24px}
-.tl-dot{position:absolute;left:-28px;top:4px;width:12px;height:12px;
-  border-radius:50%;border:2px solid var(--dc,#00ffcc);background:var(--bg);
-  box-shadow:0 0 10px var(--dc,#00ffcc)}
-.tl-phase{font-size:8px;letter-spacing:3px;color:var(--dc,#00ffcc);margin-bottom:5px}
-.tl-title{font-size:16px;font-weight:900;letter-spacing:1px;color:#fff;margin-bottom:8px}
-.tl-items{list-style:none;display:flex;flex-direction:column;gap:5px}
-.tl-items li{font-size:11px;color:#8899aa;line-height:1.6;padding-left:14px;position:relative}
-.tl-items li::before{content:'→';position:absolute;left:0;color:#3388aa}
+/* ÜTEMEZÉS */
+.timeline{display:flex;flex-direction:column;position:relative;padding-left:36px}
+.timeline::before{content:'';position:absolute;left:10px;top:14px;bottom:14px;
+  width:2px;background:linear-gradient(180deg,#00ffcc,#0088ff,#cc88ff)}
+.tl-item{position:relative;padding:0 0 44px 28px}
+.tl-dot{position:absolute;left:-30px;top:5px;width:14px;height:14px;
+  border-radius:50%;border:2px solid var(--dc,#00ffcc);background:#04080f;
+  box-shadow:0 0 12px var(--dc,#00ffcc)}
+.tl-phase{font-size:11px;letter-spacing:3px;color:var(--dc,#00ffcc);margin-bottom:6px;font-weight:700}
+.tl-title{font-size:20px;font-weight:900;letter-spacing:1px;color:#fff;margin-bottom:12px}
+.tl-items{list-style:none;display:flex;flex-direction:column;gap:8px}
+.tl-items li{font-size:14px;color:#b8d0e0;line-height:1.7;padding-left:18px;position:relative}
+.tl-items li::before{content:'→';position:absolute;left:0;color:#5bc8e8;font-weight:900}
 
 /* SZÁMOK */
-.numbers{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
-.num-card{background:rgba(4,12,28,.9);border:1px solid #00ffcc0e;border-radius:10px;
-  padding:24px 20px;text-align:center}
-.num-v{font-size:36px;font-weight:900;color:var(--nc,#00ffcc);
-  text-shadow:0 0 16px color-mix(in srgb,var(--nc,#00ffcc) 40%,transparent)}
-.num-u{font-size:12px;color:var(--nc,#00ffcc);opacity:.6;margin-left:2px}
-.num-l{font-size:8px;letter-spacing:2px;color:#99bbcc;margin-top:5px}
+.numbers{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.num-card{background:rgba(6,16,36,.95);border:1px solid rgba(255,255,255,.08);border-radius:12px;
+  padding:28px 22px;text-align:center}
+.num-v{font-size:40px;font-weight:900;color:var(--nc,#00ffcc)}
+.num-u{font-size:16px;margin-left:2px;opacity:.7}
+.num-l{font-size:11px;letter-spacing:2px;color:#90b8cc;margin-top:8px}
 
-/* KOCKÁZAT / VÁLASZ */
-.risks{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
-.risk-card{background:rgba(4,12,28,.9);border:1px solid #ff330015;border-radius:10px;padding:20px}
-.risk-q{font-size:11px;font-weight:900;color:#cc4444;margin-bottom:8px;
-  padding-bottom:8px;border-bottom:1px solid #ff330018}
-.risk-a{font-size:11px;color:#8899aa;line-height:1.7}
-.risk-a strong{color:#00aa66;font-weight:900}
+/* KOCKÁZAT */
+.risks{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
+.risk-card{background:rgba(6,16,36,.95);border:1px solid rgba(255,80,80,.15);border-radius:12px;padding:22px}
+.risk-q{font-size:13px;font-weight:900;color:#ff7777;margin-bottom:10px;
+  padding-bottom:10px;border-bottom:1px solid rgba(255,80,80,.15)}
+.risk-a{font-size:13px;color:#b8d0e0;line-height:1.75}
+.risk-a strong{color:#44dd88;font-weight:900}
 
 /* ÖRÖKSÉG */
-.heritage{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
-.her-card{background:rgba(4,12,28,.9);border:1px solid #ffee4415;border-radius:8px;
-  padding:16px;display:flex;gap:12px;align-items:flex-start}
-.her-n{width:24px;height:24px;border-radius:50%;background:#ffee4408;border:1px solid #ffee4430;
-  display:flex;align-items:center;justify-content:center;font-size:9px;
-  font-weight:900;color:#ffee44;flex-shrink:0;margin-top:1px}
-.her-info{}
-.her-name{font-size:11px;font-weight:900;color:#ccbb44;margin-bottom:3px}
-.her-use{font-size:9px;color:#334433;letter-spacing:1px}
+.heritage{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.her-card{background:rgba(6,16,36,.95);border:1px solid rgba(255,238,68,.12);border-radius:10px;
+  padding:18px;display:flex;gap:14px;align-items:flex-start}
+.her-n{width:28px;height:28px;border-radius:50%;background:rgba(255,238,68,.1);
+  border:1px solid rgba(255,238,68,.35);display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;color:#ffee44;flex-shrink:0;margin-top:2px}
+.her-name{font-size:13px;font-weight:900;color:#e8d870;margin-bottom:4px}
+.her-use{font-size:11px;color:#90b8cc;letter-spacing:1px}
 
-/* RUHR REFERENCIA */
+/* RUHR */
 .ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px}
 @media(max-width:640px){.ref-grid{grid-template-columns:1fr}}
-.ref-block{background:rgba(4,12,28,.9);border:1px solid #00ffcc0e;border-radius:10px;padding:24px}
-.ref-title{font-size:12px;font-weight:900;letter-spacing:2px;color:var(--acc);margin-bottom:14px}
-.ref-item{font-size:11px;color:#8899aa;line-height:1.75;padding-left:14px;position:relative;margin-bottom:6px}
-.ref-item::before{content:'▸';position:absolute;left:0;color:#3388aa}
+.ref-block{background:rgba(6,16,36,.95);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:28px}
+.ref-title{font-size:13px;font-weight:900;letter-spacing:2px;color:#00ffcc;margin-bottom:16px}
+.ref-item{font-size:13px;color:#b8d0e0;line-height:1.8;padding-left:16px;position:relative;margin-bottom:8px}
+.ref-item::before{content:'▸';position:absolute;left:0;color:#5bc8e8;font-weight:900}
 
 /* FOOTER */
-footer{background:#030810;border-top:1px solid #00ffcc0a;padding:44px 24px;text-align:center}
-.footer-logo{font-size:20px;font-weight:900;letter-spacing:8px;color:#3399aa;margin-bottom:8px}
-.footer-sub{font-size:8px;letter-spacing:3px;color:#5599bb}
-.footer-links{display:flex;gap:20px;justify-content:center;margin-top:20px;flex-wrap:wrap}
-.footer-links a{font-size:8px;letter-spacing:2px;color:#6699bb;text-decoration:none;
-  padding:5px 10px;border:1px solid #00ffcc0a;border-radius:4px;transition:all .2s}
-.footer-links a:hover{color:#00ffcc99;border-color:#00ffcc22}
+footer{background:#030810;border-top:1px solid rgba(0,255,204,.08);padding:48px 24px;text-align:center}
+.footer-logo{font-size:22px;font-weight:900;letter-spacing:8px;color:#3bb8cc;margin-bottom:10px}
+.footer-sub{font-size:12px;letter-spacing:3px;color:#6090a8}
+.footer-links{display:flex;gap:16px;justify-content:center;margin-top:24px;flex-wrap:wrap}
+.footer-links a{font-size:11px;letter-spacing:2px;color:#7aacbc;text-decoration:none;
+  padding:7px 14px;border:1px solid rgba(0,255,204,.15);border-radius:5px;transition:all .2s}
+.footer-links a:hover{color:#00ffcc;border-color:rgba(0,255,204,.4)}
 
-/* RESPONSIVE */
 @media(max-width:700px){
   nav{padding:0 16px}
   .nav-links{display:none}
   section{padding:56px 16px}
-  .hero-stats{gap:20px}
+  .hero-stats{gap:24px}
   .hstat-div{display:none}
 }
 </style>
@@ -476,7 +466,7 @@ footer{background:#030810;border-top:1px solid #00ffcc0a;padding:44px 24px;text-
 <footer>
   <div class="footer-logo">⬡ DAM 2050</div>
   <div class="footer-sub">DIGITÁLIS ACÉLVÁROS · MISKOLC · DIÓSGYŐRI ACÉLMŰ REVITALIZÁCIÓ</div>
-  <div style="margin-top:12px;font-size:8px;color:#5599bb;letter-spacing:2px">
+  <div style="margin-top:12px;font-size:12px;color:#6a9ab8;letter-spacing:2px">
     Forrás: Ex Ante – DANU – EX-ACT revitalizációs tanulmány, 2024. november (449 oldal)<br>
     Miskolci Fejlesztési Központ Nonprofit Kft. · TERINNO 2023 Ruhr-vidék esettanulmány
   </div>
