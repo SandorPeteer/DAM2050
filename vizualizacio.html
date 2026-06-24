@@ -2270,10 +2270,13 @@ function openModal(card, idx) {
   mCostVal.textContent  = d.cost || 'Becslés folyamatban';
   mCostDet.textContent  = d.costDetail || '';
 
-  // Kép
+  // Kép — cancel token hogy gyors kattintáskor ne jöjjön be régi kép
   imgWrap.querySelectorAll('img').forEach(e => e.remove());
   noImg.style.display = 'flex';
+  const picToken = Symbol();
+  imgWrap._picToken = picToken;
   findPic(d.pic, src => {
+    if (imgWrap._picToken !== picToken) return; // időközben másik kártya nyílt
     if (src) {
       noImg.style.display = 'none';
       const img = document.createElement('img');
