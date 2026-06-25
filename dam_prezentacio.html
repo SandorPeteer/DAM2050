@@ -1406,7 +1406,7 @@ const tileEls = [];
 const spokeEls = [];
 
 CATS.forEach((cat, ci)=>{
-  const ang = (ci/10)*Math.PI*2 - Math.PI/2;
+  const ang = (ci/12)*Math.PI*2 - Math.PI/2;
   const tx = HCX + ORBIT*Math.cos(ang) - TW/2;
   const ty = HCY + ORBIT*Math.sin(ang) - TH/2;
   const tcx = tx + TW/2, tcy = ty + TH/2;
@@ -1442,7 +1442,7 @@ function rotateRingTo(ci, animated){
   // Target angle: cat ci should be at -PI/2 (top)
   // cat ci is currently at base angle (ci/10)*2PI - PI/2 + ringAngle
   // We want that to equal -PI/2, so ringAngle = -(ci/10)*2PI
-  const target = -(ci/10)*Math.PI*2;
+  const target = -(ci/12)*Math.PI*2;
 
   // Choose shortest rotation path
   let delta = target - ringAngle;
@@ -1453,7 +1453,7 @@ function rotateRingTo(ci, animated){
 
   // Move all tiles and spokes
   CATS.forEach((_,i)=>{
-    const ang = (i/10)*Math.PI*2 - Math.PI/2 + ringAngle;
+    const ang = (i/12)*Math.PI*2 - Math.PI/2 + ringAngle;
     const tx = HCX + ORBIT*Math.cos(ang) - TW/2;
     const ty = HCY + ORBIT*Math.sin(ang) - TH/2;
     const tcx = tx + TW/2, tcy = ty + TH/2;
