@@ -415,26 +415,26 @@ html,body{width:100%;height:100%;overflow:hidden;
 #budget-title{font-size:clamp(2.2rem,4vw,4rem);font-weight:900;color:#fff;
   margin-bottom:.2rem;text-align:center;flex-shrink:0}
 #budget-sub{font-size:clamp(.8rem,1.2vw,1.1rem);letter-spacing:3px;text-transform:uppercase;
-  color:rgba(255,255,255,.25);margin-bottom:2vh;text-align:center;flex-shrink:0}
+  color:rgba(255,255,255,.65);margin-bottom:2vh;text-align:center;flex-shrink:0}
 #budget-grid{
   display:grid;grid-template-columns:repeat(2,1fr);
-  gap:2px;flex:1;min-height:0;
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.04);
+  gap:3px;flex:1;min-height:0;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);
 }
 .b-row{
   background:#03060d;display:flex;align-items:center;
   gap:1.2rem;padding:0 2vw;
 }
 .b-icon{font-size:clamp(1.4rem,2.5vw,2.2rem);width:2.5vw;text-align:center;flex-shrink:0}
-.b-name{flex:1;font-size:clamp(1rem,1.8vw,1.6rem);font-weight:700;color:rgba(255,255,255,.75)}
+.b-name{flex:1;font-size:clamp(1rem,1.8vw,1.6rem);font-weight:700;color:rgba(255,255,255,.95)}
 .b-val{font-size:clamp(1rem,1.8vw,1.6rem);font-weight:900;color:var(--cc);white-space:nowrap}
 #budget-total{
   margin-top:2vh;text-align:center;flex-shrink:0;
-  font-size:clamp(1rem,1.5vw,1.4rem);color:rgba(255,255,255,.4);
+  font-size:clamp(1rem,1.5vw,1.4rem);color:rgba(255,255,255,.75);
 }
 #budget-total strong{display:inline;font-size:clamp(2.5rem,5vw,5rem);
   font-weight:900;color:#ffc300;letter-spacing:-1px;margin-left:.5rem}
-#budget-note{font-size:clamp(.7rem,1vw,1rem);color:rgba(255,255,255,.18);margin-top:.4rem}
+#budget-note{font-size:clamp(.7rem,1vw,1rem);color:rgba(255,255,255,.5);margin-top:.4rem}
 #budget-close{
   position:absolute;top:1.5rem;right:1.5rem;
   width:38px;height:38px;border-radius:50%;
@@ -466,7 +466,7 @@ html,body{width:100%;height:100%;overflow:hidden;
 #gantt-title{font-size:clamp(2.2rem,4vw,4rem);font-weight:900;color:#fff;
   margin-bottom:.2rem;text-align:center;flex-shrink:0}
 #gantt-sub{font-size:clamp(.8rem,1.2vw,1.1rem);letter-spacing:3px;text-transform:uppercase;
-  color:rgba(255,255,255,.25);margin-bottom:2vh;text-align:center;flex-shrink:0}
+  color:rgba(255,255,255,.6);margin-bottom:2vh;text-align:center;flex-shrink:0}
 
 /* Gantt chart — flex:1 tölti ki a maradék teret */
 #gantt-wrap{
@@ -474,12 +474,12 @@ html,body{width:100%;height:100%;overflow:hidden;
   display:flex;flex-direction:column;
 }
 .gantt-day-header{
-  display:grid;grid-template-columns:18vw repeat(5,1fr);
+  display:grid;grid-template-columns:20vw repeat(5,1fr);
   gap:3px;margin-bottom:6px;flex-shrink:0;
 }
 .gantt-day-label{
-  text-align:center;font-size:clamp(.7rem,1.1vw,1rem);letter-spacing:2px;text-transform:uppercase;
-  color:rgba(255,255,255,.35);padding:6px 0;
+  text-align:center;font-size:clamp(.75rem,1.1vw,1rem);letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.7);padding:6px 0;
 }
 .gantt-day-label.today{color:#ffc300;font-weight:700}
 .gantt-rows-wrap{
@@ -487,19 +487,19 @@ html,body{width:100%;height:100%;overflow:hidden;
   display:flex;flex-direction:column;gap:3px;
 }
 .gantt-row{
-  display:grid;grid-template-columns:18vw repeat(5,1fr);
+  display:grid;grid-template-columns:20vw repeat(5,1fr);
   gap:3px;flex:1;min-height:0;align-items:stretch;
 }
 .gantt-label{
-  font-size:clamp(.85rem,1.3vw,1.2rem);color:rgba(255,255,255,.6);
+  font-size:clamp(.9rem,1.3vw,1.2rem);color:rgba(255,255,255,.9);font-weight:600;
   padding-right:.7rem;text-align:right;display:flex;align-items:center;justify-content:flex-end;
-  line-height:1.2;
+  line-height:1.25;word-break:keep-all;
 }
-.gantt-cell{border-radius:5px;background:rgba(255,255,255,.04)}
+.gantt-cell{border-radius:5px;background:rgba(255,255,255,.07)}
 .gantt-bar{
   border-radius:5px;
   display:flex;align-items:center;padding:0 1vw;
-  font-size:clamp(.7rem,1.1vw,1rem);font-weight:700;letter-spacing:1px;
+  font-size:clamp(.75rem,1.1vw,1rem);font-weight:700;letter-spacing:1px;
   color:#000;white-space:nowrap;overflow:hidden;
   grid-column: var(--gc-start) / span var(--gc-span);
 }
@@ -510,7 +510,7 @@ html,body{width:100%;height:100%;overflow:hidden;
   border-top:1px solid rgba(255,255,255,.07);padding-top:1.5vh;
 }
 #team-title{font-size:clamp(.7rem,1vw,.95rem);letter-spacing:3px;text-transform:uppercase;
-  color:rgba(255,255,255,.25);margin-bottom:1vh;text-align:center}
+  color:rgba(255,255,255,.65);margin-bottom:1vh;text-align:center}
 #team-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;
 }
@@ -519,10 +519,10 @@ html,body{width:100%;height:100%;overflow:hidden;
   border-radius:10px;padding:.8rem 1.2rem;
 }
 .team-name{font-size:clamp(.95rem,1.4vw,1.3rem);font-weight:700;color:#fff;margin-bottom:.2rem}
-.team-school{font-size:clamp(.7rem,1vw,.9rem);color:rgba(255,255,255,.3);line-height:1.4}
+.team-school{font-size:clamp(.7rem,1vw,.9rem);color:rgba(255,255,255,.65);line-height:1.4}
 .team-mentor{
   margin-top:1vh;text-align:center;font-size:clamp(.75rem,1.1vw,1rem);
-  color:rgba(255,195,0,.6);letter-spacing:1px;
+  color:rgba(255,195,0,.9);letter-spacing:1px;
 }
 
 /* ══════════════════════════════════════
@@ -627,64 +627,66 @@ html,body{width:100%;height:100%;overflow:hidden;
   width:32px;height:32px;line-height:32px;font-size:1.1rem;
 }
 
-/* Right: info panel */
+/* Right: info panel — fixed height, no overflow */
 #preview-info{
   flex:1;display:flex;flex-direction:column;
-  padding:3rem 3.5rem 2.5rem;min-width:0;
-  overflow-y:auto;justify-content:center;
+  padding:2vh 3vw 2vh;min-width:0;
+  overflow:hidden;
+  height:100%;box-sizing:border-box;
 }
 #preview-badge{
-  display:inline-block;padding:7px 18px;border-radius:5px;
-  font-size:.9rem;letter-spacing:2.5px;font-weight:800;
-  text-transform:uppercase;color:#000;margin-bottom:1.4rem;
-  align-self:flex-start;
+  display:inline-block;padding:5px 14px;border-radius:5px;
+  font-size:clamp(.7rem,1vw,.95rem);letter-spacing:2px;font-weight:800;
+  text-transform:uppercase;color:#000;margin-bottom:1vh;
+  align-self:flex-start;flex-shrink:0;
 }
 #preview-title{
-  font-size:clamp(2.8rem,4.5vw,5rem);font-weight:900;color:#fff;
-  line-height:1.0;margin-bottom:.7rem;
+  font-size:clamp(1.6rem,3.2vw,3.5rem);font-weight:900;color:#fff;
+  line-height:1.05;margin-bottom:.5vh;flex-shrink:0;
 }
 #preview-sub{
-  font-size:1.1rem;color:rgba(255,255,255,.35);
-  letter-spacing:3px;text-transform:uppercase;margin-bottom:1.8rem;
+  font-size:clamp(.75rem,1vw,1rem);color:rgba(255,255,255,.35);
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5vh;
+  flex-shrink:0;
 }
 #preview-desc{
-  flex:1;max-width:100%;
-  display:flex;flex-direction:column;gap:var(--pb-gap,.8rem);
-  overflow-y:auto;
+  flex:1;min-height:0;
+  display:flex;flex-direction:column;gap:var(--pb-gap,1vh);
+  overflow:hidden;
 }
 #preview-desc .pb{
-  display:flex;align-items:baseline;gap:.8rem;
+  display:flex;align-items:baseline;gap:.7rem;
   font-size:var(--pb-size,2vh);font-weight:600;
-  color:rgba(255,255,255,.88);line-height:1.35;
+  color:rgba(255,255,255,.88);line-height:1.3;
   flex-shrink:0;
 }
 #preview-desc .pb::before{
   content:'';
   flex-shrink:0;
-  width:11px;height:11px;border-radius:50%;
+  width:10px;height:10px;border-radius:50%;
   background:var(--cc);margin-top:.2em;
 }
 #preview-budget{
-  font-size:1.2rem;font-weight:700;color:var(--cc);
-  margin-top:1.8rem;padding-top:1.4rem;
+  font-size:clamp(.85rem,1.1vw,1.15rem);font-weight:700;color:var(--cc);
+  margin-top:1.5vh;padding-top:1.2vh;flex-shrink:0;
   border-top:1px solid rgba(255,255,255,.1);
 }
 #preview-budget span{color:rgba(255,255,255,.3);font-weight:400;margin-right:.5rem}
 #preview-actions{
-  display:flex;gap:.8rem;margin-top:1.5rem;
+  display:flex;gap:.6rem;margin-top:1.2vh;flex-shrink:0;
 }
 #preview-open-btn{
-  flex:1;padding:14px 20px;border-radius:8px;
+  flex:1;padding:10px 16px;border-radius:8px;
   border:none;cursor:pointer;
   background:var(--cc);color:#000;
-  font-size:.8rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+  font-size:clamp(.7rem,.85vw,.85rem);font-weight:800;letter-spacing:2px;text-transform:uppercase;
   transition:opacity .15s;
 }
 #preview-open-btn:hover{opacity:.85}
 #preview-close-btn{
-  padding:14px 18px;border-radius:8px;
+  padding:10px 14px;border-radius:8px;
   border:1px solid rgba(255,255,255,.15);background:transparent;
-  color:rgba(255,255,255,.5);font-size:.8rem;cursor:pointer;
+  color:rgba(255,255,255,.5);font-size:clamp(.7rem,.85vw,.85rem);cursor:pointer;
   transition:all .15s;
 }
 #preview-close-btn:hover{background:rgba(255,255,255,.07);color:#fff}
@@ -969,53 +971,63 @@ html,body{width:100%;height:100%;overflow:hidden;
 ══════════════════════════════════════════ */
 const CATS = [
   {name:'Energiarendszer', icon:'⚡', cc:'#ffc300',
-   sub:'Nulla emissziós önellátás · Mikrogrid · Green Hydrogen',
+   sub:'Zéró emissziós önellátás · Mikrogrid · Green Hydrogen',
    mainImg:'DAM_PIC/Naperőmű + Szélerőmű Park.png',
    budget:'55–104 Mrd Ft'},
   {name:'Okos közlekedés', icon:'🚌', cc:'#00c8ff',
-   sub:'Autonóm · GPS-mentes · Drón folyosók',
+   sub:'Autonóm buszok · Robotaxi · RFID utak · Drón folyosók',
    mainImg:'DAM_PIC/Autonóm elektromos buszok.png',
    budget:'21–40 Mrd Ft'},
+  {name:'Logisztika & posta', icon:'📦', cc:'#ff6b35',
+   sub:'ALZA robot-raktár · Drón posta · Robot kiszállítás',
+   mainImg:'DAM_PIC/DAM_NEXUS_AutomatizáltLogisztika.png',
+   budget:'42–68 Mrd Ft'},
   {name:'Hulladékgazdálkodás', icon:'♻️', cc:'#00ff99',
-   sub:'90% kevesebb gyűjtőjárat · Robot-válogató',
+   sub:'Pneumatikus · AI Smart Bin · Robot-válogató · WtE',
    mainImg:'DAM_PIC/Pneumatikus hulladékrendszer.png',
    budget:'15–27 Mrd Ft'},
   {name:'Élelmiszer & ellátás', icon:'🌿', cc:'#44dd66',
-   sub:'Vertikális farm · Robot kiszállítás · 365 nap',
+   sub:'Vertikális Farm · Okos hűtő · Drón-posta · Élelmiszer 24/7',
    mainImg:'DAM_PIC/Vertikális Farm.png',
    budget:'11–21 Mrd Ft'},
-  {name:'Logisztika & posta', icon:'📦', cc:'#ff6b35',
-   sub:'AS/RS robot-raktár · Drón-posta · QR-cím',
-   mainImg:'DAM_PIC/DAM_NEXUS_AutomatizáltLogisztika.png',
-   budget:'42–68 Mrd Ft'},
   {name:'Egészségügy', icon:'🏥', cc:'#ff4fa0',
-   sub:'DaVinci · AI diagnosztika · 90 mp-es drón-mentő',
+   sub:'DaVinci robot · AI diagnosztika · Telemedicina · Drón-mentő',
    mainImg:'DAM_PIC/Egészségügyi Centrum.png',
    budget:'36–58 Mrd Ft'},
   {name:'Sport & szabadidő', icon:'⚽', cc:'#a064ff',
-   sub:'Smart rekreáció · E-sport · Görkori Aréna',
-   mainImg:'DAM_PIC/SmartSportpályák.png',
+   sub:'Görkori Aréna · Smart Sportpályák · E-Sport · Uszoda',
+   mainImg:'DAM_PIC/E-SPORT ARÉNA.png',
    budget:'23–43 Mrd Ft'},
-  {name:'Smart City platform', icon:'🧠', cc:'#00dcc8',
-   sub:'Digital Twin · City OS · Citizen App',
-   mainImg:'DAM_PIC/Digitál Twin.png',
-   budget:'11–20 Mrd Ft'},
   {name:'Zöld infrastruktúra', icon:'🌳', cc:'#80ee60',
-   sub:'Zöld tetők · DAM Sétány · 1500 új fa',
+   sub:'DAM Sétány · Parkok · Szinva · Fitness · Okos bútorok',
    mainImg:'DAM_PIC/DAM Sétány — Fő zöld tengely.png',
    budget:'9–18 Mrd Ft'},
-  {name:'Gazdaság & közösség', icon:'💡', cc:'#f0b429',
-   sub:'Startup inkubátor · Blokklánc · Campus',
+  {name:'Smart City platform', icon:'🧠', cc:'#00dcc8',
+   sub:'Digital Twin · City OS · 5G · Citizen App · Kiberbiztonság',
+   mainImg:'DAM_PIC/Digitál Twin.png',
+   budget:'11–20 Mrd Ft'},
+  {name:'Városközpont', icon:'🏙️', cc:'#e040fb',
+   sub:'DAM Plaza · Mozi · Food Hall · Könyvtár · Tető-Park',
+   mainImg:'DAM_PIC/dampláza.png',
+   budget:'25–45 Mrd Ft'},
+  {name:'Kultúra & örökség', icon:'🎭', cc:'#ff8f00',
+   sub:'Fesztivál Aréna · Kultúrközpont · Múzeum · Makers District',
+   mainImg:'DAM_PIC/Acél Kultúrközpont.png',
+   budget:'19–36 Mrd Ft'},
+  {name:'Oktatás & közösség', icon:'💡', cc:'#f0b429',
+   sub:'Óvoda→Egyetem · Startup Hub · Blokklánc · Helyi valuta',
    mainImg:'DAM_PIC/Startup & Iroda Hub.png',
-   budget:'7–14 Mrd Ft'},
+   budget:'30–55 Mrd Ft'},
 ];
+
+
 
 const SLIDES = [
   // 0 — Energiarendszer
   {cat:0,img:'DAM_PIC/Naperőmű + Szélerőmű Park.png',
    title:'Naperőmű + Szélerőmű Park',
-   desc:'MW-os bifaciális napelempark a bontott ipari csarnokok helyén, Urban Wind Turbines kiegészítéssel. A felesleges energiát a hűtőtornyok pumpált vizes rendszere tárolja.',
-   cost:'~25–40 Mrd Ft'},
+   desc:'A fémszerkezetes, lebontott csarnokok helyén ground-mounted bifaciális napelempark épül. Urban wind turbines a szabad területeken. A felesleges energiát a hűtőtornyok pumpált vizes rendszere tárolja.',
+   cost:'~8–15 Mrd Ft'},
   {cat:0,img:'DAM_PIC/Bifaciális napelemek.png',
    title:'Bifaciális napelemek',
    desc:'Elő- és hátlap is termel. Szennyezett, lebontott talajon is telepíthető. Ground-mounted MW-os méretű park a bontott csarnokok helyén.',
@@ -1026,16 +1038,16 @@ const SLIDES = [
    cost:'~4–8 Mrd Ft'},
   {cat:0,img:'DAM_PIC/Hűtőtornyok.png',
    title:'Hűtőtornyok — gravitációs energiatároló',
-   desc:'Napelemes feleslegből vizet emelnek fel (Pumped Hydro Storage); csúcsidőben turbina termeli vissza az áramot. Az ikonikus tornyok új szerepben élnek tovább.',
-   cost:'~5–9 Mrd Ft'},
+   desc:'Az ikonikus tornyok megmaradnak — de új szerepet kapnak. Napelemes felesleg esetén vizet pumpálunk a tornyokba. Csúcsidőben a víz turbinán át folyik le → áramot termel.',
+   cost:'~6–10 Mrd Ft'},
   {cat:0,img:'DAM_PIC/Geotermikus hőszivattyú.png',
    title:'Geotermikus hőszivattyú',
-   desc:'A kristálytisztító és hűtőtornyok helyén talajba fúrt szondák. Télen fűtés, nyáron hűtés — az összes épülethez, CO₂-mentesen.',
-   cost:'~8–15 Mrd Ft'},
-  {cat:0,img:'DAM_PIC/Vehicle-to-Grid (V2G).png',
-   title:'Smart Grid + Vehicle-to-Grid (V2G)',
-   desc:'AI percenként egyensúlyozza a termelést és fogyasztást. A parkolt elektromos autók akkumulátora csúcsidőben pufferként szolgál.',
+   desc:'A miskolci geotermikus potenciál kihasználása: fűtés-hűtés, használati melegvíz 100%-ban megújuló forrásból. A Vasgyári Fürdőt is táplálja.',
    cost:'~3–6 Mrd Ft'},
+  {cat:0,img:'DAM_PIC/Vehicle-to-Grid (V2G).png',
+   title:'Vehicle-to-Grid (V2G)',
+   desc:'Az összes elektromos jármű akkumulátora egyszerre energiatároló is. Éjjel tölt, csúcsidőben visszaad a hálózatba — a flotta virtuális erőmű.',
+   cost:'~1–3 Mrd Ft'},
   {cat:0,img:'DAM_PIC/Hidrogén energiatárolás.png',
    title:'Green Hydrogen',
    desc:'A felesleges napenergiából elektrolízissel zöld hidrogén. Hosszú távú szezonális energiatárolás és ipari/közlekedési felhasználás.',
@@ -1062,86 +1074,86 @@ const SLIDES = [
    title:'AI forgalomirányítás',
    desc:'Pittsburgh SURTRAC-típusú rendszer: −25% menetidő, −40% várakozás, −20% CO₂. Minden lámpa valós idejű forgalom alapján dönt.',
    cost:'~2–4 Mrd Ft'},
+  {cat:1,img:'DAM_PIC/Kisvasút ipari örökség.png',
+   title:'Kisvasút — ipari örökség él tovább',
+   desc:'A meglévő iparvágányon turisztikai kisvasút a területen belül. Teherszállításhoz konténeres ipari vasút — kamion nélkül.',
+   cost:'~1,5–3 Mrd Ft'},
   {cat:1,img:'DAM_PIC/Drón folyosók.png',
    title:'Drón folyosók',
    desc:'A terület felett kijelölt légi sávok csomag- és orvosi ellátmány szállításhoz. Drón-mentő: AED 90 másodperc alatt bárhova.',
    cost:'~1–2 Mrd Ft'},
   {cat:1,img:'DAM_PIC/Kerékpár hálózat & Sharing.png',
    title:'Kerékpár hálózat & Sharing',
-   desc:'25 km kerékpárút, 15 dokkoló állomás appból kölcsönözhető e-bringákkal, zárt tárolókkal és kerékpárjavító állomásokkal.',
-   cost:'~1,5–3 Mrd Ft'},
-  {cat:1,img:'DAM_PIC/Kisvasút ipari örökség.png',
-   title:'Kisvasút — ipari örökség él tovább',
-   desc:'A meglévő iparvágányon turisztikai kisvasút a területen belül. Teherszállításhoz konténeres ipari vasút — kamion nélkül.',
+   desc:'Az egész területet lefedő, egybefüggő kerékpárút hálózat. 15 dokkoló állomás elektromos és normál kerékpárokkal, QR-kódos kölcsönzéssel.',
    cost:'~1,5–3 Mrd Ft'},
 
-  // 2 — Hulladékgazdálkodás
+  // 2 — Logisztika & posta
+  {cat:2,img:'DAM_PIC/DAM_NEXUS_AutomatizáltLogisztika.png',
+   title:'DAM NEXUS — Robot-raktár megaközpont',
+   desc:'A Középhengermű Alza-stílusú robotizált raktárrá alakul: AS/RS automatikus polcrendszer, daru-robotok, önjáró AGV-targoncák. A kiszállítást a területen belül drónok és járdai robotok végzik.',
+   cost:'~35–55 Mrd Ft'},
+  {cat:2,img:'DAM_PIC/Vertikális Farm.png',
+   title:'Vertikális Farm — automatizált ellátás',
+   desc:'Egykori ipari csarnokban AeroFarms/Plenty technológiájú vertikális farm. Robotizált betakarítás, automatikus csomagolás, közvetlen kiszállítás a raktárból.',
+   cost:'~5–9 Mrd Ft'},
+  {cat:2,img:'DAM_PIC/Robot házhozszállítás.png',
+   title:'Robot házhozszállítás',
+   desc:'Starship Technologies-típusú járdai robotok + drónok. QR-alapú digitális cím minden lakásnak. Nincs futár, nincs torlódás.',
+   cost:'~2–4 Mrd Ft'},
   {cat:2,img:'DAM_PIC/Pneumatikus hulladékrendszer.png',
    title:'Pneumatikus hulladékrendszer',
-   desc:'Föld alatti vákuumcsövek szállítják a szemetet a gyűjtőközpontba. Nincs kukásautó a közterületen. Envac-típus — Stockholm, Barcelona.',
+   desc:'Föld alatti vákuumcsövek szállítják a szemetet a gyűjtőközpontba. Nincs kukásautó a közterületen — Envac-típus, Stockholm, Barcelona.',
    cost:'~6–10 Mrd Ft'},
-  {cat:2,img:'DAM_PIC/AI-szenzoros smart bin.png',
-   title:'AI-szenzoros Smart Bin',
-   desc:'Ultrahangos töltöttségmérő + kamerás hulladékfelismerés. Csak akkor küld gyűjtőjáratot, ha teli — 30–50%-os útköltség-csökkentés.',
-   cost:'~1–2 Mrd Ft'},
   {cat:2,img:'DAM_PIC/Robot-hulladékválogató.png',
    title:'Robotizált hulladékválogató',
    desc:'Multiszpektrális kamera + robotkar: 99%-os tisztaságú anyagválogatás polimer-azonosítással. Éjjel-nappal, emberi beavatkozás nélkül.',
    cost:'~4–8 Mrd Ft'},
-  {cat:2,img:'DAM_PIC/Vasúti hulladékelszállítás.png',
+  {cat:2,img:'DAM_PIC/Vasgyári Vasútállomás.png',
+   title:'Vasúti logisztika — kamion nélkül',
+   desc:'A megújított vasútállomásról hulladék-konténerek és ipari áruk indulnak vasúton. A DAM logisztikai csomóponttá válik — TIR nélkül.',
+   cost:'~2–4 Mrd Ft'},
+
+  // 3 — Hulladékgazdálkodás
+  {cat:3,img:'DAM_PIC/AI-szenzoros smart bin.png',
+   title:'AI-szenzoros Smart Bin',
+   desc:'Ultrahangos töltöttségmérő + kamerás hulladékfelismerés. Csak akkor küld gyűjtőjáratot, ha teli — 30–50%-os útköltség-csökkentés.',
+   cost:'~1–2 Mrd Ft'},
+  {cat:3,img:'DAM_PIC/Vasúti hulladékelszállítás.png',
    title:'Vasúti hulladékelszállítás',
    desc:'A gyár meglévő belső vasúthálózatán konténeres elszállítás. Nincs kamion a városban — tisztán vasúton.',
    cost:'~2–4 Mrd Ft'},
-  {cat:2,img:'DAM_PIC/Waste-to-Energy.png',
+  {cat:3,img:'DAM_PIC/Waste-to-Energy.png',
    title:'Waste-to-Energy',
    desc:'A nem újrahasznosítható frakció helyi erőműben elégetve áramot termel. Nulla lerakó, zárt körforgás — a DAM szemete saját energiájává válik.',
    cost:'~3–5 Mrd Ft'},
 
-  // 3 — Élelmiszer & ellátás
-  {cat:3,img:'DAM_PIC/Vertikális Farm.png',
-   title:'Vertikális Farm',
-   desc:'LED-es, aeroponikus beltéri termesztés ipari csarnokban. Évi 365 nap, 95%-kal kevesebb víz mint hagyományos termesztésnél. AeroFarms/Plenty technológia.',
-   cost:'~5–9 Mrd Ft'},
-  {cat:3,img:'DAM_PIC/DAM_NEXUS_AutomatizáltLogisztika.png',
-   title:'Automatizált élelmiszerraktár',
-   desc:'AS/RS rendszer: robotok pakolnak, válogatnak, hűtenek. A vertikális farmról közvetlenül az automatizált raktárba — nulla élelmiszer-pazarlás.',
-   cost:'~3–5 Mrd Ft'},
-  {cat:3,img:'DAM_PIC/Robot házhozszállítás.png',
-   title:'Robot házhozszállítás',
-   desc:'Starship Technologies-típusú járdai robotok + drónok. QR-alapú digitális cím minden lakásnak. Nincs futár, nincs torlódás.',
-   cost:'~2–4 Mrd Ft'},
-  {cat:3,img:'DAM_PIC/okoshűtő.png',
+  // 4 — Élelmiszer & ellátás
+  {cat:4,img:'DAM_PIC/okoshűtő.png',
    title:'Okos hűtőszekrény hálózat',
    desc:'QR-kódos önkiszolgáló automaták sarkokon, napszakosan frissített készlettel a vertikális farmról. Friss élelmiszer 24/7.',
    cost:'~0,5–1 Mrd Ft'},
-  {cat:3,img:'DAM_PIC/damfoodhall.png',
+  {cat:4,img:'DAM_PIC/drón-postahivata.png',
+   title:'Drón-postahivatal & élelmiszer-kiszállítás',
+   desc:'Csomag be: automata. Csomag ki: drón viszi a területen belüli lakcímre percek alatt. Digitális postacím — minden lakáshoz QR azonosító.',
+   cost:'~3–6 Mrd Ft'},
+  {cat:4,img:'DAM_PIC/damfoodhall.png',
    title:'DAM Food Hall — farm-to-table',
    desc:'Ipari étkezőcsarnok robot konyhával (Miso Robotics-típus), QR menüvel, allergia-nyilvántartással. A farm alapanyagai egyenesen az asztalra kerülnek.',
    cost:'~3–5 Mrd Ft'},
-
-  // 4 — Logisztika & posta
-  {cat:4,img:'DAM_PIC/DAM_NEXUS_AutomatizáltLogisztika.png',
-   title:'DAM NEXUS — Robot-raktár megaközpont',
-   desc:'A Középhengermű AS/RS robot-raktárrá alakul: daru-robotok, AGV-targoncák, automatikus csomagoló. Az Alza-modell a DAM-ban, és ami azon is túlmutat.',
-   cost:'~35–55 Mrd Ft'},
-  {cat:4,img:'DAM_PIC/drón-postahivata.png',
-   title:'Drón-postahivatal',
-   desc:'Csomag be: automata. Csomag ki: drón viszi a területen belüli lakcímre percek alatt. Digitális postacím — minden lakáshoz QR azonosító.',
-   cost:'~3–6 Mrd Ft'},
-  {cat:4,img:'DAM_PIC/Robotaxi  pod-flotta.png',
-   title:'Önjáró logisztikai robotok',
-   desc:'Járdán közlekedő kis platórobotok nehezebb csomagokhoz. Reverse logistics: visszáruk és újrahasznosításra szánt eszközök automatikus begyűjtése.',
+  {cat:4,img:'DAM_PIC/dampláza.png',
+   title:'DAM Plaza — kasszamentes bevásárlás',
+   desc:'Amazon Go-stílusú kasszamentes áruházak: bejössz, elveszed, kisétálsz — az app automatikusan fizet. Arcfelismerés, robot takarítás, AI készletkezelés.',
+   cost:'~8–14 Mrd Ft'},
+  {cat:4,img:'DAM_PIC/DAM Zöld Parkok & Pihenőterek.png',
+   title:'Közösségi kertek & urban farming',
+   desc:'A lebontott épületek helyén zöldfelületek: bérelhető ágyások, közösségi kertek, esővízgyűjtő öntözőrendszer. Kiegészíti a vertikális farmot.',
    cost:'~2–4 Mrd Ft'},
-  {cat:4,img:'DAM_PIC/Vasgyári Vasútállomás.png',
-   title:'Vasúti logisztika — kamion nélkül',
-   desc:'A megújított vasútállomásról hulladék-konténerek és ipari áruk indulnak vasúton. A DAM logisztikai csomóponttá válik — TIR nélkül.',
-   cost:'~4–7 Mrd Ft'},
 
   // 5 — Egészségügy
   {cat:5,img:'DAM_PIC/Egészségügyi Centrum.png',
    title:'Egészségügyi Centrum',
-   desc:'Csúcstechnológiás intézmény a DAM szívében — robot-sebészet, AI diagnosztika, telemedicina és drón-mentő egy helyen. Az egykori Vasgyári Fürdő épületében.',
-   cost:'~25–40 Mrd Ft'},
+   desc:'Csúcstechnológiás orvosi létesítmény: DaVinci robot minimálisan invazív műtétekhez, AI-alapú MRI/CT leletértékelés, telemedicina fülkék. Drón-mentőszolgálat: AED defibrillátor 90 mp alatt bárhova.',
+   cost:'~12–20 Mrd Ft'},
   {cat:5,img:'DAM_PIC/DaVinci robot sebészet.png',
    title:'DaVinci robot sebészet',
    desc:'Minimálisan invazív műtétek precíziós robot asszisztenciával. Kisebb seb, rövidebb gyógyulás, kevesebb kórházi nap.',
@@ -1162,194 +1174,178 @@ const SLIDES = [
    title:'Automata gyógyszerkiadó',
    desc:'Recept alapján automatikusan kiadja a gyógyszereket — appban nyomon követhető, várakozás nélkül. 24/7 elérhető.',
    cost:'~1–2 Mrd Ft'},
+  {cat:5,img:'DAM_PIC/Vasgyári Fürdő.png',
+   title:'Vasgyári Fürdő — Wellness Centrum',
+   desc:'Az egykori gyári fürdő rehabilitálva: geotermikus energiával fűtött medencék, fizioterápia, prevenciós vizsgálatok. Belső telemedicina fülkék szakorvosi konzultációhoz.',
+   cost:'~3–6 Mrd Ft'},
   {cat:5,img:'DAM_PIC/Wellness + geotermikus fürdő.png',
    title:'Wellness + geotermikus fürdő',
-   desc:'A Vasgyári Fürdő geotermikus energiával fűtött medencékkel, fizioterápiával és prevenciós szűrővizsgálatokkal éled újjá.',
+   desc:'Geotermikus energiával fűtött medencék, fizioterápia és prevenciós szűrővizsgálatok. Telemedicina fülkék 5G videókonsultációval.',
    cost:'~3–6 Mrd Ft'},
 
   // 6 — Sport & szabadidő
   {cat:6,img:'DAM_PIC/GörkoriArénaDiszkó.png',
    title:'Görkori Aréna + Diszkó',
-   desc:'Programozható RGB LED mennyezet, profi hangrendszer, smart belépő arcfelismeréssel. Nappal görkori pálya, este szórakozóhely.',
+   desc:'Nagy fedett görkori pálya programozható RGB LED mennyezettel és professzionális hangrendszerrel. Estébe nyúló bulizós görkorcsolyázás. Smart belépő arcfelismeréssel.',
    cost:'~3–5 Mrd Ft'},
   {cat:6,img:'DAM_PIC/SmartSportpályák.png',
    title:'Smart Sportpályák',
-   desc:'Tenisz, padel, pingpong, kosár, futsal — pályafoglalás appból. Szenzor-hálózat méri az ütések sebességét, AI edző valós idejű visszajelzést ad.',
+   desc:'Minden pálya appból foglalható. Beépített szenzor-hálózat méri az ütések sebességét, pörgetését, a labda pattanási helyét. AI edző valós idejű visszajelzést ad.',
    cost:'~1–2 Mrd Ft'},
-  {cat:6,img:'DAM_PIC/Szabadtéri Fitness Parkok.png',
-   title:'Szabadtéri Fitness Parkok',
-   desc:'6 fitness park a területen: crossfit, street workout, kültéri erőgépek — amelyek emberi erőből elektromos energiát termelnek.',
-   cost:'~0,8–1,5 Mrd Ft'},
-  {cat:6,img:'DAM_PIC/E-SPORT ARÉNA.png',
-   title:'E-Sport Aréna',
-   desc:'Professzionális versenyközpont ipari csarnokban: 5G ultra-low latency, 500+ állomás, nézőtér 1000+ főnek. Streaming stúdióval.',
-   cost:'~2–4 Mrd Ft'},
   {cat:6,img:'DAM_PIC/Okos Uszoda.png',
    title:'Okos Uszoda',
-   desc:'Geotermikus energiával fűtött medence. IoT szenzorok mérik a pH-t, hőmérsékletet, klórt — automatikus vegyszerdagasztás. AI kamera elemzi az úszók technikáját.',
+   desc:'Geotermikus energiával fűtött medence — télen sem drága. IoT szenzorok folyamatosan mérik a pH-t, hőmérsékletet, klórt, automatikusan adagolják a vegyszert.',
    cost:'~4–7 Mrd Ft'},
-  {cat:6,img:'DAM_PIC/DAM Fesztivál Aréna.png',
-   title:'DAM Fesztivál Aréna',
-   desc:'Szabadtéri nagyszínpad 5–15 000 főnek. Zenei fesztiválok, open-air filmvetítések, városi ünnepek — az ipari táj mint díszlet.',
-   cost:'~4–8 Mrd Ft'},
+  {cat:6,img:'DAM_PIC/E-SPORT ARÉNA.png',
+   title:'E-sport Aréna',
+   desc:'Professzionális e-sport versenyközpont egy egykori ipari csarnokban. 5G ultra-low latency hálózat, 500+ PC/konzol állomás, livestream stúdió. Nézőtér 1000+ főnek.',
+   cost:'~2–4 Mrd Ft'},
+  {cat:6,img:'DAM_PIC/Szabadtéri Fitness Parkok.png',
+   title:'Szabadtéri Fitness Parkok',
+   desc:'Hat különböző fitness park a terület különböző pontjain: crossfit zóna, kültéri erőgépek kinetikus energiatermelőkkel, street workout, nyugdíjas torna, gyerek kalandpark.',
+   cost:'~0,8–1,5 Mrd Ft'},
 
-  // 7 — Smart City platform
-  {cat:7,img:'DAM_PIC/Digitál Twin.png',
-   title:'Digital Twin — a DAM digitális mása',
-   desc:'Az egész 130 hektár valós idejű digitális mása. Városmérnökök szimulálhatnak katasztrófát, energiakimaradást, tömegrendezvényt — kockázat nélkül.',
-   cost:'~6–10 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/digital twin.png',
-   title:'Digital Twin vezérlőközpont',
-   desc:'A digitális iker operátori nézete: térkép, események, energia, közlekedés és karbantartási riasztások egyetlen döntéstámogató felületen.',
-   cost:'~2–4 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/cityos.png',
-   title:'City OS / Adat-platform',
-   desc:'Minden szenzor, kamera, eszköz egyetlen platformra fut. Nyílt API-val harmadik fejlesztőknek — startup ökoszisztéma alapja.',
-   cost:'~3–6 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/5g+lorawan.png',
-   title:'5G + LoRaWAN hálózat',
-   desc:'Az összes IoT-eszköz teljes lefedése. 5G az autonóm közlekedésnek, LoRa az energiaszenzoroknak és a szenzorháló elemeinek.',
-   cost:'~2–4 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/citizen app.png',
-   title:'Citizen App',
-   desc:'Lakóknak: közlekedés, hulladék, egészségügy, sport foglalás, energia-dashboard, közösségi bejelentés — egy helyen, egy appban.',
+  // 7 — Zöld infrastruktúra
+  {cat:7,img:'DAM_PIC/DAM Sétány — Fő zöld tengely.png',
+   title:'DAM Sétány — Fő zöld tengely',
+   desc:'A terület teljes szélességét átszelő, kelet–nyugat irányú zöld főtengely. 6 méter széles kerékpárút, 4 méter sétány, kétoldalt fasor (1 500 új fa). Okos közvilágítás, töltős padok.',
+   cost:'~3–5 Mrd Ft'},
+  {cat:7,img:'DAM_PIC/Szinva Zöldfolyosó kapcsolat.png',
+   title:'Szinva Zöldfolyosó kapcsolat',
+   desc:'A DAM területét a Szinva-patak völgyéhez összekötő zöld ökológiai folyosó. Vízparti sétány, horgászhelyek, madármegfigyelő pontok. A patak medre renaturalizálva.',
+   cost:'~1,5–3 Mrd Ft'},
+  {cat:7,img:'DAM_PIC/Okos Közvilágítás & Smart Bútorok.png',
+   title:'Okos Közvilágítás & Smart Bútorok',
+   desc:'Az egész terület közterületein okos LED lámpaoszlopok: mozgásérzékelővel 20%-ra sötétítenek, ha senki nincs a közelben. Minden oszlopban WiFi hotspot, légszenzorok.',
    cost:'~1–2 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/AI prevektív karbantartás.png',
-   title:'AI prediktív karbantartás',
-   desc:'Szenzorok jelzik az épület, út vagy gép meghibásodását MIELŐTT megtörténik — nulla nem tervezett leállás.',
-   cost:'~1–2 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/kiber biztonság.png',
-   title:'Kiberbiztonság',
-   desc:'Zero Trust Architecture: minden IoT-eszköz auditált, titkosított kommunikáció. A város nem támadható le.',
-   cost:'~1–2 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/city os kamera.png',
-   title:'City OS kamera- és szenzorháló',
-   desc:'Forgalom, közbiztonság, zaj, levegőminőség és közterületi terhelés egy közös képi-szenzoros rétegben — a városüzemeltetés adatforrása.',
-   cost:'~1–2 Mrd Ft'},
-  // Városközpont funkciók
-  {cat:7,img:'DAM_PIC/dampláza.png',
-   title:'DAM Plaza',
-   desc:'Kasszamentes áruházak (Amazon Go-stílusú): bejössz, elveszed, kisétálsz — az app automatikusan fizet. Arcfelismerés, robot takarítás, AI készletkezelés.',
-   cost:'~8–14 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/damcinema.png',
-   title:'DAM Cinema',
-   desc:'4DX, IMAX, VR vetítőterem egykori ipari csarnokban. Jegyvásárlás appból, arcfelismerés belépésnél, AI ajánló rendszerrel.',
-   cost:'~5–9 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/Digitális Könyvtár.png',
-   title:'Digitális Könyvtár',
-   desc:'AI kutatósegéd chatbot, digitális archívum, 3D nyomtató és Maker Lab. Coworking, csendes olvasóterem, 24/7 önkiszolgáló könyvkölcsönző.',
-   cost:'~2–4 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/Önkormányzati & Pénzügyi Hub.png',
-   title:'Önkormányzati & Pénzügyi Hub',
-   desc:'Egyablakos ügyintézés: okmányiroda, adóhivatal digitalizálva. Robot bankfiók, drón posta, csomag automata 24/7. Mindent intézni lehet az appból is.',
-   cost:'~2–4 Mrd Ft'},
-  {cat:9,img:'DAM_PIC/Tető-Park & Közösségi Tér.png',
+  {cat:7,img:'DAM_PIC/Tető-Park & Közösségi Tér.png',
    title:'Tető-Park & Közösségi Tér',
    desc:'A Plaza és a mozi teteje zöld park: füves pihenők, fák, sétányok. Napelem borítja a nem zöld részeket. Smart padok beépített töltőkkel és WiFi-val.',
    cost:'~2–4 Mrd Ft'},
-  // Kultúra
-  {cat:7,img:'DAM_PIC/Acél Kultúrközpont.png',
-   title:'Acél Kultúrközpont',
-   desc:'Konferenciaterem 500 főnek, három kisebb szekciós terem, állandó ipartörténeti kiállítás. A nyerstégla falak és vas tartószerkezetek megmaradnak.',
+
+  // 8 — Smart City platform
+  {cat:8,img:'DAM_PIC/Digitál Twin.png',
+   title:'Digital Twin — a DAM digitális mása',
+   desc:'Az egész 130 hektár valós idejű digitális mása. Városmérnökök szimulálhatnak katasztrófát, energiakimaradást, tömegrendezvényt — kockázat nélkül.',
    cost:'~6–10 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/DAM Mozi & Médiaközpont.png',
-   title:'DAM Mozi & Médiaközpont',
-   desc:'8 termes multiplex mozi VIP szektorral, 4DX teremmel. Mellette podcast stúdiók, YouTube-creator terek, gaming zóna — bérelhető óránként.',
-   cost:'~5–9 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/Ipartörténeti Múzeum & Makers Space.png',
-   title:'Ipartörténeti Múzeum & Makers Space',
-   desc:'Sétálható AR-múzeum a régi acélmű világáról, eredeti gépekkel. FabLab és alkotóműhely: a múzeumi és makers funkciók közös csomópontja.',
+  {cat:8,img:'DAM_PIC/cityos.png',
+   title:'City OS / Adat-platform',
+   desc:'Minden szenzor, kamera, eszköz egyetlen platformra fut. Nyílt API-val harmadik fejlesztőknek — startup ökoszisztéma alapja.',
    cost:'~3–6 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/Makers District.png',
-   title:'Makers District',
-   desc:'Craft sörfőzde, specialty kávézó, étteremsor, kisüzemek, FabLab. A Konzumsor és kapcsolódó épületek kreatív negyeddé alakulnak — nyers ipari karakterrel.',
-   cost:'~2–5 Mrd Ft'},
-
-  // 8 — Zöld infrastruktúra
-  {cat:8,img:'DAM_PIC/DAM Sétány — Fő zöld tengely.png',
-   title:'DAM Sétány — Fő zöld tengely',
-   desc:'2,4 km-es K–Ny zöld főtengely: 6 m kerékpárút, 4 m sétány, 1 500 új fa, okos közvilágítás, beépített töltős padok, ivókutak.',
-   cost:'~3–5 Mrd Ft'},
-  {cat:8,img:'DAM_PIC/Kerékpár hálózat & Sharing.png',
-   title:'Kerékpár hálózat & Sharing',
-   desc:'25 km összefüggő kerékpárút hálózat, 15 dokkoló állomás e-bringákkal, QR-kódos kölcsönzés appból. Minden épületnél zárt, kamerás tároló.',
-   cost:'~1,5–3 Mrd Ft'},
-  {cat:8,img:'DAM_PIC/Szabadtéri Fitness Parkok.png',
-   title:'Szabadtéri Fitness Parkok',
-   desc:'6 különböző fitness park: crossfit, street workout, nyugdíjas torna, gyerek kalandpark. Kinetikus gépek emberi erőből elektromosságot termelnek.',
-   cost:'~0,8–1,5 Mrd Ft'},
-  {cat:8,img:'DAM_PIC/DAM Zöld Parkok & Pihenőterek.png',
-   title:'Zöld Parkok & Pihenőterek',
-   desc:'18 ha zöldfelület: ligetek, tematikus parkok, közösségi kertek bérelhető ágyásokkal. Esővízgyűjtő öntözőrendszer. IoT kukák és padok.',
+  {cat:8,img:'DAM_PIC/5g+lorawan.png',
+   title:'5G + LoRaWAN hálózat',
+   desc:'Az összes IoT-eszköz teljes lefedése. 5G az autonóm közlekedésnek, LoRa az energiaszenzoroknak és a szenzorháló elemeinek.',
    cost:'~2–4 Mrd Ft'},
-  {cat:8,img:'DAM_PIC/Szinva Zöldfolyosó kapcsolat.png',
-   title:'Szinva Zöldfolyosó-kapcsolat',
-   desc:'A DAM és a Szinva-patak között zöld ökológiai folyosó: vízparti sétány, renaturalizált patak, árvízi tározó — szárazon rekreációs tó.',
-   cost:'~1,5–3 Mrd Ft'},
-  {cat:8,img:'DAM_PIC/Okos Közvilágítás & Smart Bútorok.png',
-   title:'Okos Közvilágítás & Smart Bútorok',
-   desc:'IoT LED lámpaoszlopok mozgásérzékelővel, WiFi hotspottal, légszenzorokkal. Napelemes padok USB és Qi töltőkkel — az adatok az appban láthatók.',
+  {cat:8,img:'DAM_PIC/citizen app.png',
+   title:'Citizen App',
+   desc:'Lakóknak: közlekedés, hulladék, egészségügy, sport foglalás, energia-dashboard, közösségi bejelentés — egy helyen, egy appban.',
    cost:'~1–2 Mrd Ft'},
+  {cat:8,img:'DAM_PIC/AI prevektív karbantartás.png',
+   title:'AI prediktív karbantartás',
+   desc:'Szenzorok jelzik az épület, út vagy gép meghibásodását MIELŐTT megtörténik — nulla nem tervezett leállás.',
+   cost:'~1–2 Mrd Ft'},
+  {cat:8,img:'DAM_PIC/kiber biztonság.png',
+   title:'Kiberbiztonság',
+   desc:'Zero Trust Architecture: minden IoT-eszköz auditált, titkosított kommunikáció. A város nem támadható le.',
+   cost:'~1–2 Mrd Ft'},
+  {cat:8,img:'DAM_PIC/city os kamera.png',
+   title:'City OS kamera- és szenzorháló',
+   desc:'Forgalom, közbiztonság, zaj, levegőminőség és közterületi terhelés egy közös képi-szenzoros rétegben — a városüzemeltetés adatforrása.',
+   cost:'~1–2 Mrd Ft'},
+  {cat:8,img:'DAM_PIC/digital twin.png',
+   title:'Digital Twin vezérlőközpont',
+   desc:'A digitális iker operátori nézete: térkép, események, energia, közlekedés és karbantartási riasztások egyetlen döntéstámogató felületen.',
+   cost:'~2–4 Mrd Ft'},
 
-  // 9 — Gazdaság & közösség
-  // Épületek
-  {cat:9,img:'DAM_PIC/Volt Keleti Erőmű.png',
-   title:'Volt Keleti Erőmű — FabLab & Gyártópark',
-   desc:'FabLab + digitális gyár: KKV-k bérelnek gyártási kapacitást. CNC marás, lézervágás, fémnyomtatás, robotizált hegesztőcellák. Miskolci Egyetem közös kutatólabor.',
-   cost:'~4–8 Mrd Ft'},
-  {cat:9,img:'DAM_PIC/Vasgyári Fürdő.png',
-   title:'Vasgyári Fürdő — Wellness Centrum',
-   desc:'Az egykori gyári fürdő rehabilitálva: geotermikus fűtésű medencék, fizioterápia, prevenciós vizsgálatok. Telemedicina fülkék 5G videókonsultációval.',
-   cost:'~3–6 Mrd Ft'},
+  // 9 — Városközpont
+  {cat:9,img:'DAM_PIC/Önkormányzati & Pénzügyi Hub.png',
+   title:'Önkormányzati & Pénzügyi Hub',
+   desc:'Egyablakos ügyintézés: okmányiroda, adóhivatal digitalizálva. Robot bankfiók, drón posta, csomag automata 24/7. Mindent intézni lehet az appból is.',
+   cost:'~2–4 Mrd Ft'},
+  {cat:9,img:'DAM_PIC/Digitális Könyvtár.png',
+   title:'Digitális Könyvtár',
+   desc:'AI kutatósegéd chatbot, digitális archívum, 3D nyomtató és Maker Lab. Coworking, csendes olvasóterem, 24/7 önkiszolgáló könyvkölcsönző.',
+   cost:'~2–4 Mrd Ft'},
+  {cat:9,img:'DAM_PIC/damcinema.png',
+   title:'DAM Cinema',
+   desc:'4DX, IMAX, VR vetítőterem egykori ipari csarnokban. Jegyvásárlás appból, arcfelismerés belépésnél, AI ajánló rendszerrel.',
+   cost:'~5–9 Mrd Ft'},
   {cat:9,img:'DAM_PIC/DAM Lakónegyed.png',
    title:'DAM Lakónegyed',
-   desc:'Energiapozitív lakóépületek BIPV homlokzattal, okos kapuval, EV töltőkkel. Közösségi tetőkert, coworking, gyerekjátszótér és sharing-kerékpár minden háztömbben.',
-   cost:'~40–80 Mrd Ft'},
-  // Oktatás
-  {cat:9,img:'DAM_PIC/smartóvoda.png',
+   desc:'A rehabilitált területen 800–1200 korszerű lakás épül BIPV homlokzattal, okosablakokkal. Minden lakáshoz digitális postacím és QR-azonosító. Citizen App: energia, közösség, szolgáltatások.',
+   cost:'~25–40 Mrd Ft'},
+
+  // 10 — Kultúra & örökség
+  {cat:10,img:'DAM_PIC/DAM Fesztivál Aréna.png',
+   title:'DAM Fesztivál Aréna',
+   desc:'A lebontott csarnokok helyén kialakított szabadtéri rendezvénytér. Moduláris színpad, fedett nézőtér-szektorok, LED-falak. Zenei fesztiválok, open-air filmvetítések, városi ünnepek.',
+   cost:'~4–8 Mrd Ft'},
+  {cat:10,img:'DAM_PIC/Acél Kultúrközpont.png',
+   title:'Acél Kultúrközpont',
+   desc:'A Keleti Erőmű valamelyik szárnyában multifunkciós kulturális centrum. Konferenciaterem 500 főnek, három kisebb szekciós terem, állandó ipartörténeti kiállítás.',
+   cost:'~6–10 Mrd Ft'},
+  {cat:10,img:'DAM_PIC/DAM Mozi & Médiaközpont.png',
+   title:'DAM Mozi & Médiaközpont',
+   desc:'Modern 8 termes multiplex mozi VIP szektorral, 4DX teremmel és gyerekmozival. Mellette médiaközpont: podcast stúdiók, YouTube-creator terek, gaming zóna.',
+   cost:'~5–9 Mrd Ft'},
+  {cat:10,img:'DAM_PIC/Ipartörténeti Múzeum & Makers Space.png',
+   title:'Ipartörténeti Múzeum & Makers Space',
+   desc:'A védett épületekben sétálható ipari örökség-múzeum: AR-appban a látogató virtuálisan látja az acélmű fénykorát. Mellette FabLab és alkotóműhely.',
+   cost:'~3–6 Mrd Ft'},
+  {cat:10,img:'DAM_PIC/Makers District.png',
+   title:'Makers District',
+   desc:'A Konzumsor és a kapcsolódó ipari épületek kreatív negyeddé alakulnak: craft sörfőzde, specialty kávézó, étteremsor, kisüzemek, FabLab.',
+   cost:'~2–5 Mrd Ft'},
+  {cat:10,img:'DAM_PIC/Kulturális Negyed.png',
+   title:'Kulturális Negyed',
+   desc:'Az ipari csarnokok adottságai — hatalmas belmagasság, acélszerkezet, ipartörténeti légkör — egyedülállóan alkalmasak kulturális célra. Ipartörténeti múzeum interaktív AR/VR kiállítással.',
+   cost:'~6–12 Mrd Ft'},
+
+  // 11 — Oktatás & közösség
+  {cat:11,img:'DAM_PIC/smartóvoda.png',
    title:'DAM Smart Óvoda',
    desc:'Zöld tetőkert, IoT beléptetőrendszer, robot asszisztens fejlesztő játékokhoz. A gyerekek maguk termesztik a zöldséget a mini vertikális farmon.',
    cost:'~1–2 Mrd Ft'},
-  {cat:9,img:'DAM_PIC/digitálisáltalánosiskola.png',
+  {cat:11,img:'DAM_PIC/digitálisáltalánosiskola.png',
    title:'Digitális Általános Iskola',
    desc:'Papírmentes iskola tabletekkel, AI személyre szabott feladatokkal, VR tanteremmel. Robot kódolás szakkör már 1. osztálytól.',
    cost:'~2–4 Mrd Ft'},
-  {cat:9,img:'DAM_PIC/digitálisgimnázium.png',
+  {cat:11,img:'DAM_PIC/digitálisgimnázium.png',
    title:'Digitális Gimnázium',
    desc:'STEM fókuszú középiskola saját FabLabbal, startup szakkörrel és közös projektekkel a Miskolci Egyetemmel. Blockchain alapú digitális bizonyítvány.',
    cost:'~3–5 Mrd Ft'},
-  {cat:9,img:'DAM_PIC/egyetemlabor.png',
+  {cat:11,img:'DAM_PIC/egyetemlabor.png',
    title:'Miskolci Egyetem Kihelyezett Labor',
    desc:'Smart City labor valódi városadatokon, robotikai tesztpálya, Digital Twin VR-terem. Hallgatók valós ipari projekteken dolgoznak.',
    cost:'~3–6 Mrd Ft'},
-  {cat:9,img:'DAM_PIC/ipar4.0.png',
+  {cat:11,img:'DAM_PIC/ipar4.0.png',
    title:'Ipar 4.0 Átképző Centrum',
-   desc:'Átképzés az Ipar 4.0 munkahelyekre. VR-alapú szimulációs oktatás (robot programozás, CNC kezelés), AI és kiberbiztonság tanfolyamok. EU-s finanszírozású.',
+   desc:'Átképzés az Ipar 4.0 munkahelyekre. VR-alapú szimulációs oktatás: robot programozás, CNC kezelés, AI és kiberbiztonság tanfolyamok. EU-s finanszírozású.',
    cost:'~2–4 Mrd Ft'},
-  {cat:9,img:'DAM_PIC/Startup & Iroda Hub.png',
-   title:'Startup & Iroda Hub',
-   desc:'Az egykori ipari csarnokok innovációs laborokká alakulnak. Mentorprogram, prototípus labor, kockázati tőke — észak-magyarországi startup-hub.',
-   cost:'~4–8 Mrd Ft'},
-  {cat:9,img:'DAM_PIC/Oktatási Campus.png',
-   title:'Digitális készségközpont',
-   desc:'Átképzés az Ipar 4.0 munkahelyekre. VR-alapú szimulációs oktatás, robotika workshop — a Miskolci Egyetemmel közösen.',
-   cost:'~3–6 Mrd Ft'},
-  {cat:9,img:'DAM_PIC/Blokklánc ingatlan-nyilvántartás.png',
-   title:'Blokklánc ingatlan-nyilvántartás',
-   desc:'A 144 tulajdonos osztatlan közös tulajdon kezelése transzparensen, digitálisan. Minden tranzakció auditálható és visszakereshető.',
-   cost:'~0,5–1 Mrd Ft'},
-  {cat:9,img:'DAM_PIC/Helyi valuta  pontrendszer.png',
-   title:'Helyi valuta & pontrendszer',
-   desc:'Fenntartható viselkedés jutalmazása: tömegközlekedés, szelektív hulladék, kerékpározás → kedvezmények és helyi valuta.',
-   cost:'~0,5–1 Mrd Ft'},
-  {cat:9,img:'DAM_PIC/Kulturális Negyed.png',
-   title:'Városközpont & kultúra',
-   desc:'Pláza, mozi, étterem, fesztivál — smart módra. Az ipari örökség falai között új közösségi és kulturális élet virágzik.',
-   cost:'~10–18 Mrd Ft'},
-  {cat:9,img:'DAM_PIC/steamkalandpark.png',
+  {cat:11,img:'DAM_PIC/steamkalandpark.png',
    title:'STEAM Kalandpark',
    desc:'Kültéri interaktív kalandpark gyerekeknek: megmászható acél szerkezetek, mini napelem-készlet összerakás, programozható LED játékok.',
    cost:'~1–2 Mrd Ft'},
+  {cat:11,img:'DAM_PIC/Startup & Iroda Hub.png',
+   title:'Startup & Iroda Hub',
+   desc:'Az egykori irodaépületek és kisebb csarnokok innovációs parkká alakulnak. Startup inkubátor: mentorprogram, kockázati tőke kapcsolat, prototípus labor.',
+   cost:'~3–6 Mrd Ft'},
+  {cat:11,img:'DAM_PIC/Oktatási Campus.png',
+   title:'Oktatási Campus',
+   desc:'A Miskolci Egyetemmel közös kutatási és oktatási kampusz. Smart City labor: valódi város adatain dolgozó hallgatók. Robotikai és automatizálási centrum.',
+   cost:'~4–8 Mrd Ft'},
+  {cat:11,img:'DAM_PIC/Blokklánc ingatlan-nyilvántartás.png',
+   title:'Blokklánc ingatlan-nyilvántartás',
+   desc:'A 144 tulajdonos osztatlan közös tulajdon kezelése transzparensen, digitálisan. Minden tranzakció auditálható és visszakereshető.',
+   cost:'~0,5–1 Mrd Ft'},
+  {cat:11,img:'DAM_PIC/Helyi valuta  pontrendszer.png',
+   title:'Helyi valuta & pontrendszer',
+   desc:'Fenntartható viselkedés jutalmazása: tömegközlekedés, szelektív hulladék, kerékpározás → kedvezmények és helyi valuta.',
+   cost:'~0,5–1 Mrd Ft'},
+  {cat:11,img:'DAM_PIC/Volt Keleti Erőmű.png',
+   title:'Volt Keleti Erőmű — FabLab & Gyártópark',
+   desc:'FabLab + digitális gyár: KKV-k bérelnek gyártási kapacitást. CNC marás, lézervágás, fémnyomtatás, robotizált hegesztőcellák.',
+   cost:'~4–8 Mrd Ft'},
 ];
 
 const BUDGET_DATA = [
@@ -1772,12 +1768,15 @@ function openCat(ci){
   const previewItems = SLIDES.filter(s=>s.cat===ci);
   const descEl = document.getElementById('preview-desc');
   descEl.innerHTML = previewItems.map(s=>`<div class="pb">${s.title}</div>`).join('');
-  // Scale font based on item count so everything fits in ~50vh
+  // Available desc height ≈ 55vh (100vh minus badge/title/sub/budget/actions ~45vh)
+  // Each row = fontSize * lineHeight + gap
   const n = previewItems.length;
-  const fsVh = Math.min(2.8, Math.max(1.0, 50 / (n * 2.0)));
-  const gapVh = Math.min(1.2, fsVh * 0.4);
+  const availVh = 55;
+  const rowVh = availVh / n;           // total vh per row
+  const fsVh = Math.min(3.0, Math.max(0.9, rowVh / 1.7));  // fontSize = row / (lineHeight + gap factor)
+  const gapVh = Math.min(1.0, rowVh - fsVh * 1.3);
   descEl.style.setProperty('--pb-size', fsVh + 'vh');
-  descEl.style.setProperty('--pb-gap', gapVh + 'vh');
+  descEl.style.setProperty('--pb-gap', Math.max(0.3, gapVh) + 'vh');
   document.getElementById('preview-budget-val').textContent = cat.budget;
 
   // Fullscreen — no manual positioning needed
