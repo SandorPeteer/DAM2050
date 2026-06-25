@@ -1734,59 +1734,82 @@ function updatePreviewMap(ci){
 
   const cat = CATS[ci];
   const bounds = [];
+  // Tároljuk a tooltip adatokat az újrarajzoláshoz
+  const tooltipDefs = [];
 
   ZONE_DATA.forEach(z=>{
     if(z.cat !== ci) return;
 
     if(z.type === 'bbox'){
       const poly = L.polygon(z.coords,{
-        color: cat.cc,
-        fillColor: cat.cc,
-        fillOpacity: 0.06,
-        weight: 3,
-        opacity: 0.9,
-        dashArray: '10,6',
+        color: cat.cc, fillColor: cat.cc,
+        fillOpacity: 0.06, weight: 3, opacity: 0.9, dashArray: '10,6',
       }).addTo(previewMap);
       previewMapLayers.push(poly);
       z.coords.forEach(c => bounds.push(c));
 
     } else if(z.type === 'building'){
-      // Épület poligon — jól látható színes keret
       const poly = L.polygon(z.coords,{
-        color: z.statusColor,
-        fillColor: z.statusColor,
-        fillOpacity: 0.25,
-        weight: 3,
-        opacity: 1,
+        color: z.statusColor, fillColor: z.statusColor,
+        fillOpacity: 0.25, weight: 3, opacity: 1,
       }).addTo(previewMap);
       previewMapLayers.push(poly);
 
-      // Felirat a poligon TETEJE fölé tolva, nagy betűkkel
       const lats = z.coords.map(c=>c[0]);
       const lngs = z.coords.map(c=>c[1]);
       const topLat = Math.max(...lats);
       const midLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
 
-      const lbl = L.tooltip({
-        permanent: true,
-        direction: 'top',
-        className: 'dam-tooltip',
-        offset: [0, -14],
-      })
-      .setContent(`
-        <div style="font-size:18px;font-weight:900;color:#fff;line-height:1.2">${z.name}</div>
-        <div style="font-size:14px;font-weight:700;color:${z.statusColor};margin-top:3px">● ${z.statusLabel}</div>
-        <div style="font-size:16px;font-weight:800;color:${cat.cc};margin-top:4px">▶ ${z.future}</div>
-      `)
-      .setLatLng([topLat, midLng]);
-      lbl.addTo(previewMap);
-      previewMapLayers.push(lbl);
+      tooltipDefs.push({
+        latlng: [topLat, midLng],
+        name: z.name,
+        statusColor: z.statusColor,
+        statusLabel: z.statusLabel,
+        future: z.future,
+        catCc: cat.cc,
+      });
     }
   });
 
+  // Tooltip-ek kirajzolása zoom-szinthez igazított mérettel
+  let tooltipLayers = [];
+  function drawTooltips(){
+    tooltipLayers.forEach(l => previewMap.removeLayer(l));
+    tooltipLayers = [];
+    const z = previewMap.getZoom();
+    // Zoom 14→kis, 16→közepes, 18→nagy
+    const base = Math.max(10, Math.round((z - 13) * 4));
+    const big  = Math.round(base * 1.25);
+    const med  = Math.round(base * 0.95);
+
+    tooltipDefs.forEach(def => {
+      const lbl = L.tooltip({
+        permanent: true, direction: 'top',
+        className: 'dam-tooltip', offset: [0, -10],
+      })
+      .setContent(`
+        <div style="font-size:${big}px;font-weight:900;color:#fff;line-height:1.2">${def.name}</div>
+        <div style="font-size:${med}px;font-weight:700;color:${def.statusColor};margin-top:2px">● ${def.statusLabel}</div>
+        <div style="font-size:${med}px;font-weight:800;color:${def.catCc};margin-top:2px">▶ ${def.future}</div>
+      `)
+      .setLatLng(def.latlng);
+      lbl.addTo(previewMap);
+      tooltipLayers.push(lbl);
+      previewMapLayers.push(lbl);
+    });
+  }
+
+  // Első rajzolás + zoom esemény
   if(bounds.length) previewMap.fitBounds(bounds, {padding:[80,80], maxZoom:18});
   else previewMap.setView([48.094, 20.737], 16);
-  setTimeout(()=>previewMap.invalidateSize(), 150);
+  setTimeout(()=>{
+    previewMap.invalidateSize();
+    drawTooltips();
+  }, 150);
+
+  // Zoom változásakor újrarajzol
+  previewMap.off('zoomend.dam');
+  previewMap.on('zoomend.dam', drawTooltips);
 }
 
 /* ── Step 1: open preview card ── */
