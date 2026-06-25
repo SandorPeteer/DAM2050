@@ -161,19 +161,19 @@ html,body{width:100%;height:100%;overflow:hidden;
   transition:box-shadow .3s;
 }
 #ov-hub:hover{box-shadow:0 0 80px rgba(255,195,0,.15)}
-#ov-hub-title{font-size:1.6rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-1px}
+#ov-hub-title{font-weight:900;color:#fff;line-height:1.05;letter-spacing:-1px}
 #ov-hub-title em{color:#ffc300;font-style:normal}
-#ov-hub-sub{font-size:.52rem;letter-spacing:3px;color:rgba(255,255,255,.3);
-  margin-top:.5rem;text-transform:uppercase}
+#ov-hub-sub{letter-spacing:3px;color:rgba(255,255,255,.75);
+  margin-top:.6rem;text-transform:uppercase;font-weight:600}
 
 /* Category tiles — animate position changes (ring rotation) */
 .ov-tile{
   position:absolute;
-  border-radius:8px;
+  border-radius:12px;
   overflow:hidden;
   cursor:pointer;
-  background:#0a111e;
-  /* Hover zoom: smooth scale-up on the canvas */
+  background:rgba(10,17,30,0.85);
+  border:1px solid rgba(255,255,255,0.08);
   transition:transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .25s, left .9s cubic-bezier(.77,0,.175,1), top .9s cubic-bezier(.77,0,.175,1);
   box-shadow:0 4px 20px rgba(0,0,0,.7);
   transform-origin:center center;
@@ -195,27 +195,20 @@ html,body{width:100%;height:100%;overflow:hidden;
 }
 .ov-tile.visited .ov-tile-img{opacity:.75}
 
-/* Full image — contain, no cropping */
-.ov-tile-img{
-  position:absolute;inset:0;
-  background-size:contain;
-  background-position:center;
-  background-repeat:no-repeat;
-  transition:opacity .4s;
-}
-/* Category name bar at bottom */
+.ov-tile-img{ display:none; }
 .ov-tile-bar{
-  position:absolute;bottom:0;left:0;right:0;
-  padding:.7rem .9rem .65rem;
-  background:linear-gradient(to top,rgba(0,0,0,.97) 0%,rgba(0,0,0,.82) 60%,transparent 100%);
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:.8rem;
+  gap:.5rem;
+}
+.ov-tile-icon{
+  line-height:1;
 }
 .ov-tile-cat{
-  font-size:.65rem;letter-spacing:2.5px;text-transform:uppercase;
-  color:var(--cc);display:block;margin-bottom:3px;font-weight:700;
-}
-.ov-tile-name{
-  font-size:.95rem;font-weight:800;color:#fff;line-height:1.2;
-  text-shadow:0 1px 6px rgba(0,0,0,.9);
+  font-weight:800;color:#fff;
+  text-align:center;line-height:1.25;
+  text-shadow:0 2px 12px rgba(0,0,0,.95);
 }
 /* "Active" ring when category detail is open */
 .ov-tile.current{
@@ -241,19 +234,9 @@ html,body{width:100%;height:100%;overflow:hidden;
              left .9s cubic-bezier(.77,0,.175,1),
              top .9s cubic-bezier(.77,0,.175,1);
 }
-.ov-tile.tile-name-only .ov-tile-img{ opacity:0; }
-.ov-tile.tile-name-only .ov-tile-bar{
-  background:none;
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:0;
-}
-.ov-tile.tile-name-only .ov-tile-cat{
-  font-size:.9rem;margin-bottom:.4rem;
-}
-.ov-tile.tile-name-only .ov-tile-name{
-  font-size:1.1rem;text-align:center;
-}
+.ov-tile.tile-name-only .ov-tile-img{ display:none; }
+
+
 /* Full: normál tile dobozzal */
 .ov-tile.tile-full{
   opacity:1;
@@ -262,17 +245,9 @@ html,body{width:100%;height:100%;overflow:hidden;
              left .9s cubic-bezier(.77,0,.175,1),
              top .9s cubic-bezier(.77,0,.175,1);
 }
-.ov-tile.tile-full .ov-tile-img{
-  opacity:1;
-  transition:opacity .7s ease;
-}
-.ov-tile.tile-full .ov-tile-bar{
-  background:linear-gradient(to top,rgba(0,0,0,.97) 0%,rgba(0,0,0,.82) 60%,transparent 100%);
-  position:absolute;bottom:0;left:0;right:0;inset:unset;
-  display:block;padding:.7rem .9rem .65rem;
-}
-.ov-tile.tile-full .ov-tile-cat{ font-size:.65rem;margin-bottom:3px; }
-.ov-tile.tile-full .ov-tile-name{ font-size:.95rem;text-align:left; }
+.ov-tile.tile-full .ov-tile-img{ display:none; }
+
+
 
 /* ══════════════════════════════════════
    CATEGORY DETAIL PANEL
@@ -618,6 +593,17 @@ html,body{width:100%;height:100%;overflow:hidden;
   padding:4px 10px;border-radius:4px;pointer-events:none;
   backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.1);
 }
+/* DAM tooltip — átlátszó, nagy betű */
+.dam-tooltip {
+  background: rgba(0,0,0,0.82) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  box-shadow: 0 3px 12px rgba(0,0,0,.7) !important;
+  padding: 6px 10px !important;
+  white-space: nowrap !important;
+}
+.dam-tooltip::before { display:none !important; }
+
 /* Leaflet dark tiles */
 #preview-map .leaflet-tile{
   filter:brightness(.5) saturate(.35) hue-rotate(185deg)
@@ -642,10 +628,11 @@ html,body{width:100%;height:100%;overflow:hidden;
 }
 #preview-title{
   font-size:clamp(1.6rem,3.2vw,3.5rem);font-weight:900;color:#fff;
-  line-height:1.05;margin-bottom:.5vh;flex-shrink:0;
+  line-height:1.05;margin-bottom:2.5vh;flex-shrink:0;
+  word-break:break-word;hyphens:auto;
 }
 #preview-sub{
-  font-size:clamp(.75rem,1vw,1rem);color:rgba(255,255,255,.35);
+  font-size:clamp(.75rem,1vw,1rem);color:rgba(255,255,255,.72);
   letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5vh;
   flex-shrink:0;
 }
@@ -659,6 +646,11 @@ html,body{width:100%;height:100%;overflow:hidden;
   font-size:var(--pb-size,2vh);font-weight:600;
   color:rgba(255,255,255,.88);line-height:1.3;
   flex-shrink:0;
+  opacity:1;transform:translateX(0);
+  transition:opacity .35s ease, transform .35s ease;
+}
+#preview-desc .pb.pb-hidden{
+  opacity:0;transform:translateX(-18px);
 }
 #preview-desc .pb::before{
   content:'';
@@ -1378,15 +1370,15 @@ const VW = ()=>window.innerWidth;
 const VH = ()=>window.innerHeight;
 
 // Canvas logical size
-const CW = 2400, CH = 1600;
+const CW = 3200, CH = 1800;
 const HCX = CW/2, HCY = CH/2;
 
 // Hub size
-const HR = 150;
+const HR = 220;
 
 // Tile dimensions — big enough to look great
-const TW = 280, TH = 200;
-const ORBIT = 520;
+const TW = 300, TH = 160;
+const RX = 820, RY = 480; // ellipszis sugarak: vízszintes, függőleges
 
 // Ring rotation state (radians offset, 0 = cat:0 at top)
 let ringAngle = 0;
@@ -1407,18 +1399,27 @@ const spokeEls = [];
 
 CATS.forEach((cat, ci)=>{
   const ang = (ci/12)*Math.PI*2 - Math.PI/2;
-  const tx = HCX + ORBIT*Math.cos(ang) - TW/2;
-  const ty = HCY + ORBIT*Math.sin(ang) - TH/2;
+  const tx = HCX + RX*Math.cos(ang) - TW/2;
+  const ty = HCY + RY*Math.sin(ang) - TH/2;
   const tcx = tx + TW/2, tcy = ty + TH/2;
 
   // SVG spoke
   const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+  // Spoke ends at tile edge (not center) — shorten by half tile diagonal
+  // Spoke végpontja a tile szélénél áll meg, szögtől függően
+  const absCos = Math.abs(Math.cos(ang));
+  const absSin = Math.abs(Math.sin(ang));
+  const edgeDist = Math.min((TW/2) / (absCos + 0.001), (TH/2) / (absSin + 0.001));
+  const gap = 12; // kis rés a tile széle és a vonal vége között
+  const ex = HCX + (RX - edgeDist - gap)*Math.cos(ang);
+  const ey = HCY + (RY - edgeDist - gap)*Math.sin(ang);
   ln.setAttribute('x1',HCX); ln.setAttribute('y1',HCY);
-  ln.setAttribute('x2',tcx); ln.setAttribute('y2',tcy);
+  ln.setAttribute('x2',ex); ln.setAttribute('y2',ey);
   ln.setAttribute('stroke',cat.cc);
-  ln.setAttribute('stroke-opacity','0.18');
+  ln.setAttribute('stroke-opacity','0');
   ln.setAttribute('stroke-width','1.5');
   ln.setAttribute('stroke-dasharray','6 4');
+  ln.style.transition = 'stroke-opacity .4s';
   svg.appendChild(ln);
   spokeEls.push(ln);
 
@@ -1427,10 +1428,9 @@ CATS.forEach((cat, ci)=>{
   tile.className = 'ov-tile';
   tile.style.cssText = `left:${tx}px;top:${ty}px;width:${TW}px;height:${TH}px;--cc:${cat.cc}`;
   tile.innerHTML = `
-    <div class="ov-tile-img" data-src="${cat.mainImg}"></div>
     <div class="ov-tile-bar">
-      <span class="ov-tile-cat">${cat.icon} ${cat.name}</span>
-      <div class="ov-tile-name">${cat.sub}</div>
+      <div class="ov-tile-icon">${cat.icon}</div>
+      <div class="ov-tile-cat">${cat.name}</div>
     </div>`;
   tile.addEventListener('click', ()=>openCat(ci));
   ovCanvas.appendChild(tile);
@@ -1454,8 +1454,8 @@ function rotateRingTo(ci, animated){
   // Move all tiles and spokes
   CATS.forEach((_,i)=>{
     const ang = (i/12)*Math.PI*2 - Math.PI/2 + ringAngle;
-    const tx = HCX + ORBIT*Math.cos(ang) - TW/2;
-    const ty = HCY + ORBIT*Math.sin(ang) - TH/2;
+    const tx = HCX + RX*Math.cos(ang) - TW/2;
+    const ty = HCY + RY*Math.sin(ang) - TH/2;
     const tcx = tx + TW/2, tcy = ty + TH/2;
 
     const tile = tileEls[i];
@@ -1523,33 +1523,36 @@ function startBuildUp(){
   // semmi más nem fut — Space fogja indítani a névsorát
 }
 
-// Space handler hívja ezeket:
+// Space/kattintás elindítja az automatikus build-up-ot
+let buildUpTimer = null;
+
 function buildUpSpace(){
   if(overviewState === 'hub'){
-    // Első Space: első név bepörög
     overviewState = 'names';
-    showNextName();
-  } else if(overviewState === 'names'){
-    showNextName();
-  } else if(overviewState === 'images'){
-    doRevealImages();
+    autoRevealAll();
   }
   // 'done' állapotban a Space a kategória megnyitáshoz megy (keyboard handler kezeli)
 }
 
+function autoRevealAll(){
+  const INTERVAL = 1000; // 1 másodperc / kategória
+  function revealNext(){
+    if(namesShown >= CATS.length){
+      overviewState = 'done';
+      return;
+    }
+    const tile = tileEls[namesShown];
+    tile.classList.remove('tile-hidden');
+    tile.classList.add('tile-full');
+    spokeEls[namesShown].setAttribute('stroke-opacity','0.25');
+    namesShown++;
+    buildUpTimer = setTimeout(revealNext, INTERVAL);
+  }
+  revealNext();
+}
+
 function showNextName(){
-  if(namesShown >= CATS.length){
-    // mind a 10 fent — következő Space képeket hoz
-    overviewState = 'images';
-    return;
-  }
-  const tile = tileEls[namesShown];
-  tile.classList.remove('tile-hidden');
-  tile.classList.add('tile-name-only');
-  namesShown++;
-  if(namesShown === CATS.length){
-    overviewState = 'images';
-  }
+  // nem használt, autoRevealAll kezeli
 }
 
 function doRevealImages(){
@@ -1591,15 +1594,34 @@ function setCamera(cx, cy, z, instant){
     ? 'none'
     : 'transform .85s cubic-bezier(.77,0,.175,1)';
   ovCanvas.style.transform = `scale(${z}) translate(${x}px,${y}px)`;
+  // Szöveg méret kompenzálás: célméret / scale = canvas px
+  const iconPx  = Math.round(38 / z);   // 38px látható méret ikonnak
+  const labelPx = Math.round(20 / z);   // 20px látható méret kategória névnek
+  const hubTitlePx = Math.round(32 / z);
+  const hubSubPx   = Math.round(13 / z);
+  document.querySelectorAll('.ov-tile-icon').forEach(el => el.style.fontSize = iconPx+'px');
+  document.querySelectorAll('.ov-tile-cat').forEach(el => el.style.fontSize = labelPx+'px');
+  const ht = document.getElementById('ov-hub-title');
+  const hs = document.getElementById('ov-hub-sub');
+  if(ht) ht.style.fontSize = hubTitlePx+'px';
+  if(hs) hs.style.fontSize = hubSubPx+'px';
 }
 
 function resetView(){
   closeCatDetail();
-  // Fit the wheel (hub + orbit + tile) into the viewport, 1.65 = larger tiles on screen
-  const radius = ORBIT + TW;
-  const z = Math.min(VW()/(radius*1.65), VH()/(radius*1.65));
+  // Fit the full ellipse + tile padding into the viewport tightly
+  const padX = TW * 0.6, padY = TH * 0.6;
+  const z = Math.min(VW() / ((RX + TW/2 + padX) * 2),
+                     VH() / ((RY + TH/2 + padY) * 2));
   setCamera(HCX, HCY, z);
 }
+
+// Automatikus átméretezés viewport változásakor
+window.addEventListener('resize', ()=>{
+  if(document.getElementById('overview').classList.contains('active')){
+    resetView();
+  }
+});
 
 /* ══════════════════════════════════════════
    CATEGORY OPEN
@@ -1634,62 +1656,55 @@ function resetView(){
     Z:   DAM Sétány, zöldfolyosó      → D-i zöld tengely
 */
 const ZONE_DATA = [
-  // R — Rekreáció: Fürdő környéke + sport (ÉNy-i blokk)
-  { id:'R', color:'#f0b429',
-    coords:[
-      [48.0980,20.7295],[48.0980,20.7360],
-      [48.0950,20.7360],[48.0950,20.7295]
-    ]},
-  // INF — Infrastruktúra: Hűtőtornyok + északi energiasáv
-  { id:'INF', color:'#00ff99',
-    coords:[
-      [48.0980,20.7360],[48.0980,20.7450],
-      [48.0950,20.7450],[48.0950,20.7360]
-    ]},
-  // K — Kultúra & Kreatív: Ny-i negyed (Konzumsor, Hivatalház, Mozdonyszín)
-  { id:'K', color:'#cc88ff',
-    coords:[
-      [48.0950,20.7295],[48.0950,20.7360],
-      [48.0905,20.7360],[48.0905,20.7295]
-    ]},
-  // TP — Technológiai Park: Középső mag (Középhengermű, Turbókompresszor, K. Erőmű)
-  { id:'TP', color:'#00c8ff',
-    coords:[
-      [48.0950,20.7360],[48.0950,20.7450],
-      [48.0925,20.7450],[48.0925,20.7360]
-    ]},
-  // I — Ipari Park: D-i sáv (TP alatt)
-  { id:'I', color:'#ff4444',
-    coords:[
-      [48.0925,20.7340],[48.0925,20.7450],
-      [48.0905,20.7450],[48.0905,20.7340]
-    ]},
-  // KSZ — Kereskedelmi: Keleti rész (Vasútállomás, áruházak)
-  { id:'KSZ', color:'#ffaa00',
-    coords:[
-      [48.0960,20.7450],[48.0960,20.7510],
-      [48.0905,20.7510],[48.0905,20.7450]
-    ]},
-  // Z — Zöldfelület: D-i zöld tengely (DAM Sétány, Szinva-folyosó)
-  { id:'Z', color:'#44dd66',
-    coords:[
-      [48.0925,20.7295],[48.0925,20.7510],
-      [48.0905,20.7510],[48.0905,20.7295]
-    ]},
+  {cat:0,type:'bbox',names:["Hűtőtornyok","Vízlágyító","Vízmű C-telep"],future:"Gravitációs energiatároló · Green Hydrogen üzem · Naperőmű vezérlőközpont",center:[48.095289,20.743439],coords:[[48.097675,20.739831],[48.097675,20.747048],[48.092902,20.747048],[48.092902,20.739831]]},
+  {cat:0,type:'building',name:"Hűtőtornyok",future:"Gravitációs energiatároló",statusColor:"#2563eb",statusLabel:"Védett örökség",center:[48.096272,20.741475],coords:[[48.0963088,20.741524],[48.0962417,20.7415322],[48.0962376,20.7414571],[48.0962524,20.7414553],[48.0962504,20.7414198],[48.0963028,20.7414134],[48.0963088,20.741524]]},
+  {cat:0,type:'building',name:"Vízlágyító",future:"Green Hydrogen üzem",statusColor:"#16a34a",statusLabel:"Hasznosítandó",center:[48.093182,20.744651],coords:[[48.09318,20.7445534],[48.0932584,20.7446291],[48.0931859,20.7447976],[48.0931075,20.7447218],[48.09318,20.7445534]]},
+  {cat:0,type:'building',name:"Vízmű C-telep",future:"Naperőmű vezérlőközpont",statusColor:"#84cc16",statusLabel:"Hasznosításra javasolt",center:[48.094462,20.746311],coords:[[48.0943659,20.7462508],[48.0945819,20.7461955],[48.0946056,20.7464003],[48.0943896,20.7464556],[48.0943659,20.7462508]]},
+  {cat:1,type:'bbox',names:["Mozdonyszín","Vasgyári vasútállomás"],future:"Autonóm buszgarázs & töltő · Vasúti logisztika hub",center:[48.0916,20.741471],coords:[[48.092489,20.732017],[48.092489,20.750926],[48.090712,20.750926],[48.090712,20.732017]]},
+  {cat:1,type:'building',name:"Mozdonyszín",future:"Autonóm buszgarázs & töltő",statusColor:"#2563eb",statusLabel:"Védett örökség",center:[48.09186,20.732756],coords:[[48.0917879,20.7323236],[48.091907,20.7323085],[48.091967,20.7334059],[48.0918478,20.7334208],[48.0917879,20.7323236]]},
+  {cat:1,type:'building',name:"Vasgyári vasútállomás",future:"Vasúti logisztika hub",statusColor:"#2563eb",statusLabel:"Védett örökség",center:[48.091023,20.750646],coords:[[48.0909597,20.7507259],[48.0909503,20.7505866],[48.0910848,20.7505674],[48.0910883,20.7505668],[48.0910978,20.7507063],[48.0909597,20.7507259]]},
+  {cat:2,type:'bbox',names:["Középhengermű"],future:"DAM NEXUS robot-raktár",center:[48.095418,20.738116],coords:[[48.096162,20.736318],[48.096162,20.739914],[48.094673,20.739914],[48.094673,20.736318]]},
+  {cat:2,type:'building',name:"Középhengermű",future:"DAM NEXUS robot-raktár",statusColor:"#2563eb",statusLabel:"Védett örökség",center:[48.095265,20.736621],coords:[[48.0955209,20.7365183],[48.0955302,20.7366964],[48.0948819,20.7367743],[48.0948726,20.7365962],[48.0955209,20.7365183]]},
+  {cat:3,type:'bbox',names:["Forgattyús tengely üzem","Húzó-hőkezelő"],future:"Pneumatikus hulladékközpont · Robot-hulladékválogató",center:[48.093097,20.738609],coords:[[48.093719,20.735936],[48.093719,20.741283],[48.092475,20.741283],[48.092475,20.735936]]},
+  {cat:3,type:'building',name:"Forgattyús tengely üzem",future:"Pneumatikus hulladékközpont",statusColor:"#16a34a",statusLabel:"Hasznosítandó",center:[48.09313,20.736345],coords:[[48.0931522,20.7361846],[48.0931767,20.7365748],[48.0930954,20.736586],[48.0930715,20.7361958],[48.0931522,20.7361846]]},
+  {cat:3,type:'building',name:"Húzó-hőkezelő",future:"Robot-hulladékválogató",statusColor:"#84cc16",statusLabel:"Hasznosításra javasolt",center:[48.093226,20.740523],coords:[[48.093258,20.7405651],[48.0931831,20.7405713],[48.0931789,20.7404593],[48.0932538,20.7404531],[48.093258,20.7405651]]},
+  {cat:4,type:'bbox',names:["Tűzállótéglagyár (É)","Tűzállótéglagyár (D)"],future:"Vertikális Farm (É) · Vertikális Farm (D)",center:[48.092646,20.731409],coords:[[48.093642,20.729474],[48.093642,20.733344],[48.091651,20.733344],[48.091651,20.729474]]},
+  {cat:4,type:'building',name:"Tűzállótéglagyár (É)",future:"Vertikális Farm (É)",statusColor:"#2563eb",statusLabel:"Védett örökség",center:[48.093365,20.731193],coords:[[48.0933132,20.7311377],[48.0934343,20.7311235],[48.0934424,20.7312752],[48.0933208,20.7312908],[48.0933132,20.7311377]]},
+  {cat:4,type:'building',name:"Tűzállótéglagyár (D)",future:"Vertikális Farm (D)",statusColor:"#2563eb",statusLabel:"Védett örökség",center:[48.09242,20.729831],coords:[[48.0923296,20.7299245],[48.092321,20.7297146],[48.0925559,20.7296916],[48.0925645,20.7299015],[48.0923296,20.7299245]]},
+  {cat:5,type:'bbox',names:["Vasgyári fürdő"],future:"Wellness & geotermikus fürdő",center:[48.094652,20.733285],coords:[[48.095486,20.732224],[48.095486,20.734347],[48.093818,20.734347],[48.093818,20.732224]]},
+  {cat:5,type:'building',name:"Vasgyári fürdő",future:"Wellness & geotermikus fürdő",statusColor:"#2563eb",statusLabel:"Védett örökség",center:[48.095219,20.733125],coords:[[48.0952708,20.7330368],[48.0952859,20.7333055],[48.0952706,20.7333075],[48.0952462,20.7333107],[48.0952448,20.7332863],[48.0951311,20.7333013],[48.0951137,20.7329922],[48.0951359,20.7329893],[48.0951458,20.732988],[48.0952443,20.732975],[48.0952672,20.732972],[48.0952708,20.7330368]]},
+  {cat:6,type:'bbox',names:["Vasszerk. Üzem"],future:"Smart Sportcsarnok & E-sport",center:[48.094038,20.73561],coords:[[48.094263,20.735372],[48.094263,20.735847],[48.093812,20.735847],[48.093812,20.735372]]},
+  {cat:6,type:'building',name:"Vasszerk. Üzem",future:"Smart Sportcsarnok & E-sport",statusColor:"#16a34a",statusLabel:"Hasznosítandó",center:[48.094039,20.735614],coords:[[48.0940499,20.7356453],[48.0940296,20.7356475],[48.0940141,20.7356277],[48.0940124,20.7355973],[48.0940258,20.7355743],[48.0940462,20.735572],[48.0940617,20.7355916],[48.0940632,20.735622],[48.0940499,20.7356453]]},
+  {cat:7,type:'bbox',names:["Nagykovácsműhely","Egyedi Gépgyár"],future:"DAM Sétány — zöld tengely · Közösségi kertek & park",center:[48.094454,20.735482],coords:[[48.09562,20.733498],[48.09562,20.737467],[48.093289,20.737467],[48.093289,20.733498]]},
+  {cat:7,type:'building',name:"Nagykovácsműhely",future:"DAM Sétány — zöld tengely",statusColor:"#16a34a",statusLabel:"Hasznosítandó",center:[48.09537,20.734316],coords:[[48.0953881,20.7341855],[48.0954033,20.7345053],[48.0953439,20.7345119],[48.0953264,20.7341925],[48.0953881,20.7341855]]},
+  {cat:7,type:'building',name:"Egyedi Gépgyár",future:"Közösségi kertek & park",statusColor:"#f97316",statusLabel:"Bontásra javasolt",center:[48.093627,20.737085],coords:[[48.0934892,20.7369919],[48.0938183,20.7369505],[48.0938335,20.7372252],[48.0935044,20.7372666],[48.0934892,20.7369919]]},
+  {cat:8,type:'bbox',names:["II. Hivatalház","I. Hivatalház","Csavargyár"],future:"Digital Twin labor · City OS vezérlőközpont · Citizen App & Smart Hub",center:[48.093979,20.731793],coords:[[48.095196,20.729415],[48.095196,20.734172],[48.092762,20.734172],[48.092762,20.729415]]},
+  {cat:8,type:'building',name:"II. Hivatalház",future:"Digital Twin labor",statusColor:"#2563eb",statusLabel:"Védett örökség",center:[48.094924,20.731812],coords:[[48.0949878,20.7317609],[48.0949936,20.7318686],[48.0948287,20.7318896],[48.0948228,20.7317819],[48.0949878,20.7317609]]},
+  {cat:8,type:'building',name:"I. Hivatalház",future:"City OS vezérlőközpont",statusColor:"#16a34a",statusLabel:"Hasznosítandó",center:[48.094423,20.730923],coords:[[48.0943951,20.7309047],[48.0944455,20.7308988],[48.0944512,20.7308982],[48.094454,20.7309636],[48.0943979,20.7309693],[48.0943951,20.7309047]]},
+  {cat:8,type:'building',name:"Csavargyár",future:"Citizen App & Smart Hub",statusColor:"#84cc16",statusLabel:"Hasznosításra javasolt",center:[48.09396,20.733103],coords:[[48.0940729,20.7330212],[48.0940825,20.7331988],[48.0938683,20.7332244],[48.0938636,20.7331314],[48.0938904,20.7331282],[48.0938883,20.7330861],[48.0939524,20.7330785],[48.0939502,20.7330363],[48.0940729,20.7330212]]},
+  {cat:9,type:'bbox',names:["Konzumsor","Bugacsiszoló"],future:"DAM Plaza & Mozi · Lakónegyed & szolgáltatások",center:[48.094267,20.73448],coords:[[48.095437,20.729116],[48.095437,20.739844],[48.093097,20.739844],[48.093097,20.729116]]},
+  {cat:9,type:'building',name:"Konzumsor",future:"DAM Plaza & Mozi",statusColor:"#2563eb",statusLabel:"Védett örökség",center:[48.094301,20.729478],coords:[[48.094325,20.7295729],[48.0942745,20.7295782],[48.094264,20.7293352],[48.0943145,20.7293299],[48.094325,20.7295729]]},
+  {cat:9,type:'building',name:"Bugacsiszoló",future:"Lakónegyed & szolgáltatások",statusColor:"#84cc16",statusLabel:"Hasznosításra javasolt",center:[48.094665,20.738839],coords:[[48.0948313,20.7394836],[48.0947678,20.7394914],[48.0947682,20.7394997],[48.0944278,20.7395412],[48.0943631,20.7383459],[48.0945318,20.7383228],[48.0947008,20.7383035],[48.0946827,20.7379628],[48.0947487,20.7379558],[48.0948313,20.7394836]]},
+  {cat:10,type:'bbox',names:["Hengereszterga műhely","Keleti Erőmű"],future:"Ipartörténeti Múzeum · Acél Kultúrközpont & FabLab",center:[48.094309,20.739825],coords:[[48.095384,20.736401],[48.095384,20.743249],[48.093233,20.743249],[48.093233,20.736401]]},
+  {cat:10,type:'building',name:"Hengereszterga műhely",future:"Ipartörténeti Múzeum",statusColor:"#84cc16",statusLabel:"Hasznosításra javasolt",center:[48.095065,20.736873],coords:[[48.0951686,20.7367399],[48.0951843,20.7370404],[48.0949103,20.7370732],[48.0948946,20.7367727],[48.0951686,20.7367399]]},
+  {cat:10,type:'building',name:"Keleti Erőmű",future:"Acél Kultúrközpont & FabLab",statusColor:"#2563eb",statusLabel:"Védett örökség",center:[48.093657,20.741244],coords:[[48.0936484,20.7412918],[48.093639,20.7411776],[48.0936696,20.7411716],[48.0936788,20.7412856],[48.0936484,20.7412918]]},
+  {cat:11,type:'bbox',names:["Vasúti Felépítménygyártó Műhely"],future:"Oktatási Campus & Startup Hub",center:[48.09215,20.746323],coords:[[48.093048,20.744815],[48.093048,20.74783],[48.091251,20.74783],[48.091251,20.744815]]},
+  {cat:11,type:'building',name:"Vasúti Felépítménygyártó Műhely",future:"Oktatási Campus & Startup Hub",statusColor:"#16a34a",statusLabel:"Hasznosítandó",center:[48.091598,20.745518],coords:[[48.0916962,20.7458405],[48.0914851,20.7458587],[48.0914512,20.7450335],[48.0916624,20.7450152],[48.0916962,20.7458405]]},
 ];
 
-// Kategória → zóna(k) mapping (zóna-tartalom táblázat alapján)
 const CAT_ZONES = [
-  ['INF'],           // 0 Energia        → INF: naperőmű, hűtőtornyok, Smart Grid
-  ['TP','K'],        // 1 Közlekedés     → TP: RFID utak, autonóm buszok; K: kisvasút
-  ['I','KSZ'],       // 2 Hulladék       → I: pneumatikus rendszer, robot-válogató; KSZ: szállítás
-  ['I','KSZ'],       // 3 Élelmiszer     → I: vertikális farm, feldolgozás; KSZ: kiszállítás
-  ['KSZ','TP'],      // 4 Logisztika     → KSZ: vasútállomás, áruház; TP: robot-raktár
-  ['TP','INF'],      // 5 Egészségügy   → TP: egészségügyi centrum; INF: drón mentő
-  ['R'],             // 6 Sport          → R: sport, görkori, e-sport, medence
-  ['TP','INF'],      // 7 Smart City     → TP: Digital Twin, City OS; INF: 5G/IoT
-  ['Z','K'],         // 8 Zöld infra    → Z: DAM Sétány, Szinva; K: makers, zöldtetők
-  ['K','TP'],        // 9 Gazdaság      → K: startup inkubátor, múzeum; TP: campus, labor
+  ["Hűtőtornyok","Vízlágyító","Vízmű C-telep"],  // 0
+  ["Mozdonyszín","Vasgyári vasútállomás"],  // 1
+  ["Középhengermű"],  // 2
+  ["Forgattyús tengely üzem","Húzó-hőkezelő"],  // 3
+  ["Tűzállótéglagyár (É)","Tűzállótéglagyár (D)"],  // 4
+  ["Vasgyári fürdő"],  // 5
+  ["Vasszerk. Üzem"],  // 6
+  ["Nagykovácsműhely","Egyedi Gépgyár"],  // 7
+  ["II. Hivatalház","I. Hivatalház","Csavargyár"],  // 8
+  ["Konzumsor","Bugacsiszoló"],  // 9
+  ["Hengereszterga műhely","Keleti Erőmű"],  // 10
+  ["Vasúti Felépítménygyártó Műhely"],  // 11
 ];
 
 /* ── Preview map (Leaflet) ── */
@@ -1717,42 +1732,61 @@ function updatePreviewMap(ci){
   previewMapLayers.forEach(l=>previewMap.removeLayer(l));
   previewMapLayers=[];
 
-  // DAM határvonal
-  const boundary = L.polygon(DAM_BOUNDARY,{
-    color:'rgba(255,255,255,0.25)',
-    fillColor:'transparent',
-    weight:1.5,
-    dashArray:'6,4',
-    fillOpacity:0,
-  }).addTo(previewMap);
-  previewMapLayers.push(boundary);
-  const activeIds = CAT_ZONES[ci]||[];
   const cat = CATS[ci];
-  const bounds=[];
+  const bounds = [];
+
   ZONE_DATA.forEach(z=>{
-    const active = activeIds.includes(z.id);
-    const poly = L.polygon(z.coords,{
-      color: active?cat.cc:'#fff',
-      fillColor: active?cat.cc:'#fff',
-      fillOpacity: active?.4:.03,
-      weight: active?2.5:.4,
-      opacity: active?.95:.1,
-    }).addTo(previewMap);
-    previewMapLayers.push(poly);
-    if(active){
-      z.coords.forEach(c=>bounds.push(c));
-      const cx=z.coords.reduce((a,c)=>[a[0]+c[0]/z.coords.length,a[1]+c[1]/z.coords.length],[0,0]);
-      const lbl=L.marker(cx,{icon:L.divIcon({
-        className:'',
-        html:`<div style="background:${cat.cc};color:#000;font-size:9px;font-weight:900;padding:2px 6px;border-radius:3px;letter-spacing:1px;white-space:nowrap">${z.id}</div>`,
-        iconAnchor:[16,8]
-      })}).addTo(previewMap);
+    if(z.cat !== ci) return;
+
+    if(z.type === 'bbox'){
+      const poly = L.polygon(z.coords,{
+        color: cat.cc,
+        fillColor: cat.cc,
+        fillOpacity: 0.06,
+        weight: 3,
+        opacity: 0.9,
+        dashArray: '10,6',
+      }).addTo(previewMap);
+      previewMapLayers.push(poly);
+      z.coords.forEach(c => bounds.push(c));
+
+    } else if(z.type === 'building'){
+      // Épület poligon — jól látható színes keret
+      const poly = L.polygon(z.coords,{
+        color: z.statusColor,
+        fillColor: z.statusColor,
+        fillOpacity: 0.25,
+        weight: 3,
+        opacity: 1,
+      }).addTo(previewMap);
+      previewMapLayers.push(poly);
+
+      // Felirat a poligon TETEJE fölé tolva, nagy betűkkel
+      const lats = z.coords.map(c=>c[0]);
+      const lngs = z.coords.map(c=>c[1]);
+      const topLat = Math.max(...lats);
+      const midLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
+
+      const lbl = L.tooltip({
+        permanent: true,
+        direction: 'top',
+        className: 'dam-tooltip',
+        offset: [0, -14],
+      })
+      .setContent(`
+        <div style="font-size:18px;font-weight:900;color:#fff;line-height:1.2">${z.name}</div>
+        <div style="font-size:14px;font-weight:700;color:${z.statusColor};margin-top:3px">● ${z.statusLabel}</div>
+        <div style="font-size:16px;font-weight:800;color:${cat.cc};margin-top:4px">▶ ${z.future}</div>
+      `)
+      .setLatLng([topLat, midLng]);
+      lbl.addTo(previewMap);
       previewMapLayers.push(lbl);
     }
   });
-  if(bounds.length) previewMap.fitBounds(bounds,{padding:[16,16],maxZoom:15});
-  else previewMap.setView([48.094,20.743],14);
-  setTimeout(()=>previewMap.invalidateSize(),150);
+
+  if(bounds.length) previewMap.fitBounds(bounds, {padding:[80,80], maxZoom:18});
+  else previewMap.setView([48.094, 20.737], 16);
+  setTimeout(()=>previewMap.invalidateSize(), 150);
 }
 
 /* ── Step 1: open preview card ── */
@@ -1768,7 +1802,14 @@ function openCat(ci){
   document.getElementById('preview-sub').textContent = cat.sub;
   const previewItems = SLIDES.filter(s=>s.cat===ci);
   const descEl = document.getElementById('preview-desc');
-  descEl.innerHTML = previewItems.map(s=>`<div class="pb">${s.title}</div>`).join('');
+  // Elemek rejtve indulnak, majd staggered animációval jönnek be
+  descEl.innerHTML = previewItems.map(s=>`<div class="pb pb-hidden">${s.title}</div>`).join('');
+  // Cím után 0.6s szünet, majd 150ms-enként pattannak be az elemek
+  setTimeout(()=>{
+    descEl.querySelectorAll('.pb-hidden').forEach((el,i)=>{
+      setTimeout(()=>el.classList.remove('pb-hidden'), i*150);
+    });
+  }, 600);
   // Available desc height ≈ 55vh (100vh minus badge/title/sub/budget/actions ~45vh)
   // Each row = fontSize * lineHeight + gap
   const n = previewItems.length;
@@ -2146,15 +2187,26 @@ document.addEventListener('keydown', e=>{
     if(e.key===' '){
       e.preventDefault();
       if(overviewState === 'done'){
-        // Képek kint — Space nyitja a következő nem-látogatott kategóriát
         const next = tileEls.findIndex((_,i) => !visited.has(i));
         if(next >= 0) openCat(next);
       } else {
-        // hub / names / images állapotban: build-up léptetés
         buildUpSpace();
       }
     }
     return;
+  }
+});
+
+// Canvas kattintás → ugyanaz mint Space (build-up léptetés)
+document.getElementById('ov-canvas').addEventListener('click', e=>{
+  if(!document.getElementById('overview').classList.contains('active')) return;
+  // Ha tile-ra kattintottak, azt az openCat kezeli — ne lépjünk tovább
+  if(e.target.closest('.ov-tile')) return;
+  if(overviewState === 'done'){
+    const next = tileEls.findIndex((_,i) => !visited.has(i));
+    if(next >= 0) openCat(next);
+  } else {
+    buildUpSpace();
   }
 });
 
