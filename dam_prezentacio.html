@@ -93,13 +93,13 @@ html,body{width:100%;height:100%;overflow:hidden;
   color:rgba(255,195,0,.6);letter-spacing:6px;margin-top:.8rem;
 }
 #intro-sub{
-  font-size:clamp(.6rem,.9vw,.82rem);color:rgba(255,255,255,.3);
+  font-size:clamp(.7rem,1.1vw,1rem);color:rgba(255,255,255,.7);
   letter-spacing:3px;margin-top:1rem;text-transform:uppercase;
 }
 #intro-btn{
-  margin-top:2rem;padding:11px 28px;align-self:center;
+  margin-top:2rem;padding:clamp(8px,1.2vh,14px) clamp(18px,2.5vw,32px);align-self:center;
   border:1px solid rgba(255,195,0,.5);border-radius:30px;
-  color:#ffc300;font-size:.7rem;letter-spacing:2.5px;text-transform:uppercase;
+  color:#ffc300;font-size:clamp(.7rem,1vw,.95rem);letter-spacing:2.5px;text-transform:uppercase;
   cursor:pointer;background:transparent;transition:all .25s,opacity .4s;white-space:nowrap;
 }
 #intro-btn:hover{background:rgba(255,195,0,.1);border-color:#ffc300;
@@ -199,16 +199,19 @@ html,body{width:100%;height:100%;overflow:hidden;
 .ov-tile-bar{
   position:absolute;inset:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:.8rem;
-  gap:.5rem;
+  padding:.6rem .8rem;
+  gap:.4rem;
+  overflow:hidden;
 }
 .ov-tile-icon{
   line-height:1;
 }
 .ov-tile-cat{
   font-weight:800;color:#fff;
-  text-align:center;line-height:1.25;
+  text-align:center;line-height:1.2;
   text-shadow:0 2px 12px rgba(0,0,0,.95);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  word-break:break-word;
 }
 /* "Active" ring when category detail is open */
 .ov-tile.current{
@@ -270,110 +273,139 @@ html,body{width:100%;height:100%;overflow:hidden;
   position:absolute;inset:0;
   background-repeat:no-repeat;
   background-position:center;
+  background-size:contain;
   transition:opacity .3s;
+  will-change:transform;
+  transform-origin:center center;
 }
-/* Panoráma (széles): magasságra fit, balról jobbra pásztáz */
+/* Panoráma: GPU translateX animáció */
 #cat-photo-img.kb-pan{
   background-size:auto 100%;
-  animation:kb-pan 14s ease-in-out infinite alternate;
+  background-position:left center;
+  animation:kb-pan 16s ease-in-out infinite alternate;
 }
 @keyframes kb-pan{
-  0%  {background-position:0% center;}
-  100%{background-position:100% center;}
+  0%  {transform:translateX(0%);}
+  100%{transform:translateX(-8%);}
 }
-/* Normál (álló/négyzetes): contain + enyhe zoom, semmi levágás */
+/* Normál: GPU scale animáció */
 #cat-photo-img.kb-zoom{
   background-size:contain;
   background-position:center;
-  animation:kb-zoom 12s ease-in-out infinite alternate;
+  animation:kb-zoom 14s ease-in-out infinite alternate;
 }
 @keyframes kb-zoom{
-  0%  {background-size:92%;}
-  100%{background-size:100%;}
+  0%  {transform:scale(1);}
+  100%{transform:scale(1.06);}
 }
 
-/* Right panel */
+/* Right panel — grid, viewport-arányos */
 #cat-panel{
-  width:400px;flex-shrink:0;
+  width:clamp(280px,30vw,420px);flex-shrink:0;
   background:rgba(3,6,13,.97);
-  display:flex;flex-direction:column;
+  display:grid;
+  grid-template-rows:auto 1fr auto auto;
   overflow:hidden;
 }
 
 /* Category header */
 #cat-header{
-  padding:2rem 2rem 1.2rem;flex-shrink:0;
+  padding:clamp(.6rem,1.5vh,1.5rem) clamp(.8rem,1.5vw,1.8rem);
   border-bottom:1px solid rgba(255,255,255,.06);
 }
 #cat-badge{
-  display:inline-block;padding:3px 10px;border-radius:3px;
-  font-size:clamp(.8rem,1.1vw,1rem);letter-spacing:2.5px;font-weight:800;
-  text-transform:uppercase;color:#000;margin-bottom:1rem;
+  display:inline-block;padding:2px 8px;border-radius:3px;
+  font-size:clamp(.65rem,1vw,.95rem);letter-spacing:2px;font-weight:800;
+  text-transform:uppercase;color:#000;margin-bottom:.4rem;
 }
-#cat-title{font-size:1.5rem;font-weight:900;color:#fff;line-height:1.05;margin-bottom:.3rem}
-#cat-subtitle{font-size:.7rem;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase}
+/* Cím NEM duplikálja a badge-et — elrejtjük */
+#cat-title{display:none}
+#cat-subtitle{
+  font-size:clamp(.6rem,.9vw,.85rem);
+  color:rgba(255,255,255,.7);
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-top:.2rem;line-height:1.4;
+}
 
-/* Thumbnail strip */
+/* Thumbnail strip — 1fr, kitölti a maradék helyet */
 #cat-thumbs{
-  flex:1;overflow-y:auto;padding:1rem;
-  display:flex;flex-direction:column;gap:6px;
+  overflow-y:auto;padding:clamp(.4rem,.8vh,.8rem);
+  display:flex;flex-direction:column;gap:4px;
+  min-height:0;
 }
 #cat-thumbs::-webkit-scrollbar{width:3px}
 #cat-thumbs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
 
 .thumb-row{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 10px;border-radius:6px;
+  display:flex;align-items:center;gap:8px;
+  padding:clamp(4px,.8vh,8px) 8px;border-radius:6px;
   cursor:pointer;transition:background .15s;
-  border:1px solid transparent;
+  border:1px solid transparent;flex-shrink:0;
 }
 .thumb-row:hover{background:rgba(255,255,255,.05)}
-.thumb-row.active{
-  background:rgba(255,255,255,.07);
-  border-color:var(--cc);
-}
+.thumb-row.active{background:rgba(255,255,255,.07);border-color:var(--cc)}
 .thumb-img{
-  width:72px;height:48px;border-radius:4px;flex-shrink:0;
+  width:clamp(48px,6vw,72px);height:clamp(32px,4vw,48px);
+  border-radius:4px;flex-shrink:0;
   background-size:contain;background-position:center;
   background-repeat:no-repeat;background-color:#0a111e;
 }
 .thumb-text{flex:1;min-width:0}
-.thumb-title{font-size:.75rem;font-weight:700;color:#fff;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.thumb-cost{font-size:.62rem;color:var(--cc);margin-top:2px;font-weight:600}
+.thumb-title{
+  font-size:clamp(.65rem,1vw,.85rem);font-weight:700;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.thumb-cost{font-size:clamp(.55rem,.85vw,.75rem);color:var(--cc);margin-top:1px;font-weight:600}
 
 /* Slide description box */
 #cat-desc-box{
-  flex-shrink:0;padding:1rem 1.5rem;
+  padding:clamp(.5rem,1.2vh,1rem) clamp(.8rem,1.5vw,1.5rem);
   border-top:1px solid rgba(255,255,255,.06);
   background:rgba(255,255,255,.02);
 }
-#cat-desc-title{font-size:.85rem;font-weight:800;color:#fff;margin-bottom:.4rem}
-#cat-desc-text{font-size:.75rem;color:rgba(255,255,255,.55);line-height:1.6}
-#cat-desc-cost{font-size:.68rem;color:var(--cc);margin-top:.5rem;font-weight:700}
+#cat-desc-title{
+  font-size:clamp(1rem,1.4vw,1.3rem);font-weight:900;color:#fff;
+  margin-bottom:.4rem;line-height:1.2;
+}
+#cat-desc-text{
+  font-size:clamp(.8rem,1.1vw,1rem);
+  color:rgba(255,255,255,.85);line-height:1.6;
+}
+#cat-desc-text .bullet{
+  display:flex;gap:.4rem;margin-bottom:.2rem;
+}
+#cat-desc-text .bullet::before{
+  content:'›';color:var(--cc);font-weight:900;flex-shrink:0;
+}
+#cat-desc-cost{
+  font-size:clamp(.8rem,1.1vw,1rem);color:var(--cc);
+  margin-top:.4rem;font-weight:800;
+}
 
-/* Bottom nav in detail */
+/* Bottom nav */
 #cat-nav{
-  flex-shrink:0;display:flex;align-items:center;gap:8px;
-  padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;gap:6px;
+  padding:clamp(.4rem,.8vh,.8rem) clamp(.8rem,1.5vw,1.5rem);
+  border-top:1px solid rgba(255,255,255,.06);
 }
 #cat-prev,#cat-next{
-  flex:1;padding:9px;border-radius:5px;
+  flex:1;padding:clamp(6px,1vh,10px);border-radius:5px;
   border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);
-  color:rgba(255,255,255,.55);font-size:.7rem;letter-spacing:1px;
+  color:rgba(255,255,255,.7);font-size:clamp(.6rem,.9vw,.8rem);letter-spacing:1px;
   cursor:pointer;transition:all .15s;
 }
 #cat-prev:hover,#cat-next:hover{background:rgba(255,255,255,.09);color:#fff}
 #cat-close{
-  position:absolute;top:1.2rem;right:1.2rem;z-index:10;
-  width:36px;height:36px;border-radius:50%;
-  border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.6);
-  color:#fff;font-size:1rem;cursor:pointer;
+  position:static;
+  width:clamp(32px,3.5vw,42px);height:clamp(32px,3.5vw,42px);
+  border-radius:50%;flex-shrink:0;
+  border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);
+  color:#fff;font-size:clamp(.9rem,1.2vw,1.1rem);cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  transition:all .15s;backdrop-filter:blur(6px);
+  transition:all .15s;
 }
-#cat-close:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35)}
-#cat-counter{font-size:.6rem;color:rgba(255,255,255,.18);
+#cat-close:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.4)}
+#cat-counter{font-size:clamp(.65rem,.9vw,.85rem);color:rgba(255,255,255,.5);
   letter-spacing:2px;white-space:nowrap}
 
 /* ══════════════════════════════════════
@@ -425,78 +457,86 @@ html,body{width:100%;height:100%;overflow:hidden;
 #gantt{
   position:fixed;inset:0;z-index:150;
   background:rgba(3,6,13,.96);backdrop-filter:blur(8px);
-  display:flex;flex-direction:column;align-items:stretch;
-  padding:3vh 4vw;opacity:0;pointer-events:none;transition:opacity .4s;
-  box-sizing:border-box;
+  display:grid;
+  grid-template-rows:auto auto 1fr auto;
+  grid-template-columns:1fr;
+  padding:1.5vh 3vw 1.5vh;
+  gap:0;
+  opacity:0;pointer-events:none;transition:opacity .4s;
+  box-sizing:border-box;overflow:hidden;
 }
 #gantt.open{opacity:1;pointer-events:all}
 #gantt-close{
-  position:absolute;top:1.5rem;right:1.5rem;
-  width:44px;height:44px;border-radius:50%;
+  position:absolute;top:1rem;right:1rem;
+  width:40px;height:40px;border-radius:50%;
   border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);
-  color:#fff;font-size:1.2rem;cursor:pointer;
+  color:#fff;font-size:1.1rem;cursor:pointer;z-index:151;
   display:flex;align-items:center;justify-content:center;transition:all .15s;
 }
 #gantt-close:hover{background:rgba(255,255,255,.12)}
-#gantt-title{font-size:clamp(2.2rem,4vw,4rem);font-weight:900;color:#fff;
-  margin-bottom:.2rem;text-align:center;flex-shrink:0}
-#gantt-sub{font-size:clamp(.8rem,1.2vw,1.1rem);letter-spacing:3px;text-transform:uppercase;
-  color:rgba(255,255,255,.6);margin-bottom:2vh;text-align:center;flex-shrink:0}
+#gantt-title{
+  font-size:clamp(1.2rem,3.5vw,3.5rem);font-weight:900;color:#fff;
+  text-align:center;line-height:1.1;padding-bottom:.3vh;
+}
+#gantt-sub{
+  font-size:clamp(.6rem,1vw,1rem);letter-spacing:3px;text-transform:uppercase;
+  color:rgba(255,255,255,.6);text-align:center;padding-bottom:1vh;
+}
 
-/* Gantt chart — flex:1 tölti ki a maradék teret */
+/* Gantt chart — a grid 1fr sorát tölti ki */
 #gantt-wrap{
-  flex:1;min-height:0;
-  display:flex;flex-direction:column;
+  display:flex;flex-direction:column;gap:.5vh;min-height:0;
 }
 .gantt-day-header{
-  display:grid;grid-template-columns:20vw repeat(5,1fr);
-  gap:3px;margin-bottom:6px;flex-shrink:0;
+  display:grid;grid-template-columns:18vw repeat(5,1fr);
+  gap:3px;flex-shrink:0;
 }
 .gantt-day-label{
-  text-align:center;font-size:clamp(.75rem,1.1vw,1rem);letter-spacing:2px;text-transform:uppercase;
-  color:rgba(255,255,255,.7);padding:6px 0;
+  text-align:center;font-size:clamp(.55rem,1vw,.95rem);letter-spacing:1px;text-transform:uppercase;
+  color:rgba(255,255,255,.7);padding:2px 0;
 }
 .gantt-day-label.today{color:#ffc300;font-weight:700}
 .gantt-rows-wrap{
-  flex:1;min-height:0;
-  display:flex;flex-direction:column;gap:3px;
+  display:grid;
+  grid-template-rows:repeat(6,1fr);
+  gap:2px;flex:1;min-height:0;
 }
 .gantt-row{
-  display:grid;grid-template-columns:20vw repeat(5,1fr);
-  gap:3px;flex:1;min-height:0;align-items:stretch;
+  display:grid;grid-template-columns:18vw repeat(5,1fr);
+  gap:3px;min-height:0;align-items:stretch;
 }
 .gantt-label{
-  font-size:clamp(.9rem,1.3vw,1.2rem);color:rgba(255,255,255,.9);font-weight:600;
-  padding-right:.7rem;text-align:right;display:flex;align-items:center;justify-content:flex-end;
-  line-height:1.25;word-break:keep-all;
+  font-size:clamp(.55rem,1vw,1rem);color:rgba(255,255,255,.9);font-weight:600;
+  padding-right:.5rem;text-align:right;display:flex;align-items:center;justify-content:flex-end;
+  line-height:1.2;word-break:break-word;
 }
-.gantt-cell{border-radius:5px;background:rgba(255,255,255,.07)}
-.gantt-bar{
-  border-radius:5px;
-  display:flex;align-items:center;padding:0 1vw;
-  font-size:clamp(.75rem,1.1vw,1rem);font-weight:700;letter-spacing:1px;
-  color:#000;white-space:nowrap;overflow:hidden;
-  grid-column: var(--gc-start) / span var(--gc-span);
+.gantt-cell{border-radius:4px;background:rgba(255,255,255,.07)}
+.gantt-cell span,.gantt-bar span{
+  font-size:clamp(.55rem,1vw,.95rem)!important;font-weight:700;
 }
 
 /* Team section */
 #team-wrap{
-  flex-shrink:0;margin-top:2vh;
-  border-top:1px solid rgba(255,255,255,.07);padding-top:1.5vh;
+  display:flex;flex-direction:column;gap:.4vh;
+  border-top:1px solid rgba(255,255,255,.07);padding-top:.8vh;margin-top:.5vh;
 }
-#team-title{font-size:clamp(.7rem,1vw,.95rem);letter-spacing:3px;text-transform:uppercase;
-  color:rgba(255,255,255,.65);margin-bottom:1vh;text-align:center}
-#team-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;
+#team-title{
+  font-size:clamp(.55rem,.9vw,.85rem);letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.65);text-align:center;
 }
-.team-card{
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
-  border-radius:10px;padding:.8rem 1.2rem;
+/* team sorok inline style-jait override-oljuk */
+#team-wrap > div[style]{
+  min-height:0!important;
 }
-.team-name{font-size:clamp(.95rem,1.4vw,1.3rem);font-weight:700;color:#fff;margin-bottom:.2rem}
-.team-school{font-size:clamp(.7rem,1vw,.9rem);color:rgba(255,255,255,.65);line-height:1.4}
+#team-wrap > div[style] > div[style*="height"]{
+  height:clamp(24px,4.5vh,52px)!important;
+}
+#team-wrap > div[style] > div[style*="font-size"]{
+  font-size:clamp(.55rem,1vw,1.1rem)!important;
+}
+#team-grid{display:none}
 .team-mentor{
-  margin-top:1vh;text-align:center;font-size:clamp(.75rem,1.1vw,1rem);
+  text-align:center;font-size:clamp(.6rem,.9vw,.9rem);
   color:rgba(255,195,0,.9);letter-spacing:1px;
 }
 
@@ -506,22 +546,25 @@ html,body{width:100%;height:100%;overflow:hidden;
 #topbar{
   position:fixed;top:0;left:0;right:0;z-index:50;
   display:flex;align-items:center;justify-content:space-between;
-  padding:.8rem 1.5rem;
+  padding:clamp(.5rem,.8vh,.9rem) clamp(.8rem,2vw,1.5rem);
   background:linear-gradient(to bottom,rgba(3,6,13,.85),transparent);
   pointer-events:none;opacity:0;transition:opacity .4s;
 }
 #topbar.visible{opacity:1;pointer-events:all}
-#topbar-title{font-size:.6rem;letter-spacing:3px;text-transform:uppercase;
-  color:rgba(255,255,255,.3)}
-#topbar-right{display:flex;gap:.6rem}
-.tb-btn{
-  padding:5px 14px;border-radius:20px;font-size:.6rem;letter-spacing:2px;
-  text-transform:uppercase;cursor:pointer;border:1px solid rgba(255,255,255,.15);
-  background:rgba(3,6,13,.7);color:rgba(255,255,255,.5);
-  backdrop-filter:blur(8px);transition:all .2s;
+#topbar-title{
+  font-size:clamp(.6rem,.9vw,.85rem);letter-spacing:3px;text-transform:uppercase;
+  color:rgba(255,255,255,.6);
 }
-.tb-btn:hover{border-color:rgba(255,255,255,.4);color:#fff;background:rgba(255,255,255,.07)}
-.tb-btn.gold{border-color:rgba(255,195,0,.35);color:rgba(255,195,0,.8)}
+#topbar-right{display:flex;gap:.5rem;flex-wrap:wrap}
+.tb-btn{
+  padding:clamp(4px,.6vh,7px) clamp(8px,1.2vw,16px);
+  border-radius:20px;font-size:clamp(.6rem,.85vw,.8rem);letter-spacing:1.5px;
+  text-transform:uppercase;cursor:pointer;border:1px solid rgba(255,255,255,.2);
+  background:rgba(3,6,13,.7);color:rgba(255,255,255,.75);
+  backdrop-filter:blur(8px);transition:all .2s;white-space:nowrap;
+}
+.tb-btn:hover{border-color:rgba(255,255,255,.5);color:#fff;background:rgba(255,255,255,.07)}
+.tb-btn.gold{border-color:rgba(255,195,0,.5);color:rgba(255,195,0,.9)}
 .tb-btn.gold:hover{border-color:#ffc300;color:#ffc300}
 
 /* Progress bar */
@@ -723,6 +766,7 @@ html,body{width:100%;height:100%;overflow:hidden;
   <div id="topbar-right">
     <div class="tb-btn" onclick="showGantt()">📅 Projekt</div>
     <div class="tb-btn" onclick="showBudget()">💰 Beruházás</div>
+    <div class="tb-btn" onclick="window.open('dam_prezentacio_terkep.html','_blank')">🗺️ Térkép</div>
     <div class="tb-btn gold" onclick="showIntro()">⌂ Kezdőlap</div>
   </div>
 </div>
@@ -767,7 +811,10 @@ html,body{width:100%;height:100%;overflow:hidden;
   </div>
   <div id="cat-panel">
     <div id="cat-header">
-      <div id="cat-badge"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.4rem">
+        <div id="cat-badge"></div>
+        <button id="cat-close" onclick="closeCatDetail()">✕</button>
+      </div>
       <div id="cat-title"></div>
       <div id="cat-subtitle"></div>
     </div>
@@ -783,7 +830,6 @@ html,body{width:100%;height:100%;overflow:hidden;
       <button id="cat-next" onclick="slideStep(1)">Következő ›</button>
     </div>
   </div>
-  <button id="cat-close" onclick="closeCatDetail()">✕</button>
 </div>
 
 <!-- ══ BUDGET ══ -->
@@ -818,7 +864,7 @@ html,body{width:100%;height:100%;overflow:hidden;
     <div class="gantt-rows-wrap">
     <!-- Sor 1 -->
     <div class="gantt-row">
-      <div class="gantt-label">Helyszín & területi<br>információk</div>
+      <div class="gantt-label">Helyszín & területi információk</div>
       <div class="gantt-cell" style="background:rgba(255,195,0,.18);border-radius:4px;grid-column:2;display:flex;align-items:center;padding:0 8px"><span style="font-size:clamp(.8rem,1.1vw,1rem);color:#ffc300;font-weight:700">Előadások · DAM bemutató</span></div>
       <div class="gantt-cell"></div>
       <div class="gantt-cell"></div>
@@ -828,7 +874,7 @@ html,body{width:100%;height:100%;overflow:hidden;
 
     <!-- Sor 2 -->
     <div class="gantt-row">
-      <div class="gantt-label">Épületek felmérése<br>& kategorizálás</div>
+      <div class="gantt-label">Épületek felmérése & kategorizálás</div>
       <div class="gantt-cell"></div>
       <div class="gantt-cell" style="background:rgba(0,200,255,.18);border-radius:4px;grid-column:3;display:flex;align-items:center;padding:0 8px"><span style="font-size:clamp(.8rem,1.1vw,1rem);color:#00c8ff;font-weight:700">Drónfelvétel · térkép</span></div>
       <div class="gantt-cell"></div>
@@ -848,7 +894,7 @@ html,body{width:100%;height:100%;overflow:hidden;
 
     <!-- Sor 4 -->
     <div class="gantt-row">
-      <div class="gantt-label">Technológiai kutatás<br>& features lista</div>
+      <div class="gantt-label">Technológiai kutatás & features lista</div>
       <div class="gantt-cell"></div>
       <div class="gantt-cell"></div>
       <div class="gantt-cell" style="background:rgba(68,221,102,.18);border-radius:4px;grid-column:4;display:flex;align-items:center;padding:0 8px"><span style="font-size:clamp(.8rem,1.1vw,1rem);color:#44dd66;font-weight:700">features.md · AI képek</span></div>
@@ -858,7 +904,7 @@ html,body{width:100%;height:100%;overflow:hidden;
 
     <!-- Sor 5 -->
     <div class="gantt-row">
-      <div class="gantt-label">Interaktív prezentáció<br>fejlesztés</div>
+      <div class="gantt-label">Interaktív prezentáció fejlesztés</div>
       <div class="gantt-cell"></div>
       <div class="gantt-cell"></div>
       <div class="gantt-cell"></div>
@@ -882,7 +928,7 @@ html,body{width:100%;height:100%;overflow:hidden;
     <div id="team-title">Csapattagok részvétele — 3. csapat · Digitális Acélváros</div>
 
     <!-- Fejléc -->
-    <div style="display:grid;grid-template-columns:16vw repeat(5,1fr);gap:2px;margin-bottom:6px">
+    <div style="display:grid;grid-template-columns:minmax(100px,16vw) repeat(5,1fr);gap:2px;margin-bottom:6px">
       <div></div>
       <div class="gantt-day-label">Hétfő</div>
       <div class="gantt-day-label">Kedd</div>
@@ -892,7 +938,7 @@ html,body{width:100%;height:100%;overflow:hidden;
     </div>
 
     <!-- Tóth László: végig -->
-    <div style="display:grid;grid-template-columns:16vw repeat(5,1fr);gap:2px;margin-bottom:4px;align-items:center">
+    <div style="display:grid;grid-template-columns:minmax(100px,16vw) repeat(5,1fr);gap:2px;margin-bottom:4px;align-items:center">
       <div style="font-size:clamp(1rem,1.5vw,1.4rem);color:rgba(255,255,255,.85);text-align:right;padding-right:.6rem;line-height:1.3">
         Tóth László<br><span style="color:rgba(255,255,255,.5);font-size:clamp(.85rem,1.2vw,1.1rem)">Kandó</span>
       </div>
@@ -902,7 +948,7 @@ html,body{width:100%;height:100%;overflow:hidden;
     </div>
 
     <!-- Oláh Henrietta: hétfőtől (Oláh Roland beteg lett, Heni jött helyette) -->
-    <div style="display:grid;grid-template-columns:16vw repeat(5,1fr);gap:2px;margin-bottom:4px;align-items:center">
+    <div style="display:grid;grid-template-columns:minmax(100px,16vw) repeat(5,1fr);gap:2px;margin-bottom:4px;align-items:center">
       <div style="font-size:clamp(1rem,1.5vw,1.4rem);color:rgba(255,255,255,.85);text-align:right;padding-right:.6rem;line-height:1.3">
         Oláh Henrietta<br><span style="color:rgba(255,255,255,.5);font-size:clamp(.85rem,1.2vw,1.1rem)">Kós Károly</span>
       </div>
@@ -913,7 +959,7 @@ html,body{width:100%;height:100%;overflow:hidden;
     </div>
 
     <!-- Pál Dominika: hétfő–kedd -->
-    <div style="display:grid;grid-template-columns:16vw repeat(5,1fr);gap:2px;margin-bottom:4px;align-items:center">
+    <div style="display:grid;grid-template-columns:minmax(100px,16vw) repeat(5,1fr);gap:2px;margin-bottom:4px;align-items:center">
       <div style="font-size:clamp(1rem,1.5vw,1.4rem);color:rgba(255,255,255,.45);text-align:right;padding-right:.6rem;line-height:1.3">
         Pál Dominika<br><span style="color:rgba(255,255,255,.3);font-size:clamp(.85rem,1.2vw,1.1rem)">Baross Gábor</span>
       </div>
@@ -926,7 +972,7 @@ html,body{width:100%;height:100%;overflow:hidden;
     </div>
 
     <!-- Sipos Petra: szerdától -->
-    <div style="display:grid;grid-template-columns:16vw repeat(5,1fr);gap:2px;margin-bottom:4px;align-items:center">
+    <div style="display:grid;grid-template-columns:minmax(100px,16vw) repeat(5,1fr);gap:2px;margin-bottom:4px;align-items:center">
       <div style="font-size:clamp(1rem,1.5vw,1.4rem);color:rgba(255,255,255,.85);text-align:right;padding-right:.6rem;line-height:1.3">
         Sipos Petra<br><span style="color:rgba(255,255,255,.5);font-size:clamp(.85rem,1.2vw,1.1rem)">Baross Gábor</span>
       </div>
@@ -939,7 +985,7 @@ html,body{width:100%;height:100%;overflow:hidden;
     </div>
 
     <!-- Teleki Tamás: végig -->
-    <div style="display:grid;grid-template-columns:16vw repeat(5,1fr);gap:2px;margin-bottom:4px;align-items:center">
+    <div style="display:grid;grid-template-columns:minmax(100px,16vw) repeat(5,1fr);gap:2px;margin-bottom:4px;align-items:center">
       <div style="font-size:clamp(1rem,1.5vw,1.4rem);color:rgba(255,255,255,.85);text-align:right;padding-right:.6rem;line-height:1.3">
         Teleki Tamás<br><span style="color:rgba(255,255,255,.5);font-size:clamp(.85rem,1.2vw,1.1rem)">Bláthy Ottó</span>
       </div>
@@ -1377,7 +1423,7 @@ const HCX = CW/2, HCY = CH/2;
 const HR = 220;
 
 // Tile dimensions — big enough to look great
-const TW = 300, TH = 160;
+const TW = 300, TH = 180;
 const RX = 820, RY = 480; // ellipszis sugarak: vízszintes, függőleges
 
 // Ring rotation state (radians offset, 0 = cat:0 at top)
@@ -1512,6 +1558,7 @@ function findPic(key, cb){
 let overviewState = 'hub';
 let namesShown = 0;
 const tileImgCache = new Array(CATS.length).fill(null);
+const slideImgCache = new Map(); // key → resolved src, előre betöltve
 let imagesReady = false;
 
 // Tile-ok rejtve indulnak
@@ -1594,11 +1641,16 @@ function setCamera(cx, cy, z, instant){
     ? 'none'
     : 'transform .85s cubic-bezier(.77,0,.175,1)';
   ovCanvas.style.transform = `scale(${z}) translate(${x}px,${y}px)`;
-  // Szöveg méret kompenzálás: célméret / scale = canvas px
-  const iconPx  = Math.round(38 / z);   // 38px látható méret ikonnak
-  const labelPx = Math.round(20 / z);   // 20px látható méret kategória névnek
-  const hubTitlePx = Math.round(32 / z);
-  const hubSubPx   = Math.round(13 / z);
+  // Szöveg méret kompenzálás: viewport-arányos célméret / scale = canvas px
+  const vw = VW();
+  const iconTarget     = Math.max(16, Math.round(vw * 0.028));  // ~2.8vw
+  const labelTarget    = Math.max(10, Math.round(vw * 0.014));  // ~1.4vw
+  const hubTitleTarget = Math.max(14, Math.round(vw * 0.022));  // ~2.2vw
+  const hubSubTarget   = Math.max( 8, Math.round(vw * 0.009));  // ~0.9vw
+  const iconPx     = Math.round(iconTarget     / z);
+  const labelPx    = Math.round(labelTarget    / z);
+  const hubTitlePx = Math.round(hubTitleTarget / z);
+  const hubSubPx   = Math.round(hubSubTarget   / z);
   document.querySelectorAll('.ov-tile-icon').forEach(el => el.style.fontSize = iconPx+'px');
   document.querySelectorAll('.ov-tile-cat').forEach(el => el.style.fontSize = labelPx+'px');
   const ht = document.getElementById('ov-hub-title');
@@ -1616,10 +1668,14 @@ function resetView(){
   setCamera(HCX, HCY, z);
 }
 
-// Automatikus átméretezés viewport változásakor
+// Automatikus átméretezés viewport változásakor — csak kamera, ne zárja be a galériát
 window.addEventListener('resize', ()=>{
   if(document.getElementById('overview').classList.contains('active')){
-    resetView();
+    // Csak zoom újraszámolás, closeCatDetail() nélkül
+    const padX = TW * 0.6, padY = TH * 0.6;
+    const z = Math.min(VW() / ((RX + TW/2 + padX) * 2),
+                       VH() / ((RY + TH/2 + padY) * 2));
+    setCamera(HCX, HCY, z);
   }
 });
 
@@ -1916,34 +1972,43 @@ function openSlide(ci, si){
   const sl = slides[si];
   const cat = CATS[ci];
 
-  // Big photo — findPic resolves NFC/NFD/ext variants
+  // Big photo — slideImgCache-ből azonnal, ha már be van töltve
   const photoEl = document.getElementById('cat-photo-img');
   photoEl.style.opacity = '0';
   photoEl.classList.remove('kb-pan','kb-zoom');
-  findPic(sl.img, src=>{
+
+  function applyPhoto(src){
     if(!src){ photoEl.style.opacity='1'; return; }
-    // Mérjük meg a kép arányát vs konténer arány
     const probe = new Image();
     probe.onload = ()=>{
       const imgRatio = probe.naturalWidth / probe.naturalHeight;
       const box = photoEl.parentElement || photoEl;
       const boxRatio = box.offsetWidth / box.offsetHeight;
-      // Ha a kép legalább 1.6x szélesebb mint a konténer arány → panoráma mód
-      if(imgRatio > boxRatio * 1.4){
-        photoEl.classList.add('kb-pan');
-      } else {
-        photoEl.classList.add('kb-zoom');
-      }
+      photoEl.classList.add(imgRatio > boxRatio * 1.4 ? 'kb-pan' : 'kb-zoom');
       photoEl.style.backgroundImage=`url('${src}')`;
       photoEl.style.opacity='1';
     };
     probe.onerror = ()=>{ photoEl.style.opacity='1'; };
-    probe.src = src;
-  });
+    // Ha a kép már a böngésző cache-ben van, complete azonnal igaz
+    if(probe.complete){ probe.onload(); }
+    else { probe.src = src; }
+  }
+
+  if(slideImgCache.has(sl.img)){
+    applyPhoto(slideImgCache.get(sl.img));
+  } else {
+    findPic(sl.img, src=>{
+      slideImgCache.set(sl.img, src);
+      applyPhoto(src);
+    });
+  }
 
   // Description
   document.getElementById('cat-desc-title').textContent = sl.title;
-  document.getElementById('cat-desc-text').textContent = sl.desc;
+  // Leírás → bullet pontok mondatvégek mentén
+  const bullets = (sl.desc||'').split(/(?<=\.)\s+|(?= —|—)/).filter(s=>s.trim());
+  document.getElementById('cat-desc-text').innerHTML = bullets
+    .map(b=>`<div class="bullet">${b.trim().replace(/^\./, '')}</div>`).join('');
   document.getElementById('cat-desc-cost').textContent = sl.cost;
 
   // Counter
@@ -2102,15 +2167,18 @@ function startPreload(){
         const img = new Image();
         img.onload = () => {
           if(tileIdx >= 0) tileImgCache[tileIdx] = src;
+          slideImgCache.set(key, src); // minden kép cache-be kerül
           tick();
         };
         img.onerror = () => {
           if(tileIdx >= 0) tileImgCache[tileIdx] = null;
+          slideImgCache.set(key, null);
           tick();
         };
         img.src = src;
       } else {
         if(tileIdx >= 0) tileImgCache[tileIdx] = null;
+        slideImgCache.set(key, null);
         tick();
       }
     });
