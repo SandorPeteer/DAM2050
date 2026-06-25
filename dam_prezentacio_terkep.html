@@ -58,6 +58,7 @@ html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:Ari
   </div>
   <div id="actions">
     <a class="btn" href="index.html">FŐOLDAL</a>
+    <button class="btn" onclick="window.close(); window.opener && window.opener.focus();" type="button">◀ VISSZA PREZENTÁCIÓBA</button>
     <button class="btn active" id="satBtn" type="button">MŰHOLD</button>
     <button class="btn" id="mapBtn" type="button">TÉRKÉP</button>
     <button class="btn active" id="pdfBtn" type="button">DAM RÉTEG</button>
@@ -139,8 +140,16 @@ window.initMap = function() {
     gestureHandling:'greedy'
   });
   bounds = new google.maps.LatLngBounds();
-  wireUi();
+  if(!IS_EMBED) wireUi();
   loadLayers();
+  if(IS_EMBED){
+    google.maps.event.addListenerOnce(map,'idle',()=>{
+      mapReady = true;
+      msgQueue.forEach(handleCmd);
+      msgQueue.length = 0;
+      window.parent.postMessage({damReady:true},'*');
+    });
+  }
 };
 
 function wireUi() {
@@ -168,8 +177,10 @@ function wireUi() {
 
 function setBase(type) {
   map.setMapTypeId(type);
-  document.getElementById('satBtn').classList.toggle('active', type === 'satellite');
-  document.getElementById('mapBtn').classList.toggle('active', type === 'roadmap');
+  const sb = document.getElementById('satBtn');
+  const mb = document.getElementById('mapBtn');
+  if(sb) sb.classList.toggle('active', type === 'satellite');
+  if(mb) mb.classList.toggle('active', type === 'roadmap');
 }
 
 function loadLayers() {
@@ -462,6 +473,31 @@ function escapeHtml(value) {
 }
 
 loadGoogle();
+
+// Embed mód: ?embed=1 paraméter esetén saját UI eltávolítva, postMessage vezérlés
+const IS_EMBED = new URLSearchParams(location.search).get('embed') === '1';
+const msgQueue = [];
+let mapReady = false;
+
+function handleCmd(cmd){
+  if(cmd==='sat') setBase('satellite');
+  else if(cmd==='map') setBase('roadmap');
+  else if(cmd==='pdf'){ pdfVisible=!pdfVisible; applyLayerVisibility(); }
+}
+
+if(IS_EMBED){
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const top = document.getElementById('top');
+    const leg = document.getElementById('legend');
+    if(top) top.remove();
+    if(leg) leg.remove();
+  });
+  window.addEventListener('message', e=>{
+    if(!e.data || !e.data.dam) return;
+    if(mapReady) handleCmd(e.data.dam);
+    else msgQueue.push(e.data.dam);
+  });
+}
 </script>
 </body>
 </html>

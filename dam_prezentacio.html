@@ -453,6 +453,59 @@ html,body{width:100%;height:100%;overflow:hidden;
 #budget-close:hover{background:rgba(255,255,255,.12)}
 
 /* ══════════════════════════════════════
+   TÉRKÉP OVERLAY
+══════════════════════════════════════ */
+#map-overlay{
+  position:fixed;inset:0;z-index:150;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  opacity:0;pointer-events:none;transition:opacity .4s;
+  background:#03060d;
+}
+#map-overlay.open{opacity:1;pointer-events:all}
+#map-overlay-header{
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:clamp(.6rem,1.2vh,1rem) clamp(1rem,2vw,2rem);
+  background:rgba(3,6,13,.97);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  flex-shrink:0;
+}
+#map-overlay-title{
+  font-size:clamp(1.2rem,2.5vw,2.2rem);font-weight:900;color:#fff;
+}
+#map-overlay-title span{color:#ffc300}
+#map-overlay-controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.map-ctrl-btn{
+  padding:clamp(4px,.6vh,8px) clamp(8px,1.2vw,14px);
+  border-radius:6px;font-size:clamp(.6rem,.85vw,.8rem);font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;
+  border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);
+  color:rgba(255,255,255,.7);transition:all .15s;white-space:nowrap;
+}
+.map-ctrl-btn:hover,.map-ctrl-btn.active{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)}
+.map-ctrl-btn.close-btn{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.5)}
+.map-ctrl-btn:focus{outline:none}
+#map-overlay-iframe{
+  width:100%;height:100%;border:none;display:block;
+}
+#map-overlay-footer{
+  display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;
+  padding:clamp(.5rem,1vh,.9rem) clamp(1rem,2vw,2rem);
+  background:rgba(3,6,13,.98);
+  border-top:1px solid rgba(255,255,255,.1);
+  flex-shrink:0;position:relative;z-index:10;
+}
+.map-legend-item{
+  display:flex;align-items:center;gap:.4rem;
+  font-size:clamp(.55rem,.8vw,.75rem);font-weight:700;color:rgba(255,255,255,.75);
+  letter-spacing:.5px;text-transform:uppercase;
+}
+.map-legend-dot{
+  width:clamp(8px,1vw,12px);height:clamp(8px,1vw,12px);
+  border-radius:2px;flex-shrink:0;
+}
+
+/* ══════════════════════════════════════
    GANTT + TEAM OVERLAY
 ══════════════════════════════════════ */
 #gantt{
@@ -567,6 +620,22 @@ html,body{width:100%;height:100%;overflow:hidden;
 .tb-btn:hover{border-color:rgba(255,255,255,.5);color:#fff;background:rgba(255,255,255,.07)}
 .tb-btn.gold{border-color:rgba(255,195,0,.5);color:rgba(255,195,0,.9)}
 .tb-btn.gold:hover{border-color:#ffc300;color:#ffc300}
+
+/* Overview — projekt név + időzítő */
+#ov-project-name,#ov-timer{
+  opacity:0;transition:opacity .4s;pointer-events:none;z-index:20;
+}
+#overview.active #ov-project-name,#overview.active #ov-timer{opacity:1;}
+#ov-project-name{
+  position:fixed;bottom:clamp(.6rem,1.5vh,1.2rem);right:clamp(.8rem,2vw,1.5rem);
+  font-size:clamp(.55rem,.8vw,.8rem);letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.35);font-weight:500;
+}
+#ov-timer{
+  position:fixed;bottom:clamp(.6rem,1.5vh,1.2rem);left:clamp(.8rem,2vw,1.5rem);
+  font-size:clamp(.65rem,.9vw,.9rem);letter-spacing:2px;
+  color:rgba(255,255,255,.4);font-weight:600;font-variant-numeric:tabular-nums;
+}
 
 /* Progress bar */
 #progress{
@@ -767,7 +836,7 @@ html,body{width:100%;height:100%;overflow:hidden;
   <div id="topbar-right">
     <div class="tb-btn" onclick="showGantt()">📅 Projekt</div>
     <div class="tb-btn" onclick="showBudget()">💰 Beruházás</div>
-    <div class="tb-btn" onclick="window.open('dam_prezentacio_terkep.html','_blank')">🗺️ Térkép</div>
+    <div class="tb-btn" onclick="showMapOverlay()">🗺️ Térkép</div>
     <div class="tb-btn gold" onclick="showIntro()">⌂ Kezdőlap</div>
   </div>
 </div>
@@ -782,6 +851,10 @@ html,body{width:100%;height:100%;overflow:hidden;
       <div id="ov-hub-sub">130 ha · 50+ innováció</div>
     </div>
   </div>
+  <!-- Jobb alul: projekt név -->
+  <div id="ov-project-name">Diósgyőri Acélművek revitalizációja · 2026</div>
+  <!-- Bal alul: időzítő -->
+  <div id="ov-timer">⏱ <span id="ov-timer-val">0:00</span></div>
 </div>
 
 <!-- ══ CATEGORY PREVIEW (step 1) ══ -->
@@ -843,6 +916,28 @@ html,body{width:100%;height:100%;overflow:hidden;
     Teljes fejlesztési csomag
     <strong>260–460 Mrd Ft</strong>
     <div id="budget-note">~600 M – 1,1 Mrd EUR · Tájékoztató jellegű · Részletes feasibility study szükséges</div>
+  </div>
+</div>
+
+<!-- ══ TÉRKÉP OVERLAY ══ -->
+<div id="map-overlay">
+  <div id="map-overlay-header">
+    <div id="map-overlay-title">🗺️ DAM 2050 · <span>Épületkategóriák</span></div>
+    <div id="map-overlay-controls">
+      <button class="map-ctrl-btn active" id="mo-sat" onclick="mapOverlayMsg('sat')">🛰 Műhold</button>
+      <button class="map-ctrl-btn" id="mo-map" onclick="mapOverlayMsg('map')">🗺 Térkép</button>
+      <button class="map-ctrl-btn active" id="mo-pdf" onclick="mapOverlayMsg('pdf')">🏭 DAM réteg</button>
+      <button class="map-ctrl-btn close-btn" onclick="closeMapOverlay()">✕ Bezár</button>
+    </div>
+  </div>
+  <iframe id="map-overlay-iframe" src="dam_prezentacio_terkep.html?embed=1" allowfullscreen tabindex="-1" style="outline:none;border:none"></iframe>
+  <div id="map-overlay-footer">
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:#dc2626"></div>Bontandó</div>
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:#f97316"></div>Bontásra javasolt</div>
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:#84cc16"></div>Hasznosításra javasolt</div>
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:#16a34a"></div>Hasznosítandó</div>
+    <div class="map-legend-item"><div class="map-legend-dot" style="background:#2563eb"></div>Védett örökség</div>
+    <div style="margin-left:auto;font-size:clamp(.5rem,.75vw,.7rem);color:rgba(255,255,255,.3);letter-spacing:1px">130 ha · 453 DAM elem</div>
   </div>
 </div>
 
@@ -1421,7 +1516,7 @@ const CW = 3200, CH = 1800;
 const HCX = CW/2, HCY = CH/2;
 
 // Hub size
-const HR = 220;
+const HR = 250;
 
 // Tile dimensions — big enough to look great
 const TW = 380, TH = 160;
@@ -1653,8 +1748,8 @@ function setCamera(cx, cy, z, instant){
   // TH * z = tile fizikai magasság px-ben
   const iconPx     = Math.round(TH * 0.35);
   const labelPx    = Math.round(TW * 0.082);
-  const hubTitlePx = Math.round(HR * 0.30);
-  const hubSubPx   = Math.round(HR * 0.12);
+  const hubTitlePx = Math.round(HR * 0.24);
+  const hubSubPx   = Math.round(HR * 0.10);
   document.querySelectorAll('.ov-tile-icon').forEach(el => el.style.fontSize = iconPx+'px');
   document.querySelectorAll('.ov-tile-cat').forEach(el => el.style.fontSize = labelPx+'px');
   const ht = document.getElementById('ov-hub-title');
@@ -2091,6 +2186,25 @@ function updateVisited(){
 
 function showBudget(){document.getElementById('budget').classList.add('open')}
 function closeBudget(){document.getElementById('budget').classList.remove('open')}
+
+function showMapOverlay(){
+  document.getElementById('map-overlay').classList.add('open');
+  // iframe újratöltés csak ha még nem töltötte be
+  const fr = document.getElementById('map-overlay-iframe');
+  if(!fr.dataset.loaded){
+    fr.dataset.loaded='1';
+    fr.src = fr.src; // reload
+  }
+}
+function closeMapOverlay(){document.getElementById('map-overlay').classList.remove('open')}
+let _moSat = true, _moPdf = true;
+function mapOverlayMsg(cmd){
+  const fr = document.getElementById('map-overlay-iframe');
+  fr.contentWindow.postMessage({dam:cmd},'*');
+  if(cmd==='sat'){ _moSat=true; document.getElementById('mo-sat').classList.add('active'); document.getElementById('mo-map').classList.remove('active'); }
+  else if(cmd==='map'){ _moSat=false; document.getElementById('mo-map').classList.add('active'); document.getElementById('mo-sat').classList.remove('active'); }
+  else if(cmd==='pdf'){ _moPdf=!_moPdf; document.getElementById('mo-pdf').classList.toggle('active',_moPdf); }
+}
 function showGantt(){document.getElementById('gantt').classList.add('open')}
 function closeGantt(){document.getElementById('gantt').classList.remove('open')}
 
@@ -2205,14 +2319,26 @@ function startPreload(){
   }
 }
 
+let _timerStart = null, _timerInterval = null;
+function startTimer(){
+  _timerStart = Date.now();
+  const el = document.getElementById('ov-timer-val');
+  _timerInterval = setInterval(()=>{
+    const s = Math.floor((Date.now() - _timerStart) / 1000);
+    const m = Math.floor(s / 60);
+    const ss = String(s % 60).padStart(2,'0');
+    el.textContent = `${m}:${ss}`;
+  }, 1000);
+}
+
 function startPresentation(){
   if(ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
   document.getElementById('intro').classList.add('hidden');
   document.getElementById('overview').classList.add('active');
   document.getElementById('topbar').classList.add('visible');
   setTimeout(resetView, 100);
-  // Build-up animáció indítása — tile nevek feljönnek, majd képek
   startBuildUp();
+  startTimer();
 }
 
 function showIntro(){
