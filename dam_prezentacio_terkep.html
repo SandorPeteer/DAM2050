@@ -124,7 +124,7 @@ html, body { width:100%; height:100%; overflow:hidden; font-family:'Courier New'
 <script src="google_maps_key_public.js"></script>
 <script>
 window.gm_authFailure = function() {
-  document.getElementById('subtitle').textContent = 'Google API hiba: kulcs vagy referrer tiltás.';
+  const _sub=document.getElementById('subtitle'); if(_sub) _sub.textContent = 'Google API hiba: kulcs vagy referrer tiltás.';
 };
 
 const CAT = {
@@ -153,7 +153,7 @@ const MAPS_3D_OFFSET_METERS = { north: -250, east: 0 };
 
 function loadGoogle() {
   if (!window.GOOGLE_MAPS_API_KEY || window.GOOGLE_MAPS_API_KEY.includes('PASTE_')) {
-    document.getElementById('subtitle').textContent = 'Hiányzó Google API kulcs: google_maps_key.js';
+    const _sub=document.getElementById('subtitle'); if(_sub) _sub.textContent = 'Hiányzó Google API kulcs: google_maps_key.js';
     return;
   }
   const s = document.createElement('script');
@@ -235,7 +235,7 @@ function loadLayers() {
     document.getElementById('labelStat').textContent = `${(pdfSource.labels || []).length} DAM felirat`;
     map.fitBounds(bounds, 90);
   }).catch(err => {
-    document.getElementById('subtitle').textContent = 'Réteg betöltési hiba: ' + err.message;
+    const _sub=document.getElementById('subtitle'); if(_sub) _sub.textContent = 'Réteg betöltési hiba: ' + err.message;
   });
 }
 

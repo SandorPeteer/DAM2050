@@ -304,17 +304,17 @@ html,body{width:100%;height:100%;overflow:hidden;
   will-change:transform;
   transform-origin:center center;
 }
-/* Panoráma: GPU translateX animáció */
+/* Panoráma: background-position pásztázás bal→jobb */
 #cat-photo-img.kb-pan{
   background-size:auto 100%;
   background-position:left center;
-  animation:kb-pan 16s ease-in-out infinite alternate;
+  animation:kb-pan 18s ease-in-out infinite alternate;
 }
 @keyframes kb-pan{
-  0%  {transform:translateX(0%);}
-  100%{transform:translateX(-8%);}
+  0%  {background-position:left center;}
+  100%{background-position:right center;}
 }
-/* Normál: GPU scale animáció */
+/* Normál: enyhe zoom, contain hogy ne vágja le a széleket */
 #cat-photo-img.kb-zoom{
   background-size:contain;
   background-position:center;
@@ -322,7 +322,7 @@ html,body{width:100%;height:100%;overflow:hidden;
 }
 @keyframes kb-zoom{
   0%  {transform:scale(1);}
-  100%{transform:scale(1.06);}
+  100%{transform:scale(1.04);}
 }
 
 /* Right panel — grid, viewport-arányos */
@@ -2116,14 +2116,14 @@ function openSlide(ci, si){
       const imgRatio = probe.naturalWidth / probe.naturalHeight;
       const box = photoEl.parentElement || photoEl;
       const boxRatio = box.offsetWidth / box.offsetHeight;
-      photoEl.classList.add(imgRatio > boxRatio * 1.4 ? 'kb-pan' : 'kb-zoom');
+      const isPan = imgRatio > boxRatio * 1.3;
+      photoEl.classList.add(isPan ? 'kb-pan' : 'kb-zoom');
       photoEl.style.backgroundImage=`url('${src}')`;
       photoEl.style.opacity='1';
     };
     probe.onerror = ()=>{ photoEl.style.opacity='1'; };
-    // Ha a kép már a böngésző cache-ben van, complete azonnal igaz
-    if(probe.complete){ probe.onload(); }
-    else { probe.src = src; }
+    probe.src = src;
+    if(probe.complete) probe.onload();
   }
 
   if(slideImgCache.has(sl.img)){
