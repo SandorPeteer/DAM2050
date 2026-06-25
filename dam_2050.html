@@ -13,7 +13,7 @@ canvas{display:block}
 #title p{font-size:9px;color:#006688;letter-spacing:3px;margin-top:3px}
 @keyframes glow{0%,100%{text-shadow:0 0 18px #00ffcc,0 0 36px #0088ff}50%{text-shadow:0 0 30px #00ffcc,0 0 60px #0088ff,0 0 90px #0055ff}}
 #controls{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10;flex-wrap:wrap;justify-content:center}
-.cb{background:rgba(4,18,40,0.92);border:1px solid #00ffcc44;color:#00ccaa;padding:6px 13px;border-radius:14px;font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .18s;backdrop-filter:blur(6px)}
+.cb{background:rgba(4,18,40,0.92);border:1px solid #00ffcc44;color:#00ccaa;padding:6px 13px;border-radius:14px;font-family:'Courier New',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .18s;backdrop-filter:blur(6px);text-decoration:none;display:inline-block;line-height:normal}
 .cb:hover,.cb.active{border-color:#00ffcc;color:#fff;background:rgba(0,70,90,0.8);box-shadow:0 0 12px #00ffcc33}
 #legend{position:fixed;top:76px;left:14px;background:rgba(4,10,24,0.92);border:1px solid #00ffcc22;border-radius:8px;padding:11px 13px;z-index:10;pointer-events:none}
 #legend h3{color:#00ffcc;font-size:7px;letter-spacing:3px;margin-bottom:7px}
@@ -64,6 +64,7 @@ canvas{display:block}
   <div class="st"><span class="sl">MISKOLC</span><span class="sv">2050</span></div>
 </div>
 <div id="controls">
+  <a class="cb" href="index.html">⬡ FŐOLDAL</a>
   <button class="cb active" id="btn-overview" onclick="setView('overview')">⬡ TELJES</button>
   <button class="cb" id="btn-setany" onclick="setView('setany')">⟶ SÉTÁNY</button>
   <button class="cb" id="btn-makers" onclick="setView('makers')">◈ MAKERS</button>

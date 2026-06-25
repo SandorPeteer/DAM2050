@@ -35,6 +35,18 @@ html,body{width:100%;height:100%;overflow:hidden;
 }
 #presplash-btn:hover{background:rgba(255,195,0,.1);border-color:#ffc300;
   box-shadow:0 0 40px rgba(255,195,0,.2);}
+#presplash-qr{
+  margin-top:2.5rem;display:flex;flex-direction:column;align-items:center;gap:.8rem;
+  opacity:.9;
+}
+#presplash-qr img{
+  border-radius:10px;border:4px solid #fff;
+  display:block;box-shadow:0 0 40px rgba(255,255,255,.2);
+}
+#presplash-qr-label{
+  font-size:clamp(.6rem,1vw,.85rem);letter-spacing:4px;
+  color:rgba(255,255,255,.5);text-transform:uppercase;
+}
 
 /* ══ INTRO — bal videó, jobb szöveg ══ */
 #intro{
@@ -127,6 +139,19 @@ html,body{width:100%;height:100%;overflow:hidden;
   text-decoration:none;text-transform:uppercase;transition:color .2s;
 }
 #intro-back:hover{color:rgba(255,255,255,.5)}
+#intro-qr{
+  display:flex;flex-direction:column;align-items:center;gap:.6rem;
+  margin-top:1.8rem;opacity:.9;
+}
+#intro-qr img{
+  border-radius:10px;border:4px solid #fff;display:block;
+  box-shadow:0 0 40px rgba(255,255,255,.15);
+  width:clamp(100px,14vw,200px);height:clamp(100px,14vw,200px);
+}
+#intro-qr-label{
+  font-size:clamp(.5rem,.8vw,.72rem);letter-spacing:3px;
+  color:rgba(255,255,255,.45);text-transform:uppercase;
+}
 
 /* ══════════════════════════════════════
    OVERVIEW — canvas with 10 big tiles
@@ -806,6 +831,10 @@ html,body{width:100%;height:100%;overflow:hidden;
 <div id="presplash">
   <div id="presplash-title">Digitális Acélváros 2050</div>
   <button id="presplash-btn" onclick="enterIntro()">▶ Belépés</button>
+  <div id="presplash-qr">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&bgcolor=ffffff&color=000000&data=http%3A%2F%2Fsp.myddns.me%2Fdam2050%2F" alt="QR" width="220" height="220">
+    <div id="presplash-qr-label">sp.myddns.me/dam2050</div>
+  </div>
 </div>
 
 <!-- ══ INTRO ══ -->
@@ -826,6 +855,10 @@ html,body{width:100%;height:100%;overflow:hidden;
       <div id="intro-progress-label">Betöltés…</div>
     </div>
     <button id="intro-btn" class="loading" onclick="startPresentation()">Prezentáció indítása →</button>
+    <div id="intro-qr">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&bgcolor=ffffff&color=000000&data=http%3A%2F%2Fsp.myddns.me%2Fdam2050%2F" alt="QR" width="110" height="110">
+      <div id="intro-qr-label">sp.myddns.me/dam2050</div>
+    </div>
     <a href="index.html" id="intro-back">← Vissza a főoldalra</a>
   </div>
 </div>
@@ -2220,7 +2253,6 @@ function onYouTubeIframeAPIReady(){
 }
 
 function enterIntro(){
-  // Fullscreen — must be called directly from user gesture (click)
   const docEl = document.documentElement;
   if(docEl.requestFullscreen) docEl.requestFullscreen().catch(()=>{});
   else if(docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
@@ -2228,33 +2260,20 @@ function enterIntro(){
   document.getElementById('presplash').classList.add('hidden');
   document.getElementById('intro').classList.remove('hidden');
 
-  // mute=1 → Chrome biztosan elindítja, a 🔇 gombbal lehet hangot adni
   const iframe = document.getElementById('intro-yt');
   iframe.src = 'https://www.youtube.com/embed/maQVHy2qC74?autoplay=1&mute=1&loop=1&playlist=maQVHy2qC74&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&fs=0&cc_load_policy=0&enablejsapi=1';
-
-  function initPlayer(){
-    ytPlayer = new YT.Player('intro-yt',{
-      events:{
-        onReady: e => { e.target.playVideo(); }
-      }
-    });
-  }
-  if(ytAPIReady) initPlayer();
-  else { const t=setInterval(()=>{ if(ytAPIReady){clearInterval(t);initPlayer();} },100); }
 
   startPreload();
 }
 
-// 🔇 gomb → hang bekapcsolása user gesture-ből (Chrome megengedi)
 function unmuteVideo(){
-  if(ytPlayer && ytPlayer.unMute){
-    ytPlayer.unMute();
-    ytPlayer.setVolume(85);
-  }
+  const iframe = document.getElementById('intro-yt');
+  // postMessage alapú unmute — nem kell YT.Player, mindig működik
+  iframe.contentWindow.postMessage(JSON.stringify({event:'command', func:'unMute', args:[]}), '*');
+  iframe.contentWindow.postMessage(JSON.stringify({event:'command', func:'setVolume', args:[85]}), '*');
   document.getElementById('intro-unmute').classList.add('hidden');
 }
 
-// Bárhova kattintás az intro-n → némítás feloldása (egyszer fut le)
 document.getElementById('intro').addEventListener('click', function handler(){
   unmuteVideo();
   document.getElementById('intro').removeEventListener('click', handler);
@@ -2331,8 +2350,13 @@ function startTimer(){
   }, 1000);
 }
 
+function ytCmd(func, args){
+  const fr = document.getElementById('intro-yt');
+  if(fr && fr.contentWindow) fr.contentWindow.postMessage(JSON.stringify({event:'command',func,args:args||[]}),'*');
+}
+
 function startPresentation(){
-  if(ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
+  ytCmd('pauseVideo');
   document.getElementById('intro').classList.add('hidden');
   document.getElementById('overview').classList.add('active');
   document.getElementById('topbar').classList.add('visible');
@@ -2344,17 +2368,19 @@ function startPresentation(){
 function showIntro(){
   closeCatDetail();
   closeBudget();
-  // Vissza a presplash-re
-  document.getElementById('intro').classList.add('hidden');
-  document.getElementById('presplash').classList.remove('hidden');
   document.getElementById('overview').classList.remove('active');
   document.getElementById('topbar').classList.remove('visible');
   document.getElementById('visited-badge').classList.remove('visible');
-  // Videó leállítása
-  if(ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
   visited.clear();
   tileEls.forEach(t=>{t.classList.remove('visited');t.classList.remove('current')});
   document.getElementById('progress').style.width='0';
+
+  // Videó az elejéről, hang állapota megmarad (nem töltjük újra az src-t)
+  ytCmd('seekTo', [0, true]);
+  ytCmd('playVideo');
+
+  document.getElementById('intro').classList.remove('hidden');
+  document.getElementById('presplash').classList.add('hidden');
 }
 
 /* ══════════════════════════════════════════

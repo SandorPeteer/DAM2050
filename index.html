@@ -6,10 +6,11 @@
 <title>DAM · Diósgyőri Acélmű · Revitalizáció</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-html, body { width:100%; height:100%; background:#060c18; overflow:hidden;
-  font-family:'Courier New', monospace; color:#cce; }
+html, body {
+  width:100%; min-height:100%; background:#060c18;
+  font-family:'Courier New', monospace; color:#cce;
+}
 
-/* Animated grid bg */
 body::before {
   content:''; position:fixed; inset:0;
   background-image:
@@ -17,10 +18,10 @@ body::before {
     linear-gradient(90deg, rgba(0,255,255,0.025) 1px, transparent 1px);
   background-size:60px 60px;
   animation:gridmove 20s linear infinite;
+  pointer-events:none;
 }
 @keyframes gridmove { from{background-position:0 0} to{background-position:60px 60px} }
 
-/* Scanline */
 body::after {
   content:''; position:fixed; inset:0; pointer-events:none;
   background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
@@ -28,16 +29,16 @@ body::after {
 
 #wrap {
   position:relative; z-index:1;
-  width:100%; height:100%;
+  min-height:100vh;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:clamp(1.5rem,4vh,3rem) clamp(1rem,4vw,3rem);
   gap:0;
 }
 
-/* Logo / Title */
-#logo-area { text-align:center; margin-bottom:48px; }
-
+/* Logo */
+#logo-area { text-align:center; margin-bottom:clamp(1.5rem,4vh,3rem); }
 #logo-hex {
-  font-size:52px; color:#00ffff;
+  font-size:clamp(2.5rem,7vw,4rem); color:#00ffff;
   text-shadow:0 0 30px #00ffff, 0 0 60px #0088ff;
   animation:hexspin 8s ease-in-out infinite;
   display:block; line-height:1;
@@ -46,62 +47,66 @@ body::after {
   0%,100%{ text-shadow:0 0 30px #00ffff, 0 0 60px #0088ff; }
   50%{ text-shadow:0 0 50px #00ffff, 0 0 100px #0055ff, 0 0 140px #0022aa; }
 }
-
 #logo-title {
-  font-size:28px; font-weight:900; letter-spacing:10px;
-  color:#00ffff; margin-top:12px;
+  font-size:clamp(1.4rem,5vw,2.2rem); font-weight:900; letter-spacing:clamp(4px,2vw,10px);
+  color:#00ffff; margin-top:clamp(.4rem,1vh,.8rem);
   text-shadow:0 0 20px #00ffff88;
 }
 #logo-sub {
-  font-size:12px; letter-spacing:5px; color:#7abcd0; margin-top:6px;
+  font-size:clamp(.6rem,1.5vw,.85rem); letter-spacing:clamp(2px,1vw,5px);
+  color:#7abcd0; margin-top:clamp(.2rem,.5vh,.4rem);
 }
 #logo-place {
-  font-size:12px; letter-spacing:4px; color:#5a9ab8; margin-top:3px;
+  font-size:clamp(.6rem,1.3vw,.8rem); letter-spacing:clamp(2px,1vw,4px);
+  color:#5a9ab8; margin-top:clamp(.1rem,.3vh,.25rem);
 }
 
-/* Horizontal divider */
 .hdiv {
-  width:320px; height:1px;
+  width:clamp(180px,40vw,320px); height:1px;
   background:linear-gradient(90deg, transparent, #00ffff44, transparent);
-  margin:0 auto 40px;
+  margin:0 auto clamp(1.2rem,3vh,2.5rem);
 }
 
-/* Cards */
-#cards { display:flex; gap:20px; align-items:stretch; }
+/* Cards grid */
+#cards {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(clamp(140px,28vw,220px), 1fr));
+  gap:clamp(.6rem,1.5vw,1.2rem);
+  width:100%;
+  max-width:1200px;
+}
 
 .card {
-  width:230px; background:rgba(4,12,28,0.9);
+  background:rgba(4,12,28,0.9);
   border:1px solid #00ffff22; border-radius:12px;
-  padding:28px 22px 24px;
-  display:flex; flex-direction:column; align-items:center; gap:16px;
+  padding:clamp(1rem,2.5vh,1.8rem) clamp(.8rem,2vw,1.4rem);
+  display:flex; flex-direction:column; align-items:center;
+  gap:clamp(.5rem,1.2vh,.9rem);
   cursor:pointer; text-decoration:none; color:inherit;
   transition:border-color .3s, box-shadow .3s, transform .25s;
   position:relative; overflow:hidden;
-  height:320px;
 }
-.card-desc { flex:1; }
 .card::before {
   content:''; position:absolute; inset:0;
   background:radial-gradient(ellipse at 50% 0%, rgba(0,255,255,0.06), transparent 70%);
   opacity:0; transition:opacity .3s;
 }
-.card:hover { border-color:#00ffff66; box-shadow:0 0 30px #00ffff18, 0 8px 32px #00000088;
-  transform:translateY(-4px); }
+.card:hover { border-color:#00ffff66; box-shadow:0 0 30px #00ffff18, 0 8px 32px #00000088; transform:translateY(-4px); }
 .card:hover::before { opacity:1; }
 
-.card-icon { font-size:36px; line-height:1; filter:drop-shadow(0 0 8px currentColor); }
-.card-year { font-size:26px; font-weight:900; letter-spacing:4px; }
-.card-title { font-size:11px; letter-spacing:3px; color:#a0c4d8; text-align:center; line-height:1.7; }
-.card-desc { font-size:11px; color:#8ab4c8; text-align:center; line-height:1.75; }
+.card-icon { font-size:clamp(1.6rem,4vw,2.4rem); line-height:1; filter:drop-shadow(0 0 8px currentColor); }
+.card-year { font-size:clamp(1.1rem,3vw,1.7rem); font-weight:900; letter-spacing:4px; }
+.card-title { font-size:clamp(.55rem,1.1vw,.75rem); letter-spacing:2px; color:#a0c4d8; text-align:center; line-height:1.7; }
+.card-desc { font-size:clamp(.55rem,1vw,.72rem); color:#8ab4c8; text-align:center; line-height:1.75; flex:1; }
 .card-btn {
-  margin-top:4px; padding:8px 22px;
-  border:1px solid; border-radius:6px; font-size:10px; font-weight:900;
+  margin-top:auto; padding:clamp(5px,.8vh,9px) clamp(12px,2vw,22px);
+  border:1px solid; border-radius:6px;
+  font-size:clamp(.5rem,.85vw,.68rem); font-weight:900;
   letter-spacing:2px; font-family:inherit;
   background:transparent; cursor:pointer;
   transition:background .2s, color .2s;
 }
 
-/* Card accent colors */
 .card.map .card-icon { color:#44aaff; }
 .card.map .card-year { color:#44aaff; text-shadow:0 0 12px #44aaff66; }
 .card.map .card-btn { color:#44aaff; border-color:#44aaff44; }
@@ -117,18 +122,21 @@ body::after {
 .card.future .card-btn { color:#cc88ff; border-color:#cc88ff44; }
 .card.future:hover .card-btn { background:#cc88ff22; }
 
-/* Stats bar */
+/* Stats */
 #stats {
-  margin-top:44px; display:flex; gap:32px; align-items:center;
+  margin-top:clamp(1.2rem,3vh,2.5rem);
+  display:flex; gap:clamp(.8rem,2vw,2rem);
+  align-items:center; flex-wrap:wrap; justify-content:center;
 }
 .stt { text-align:center; }
-.stt-v { font-size:20px; font-weight:900; color:#00ffcc; }
-.stt-l { font-size:10px; letter-spacing:2px; color:#6a9ab8; margin-top:2px; }
-.sdiv { width:1px; height:32px; background:rgba(0,255,204,.2); }
+.stt-v { font-size:clamp(.9rem,2.5vw,1.4rem); font-weight:900; color:#00ffcc; }
+.stt-l { font-size:clamp(.45rem,.8vw,.65rem); letter-spacing:2px; color:#6a9ab8; margin-top:2px; }
+.sdiv { width:1px; height:clamp(20px,3vh,32px); background:rgba(0,255,204,.2); }
 
-/* Version */
-#ver { position:fixed; bottom:14px; right:18px; font-size:10px;
-  color:#4a7a90; letter-spacing:2px; z-index:2; }
+#ver {
+  position:fixed; bottom:clamp(.5rem,1vh,.9rem); right:clamp(.8rem,1.5vw,1.2rem);
+  font-size:clamp(.45rem,.7vw,.65rem); color:#4a7a90; letter-spacing:2px; z-index:2;
+}
 </style>
 </head>
 <body>
@@ -174,10 +182,10 @@ body::after {
     </a>
 
     <a href="dam_prezentacio.html" class="card" style="--acc:#ffaa00">
-      <div class="card-icon" style="color:#ffaa00">📋</div>
+      <div class="card-icon" style="color:#ffaa00">🎯</div>
       <div class="card-year" style="color:#ffaa00;text-shadow:0 0 12px #ffaa0066">PREZ</div>
-      <div class="card-title">BEFEKTETŐI<br>ÖSSZEFOGLALÓ</div>
-      <div class="card-desc">7 zóna, 14 védett épület.<br>3 ütem, 30 éves program.<br>Adatok és kockázatok.</div>
+      <div class="card-title">INTERAKTÍV<br>PREZENTÁCIÓ</div>
+      <div class="card-desc">12 témakör, 75 slide.<br>Térkép, beruházás, csapat.<br>Vetítésre optimalizálva.</div>
     </a>
 
   </div>
@@ -199,9 +207,7 @@ body::after {
 <div id="ver">DAM REVITALIZÁCIÓ · 2024–2050 · MISKOLC</div>
 
 <script>
-// Subtle floating animation on cards
 document.querySelectorAll('.card').forEach((c, i) => {
-  c.style.animationDelay = (i * 0.15) + 's';
   c.animate([
     {transform:'translateY(0px)'},
     {transform:'translateY(-5px)'},
