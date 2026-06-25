@@ -210,8 +210,9 @@ html,body{width:100%;height:100%;overflow:hidden;
   font-weight:800;color:#fff;
   text-align:center;line-height:1.2;
   text-shadow:0 2px 12px rgba(0,0,0,.95);
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  word-break:break-word;
+  overflow:hidden;max-width:100%;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  word-break:keep-all;overflow-wrap:normal;
 }
 /* "Active" ring when category detail is open */
 .ov-tile.current{
@@ -1423,8 +1424,13 @@ const HCX = CW/2, HCY = CH/2;
 const HR = 220;
 
 // Tile dimensions — big enough to look great
-const TW = 300, TH = 180;
+const TW = 380, TH = 160;
 const RX = 820, RY = 480; // ellipszis sugarak: vízszintes, függőleges
+// Effektív méretek — mobilon kisebb ellipszis, nagyobb tile
+function effRX(){ return RX; }
+function effRY(){ return RY; }
+function effTW(){ return TW; }
+function effTH(){ return TH; }
 
 // Ring rotation state (radians offset, 0 = cat:0 at top)
 let ringAngle = 0;
@@ -1445,9 +1451,9 @@ const spokeEls = [];
 
 CATS.forEach((cat, ci)=>{
   const ang = (ci/12)*Math.PI*2 - Math.PI/2;
-  const tx = HCX + RX*Math.cos(ang) - TW/2;
-  const ty = HCY + RY*Math.sin(ang) - TH/2;
-  const tcx = tx + TW/2, tcy = ty + TH/2;
+  const tx = HCX + effRX()*Math.cos(ang) - effTW()/2;
+  const ty = HCY + effRY()*Math.sin(ang) - effTH()/2;
+  const tcx = tx + effTW()/2, tcy = ty + effTH()/2;
 
   // SVG spoke
   const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
@@ -1455,10 +1461,10 @@ CATS.forEach((cat, ci)=>{
   // Spoke végpontja a tile szélénél áll meg, szögtől függően
   const absCos = Math.abs(Math.cos(ang));
   const absSin = Math.abs(Math.sin(ang));
-  const edgeDist = Math.min((TW/2) / (absCos + 0.001), (TH/2) / (absSin + 0.001));
+  const edgeDist = Math.min((effTW()/2) / (absCos + 0.001), (effTH()/2) / (absSin + 0.001));
   const gap = 12; // kis rés a tile széle és a vonal vége között
-  const ex = HCX + (RX - edgeDist - gap)*Math.cos(ang);
-  const ey = HCY + (RY - edgeDist - gap)*Math.sin(ang);
+  const ex = HCX + (effRX() - edgeDist - gap)*Math.cos(ang);
+  const ey = HCY + (effRY() - edgeDist - gap)*Math.sin(ang);
   ln.setAttribute('x1',HCX); ln.setAttribute('y1',HCY);
   ln.setAttribute('x2',ex); ln.setAttribute('y2',ey);
   ln.setAttribute('stroke',cat.cc);
@@ -1472,7 +1478,7 @@ CATS.forEach((cat, ci)=>{
   // Tile — lazy load: data-src set now, actual bg applied staggered
   const tile = document.createElement('div');
   tile.className = 'ov-tile';
-  tile.style.cssText = `left:${tx}px;top:${ty}px;width:${TW}px;height:${TH}px;--cc:${cat.cc}`;
+  tile.style.cssText = `left:${tx}px;top:${ty}px;width:${effTW()}px;height:${effTH()}px;--cc:${cat.cc}`;
   tile.innerHTML = `
     <div class="ov-tile-bar">
       <div class="ov-tile-icon">${cat.icon}</div>
@@ -1500,9 +1506,9 @@ function rotateRingTo(ci, animated){
   // Move all tiles and spokes
   CATS.forEach((_,i)=>{
     const ang = (i/12)*Math.PI*2 - Math.PI/2 + ringAngle;
-    const tx = HCX + RX*Math.cos(ang) - TW/2;
-    const ty = HCY + RY*Math.sin(ang) - TH/2;
-    const tcx = tx + TW/2, tcy = ty + TH/2;
+    const tx = HCX + effRX()*Math.cos(ang) - effTW()/2;
+    const ty = HCY + effRY()*Math.sin(ang) - effTH()/2;
+    const tcx = tx + effTW()/2, tcy = ty + effTH()/2;
 
     const tile = tileEls[i];
     if(animated){
@@ -1643,14 +1649,12 @@ function setCamera(cx, cy, z, instant){
   ovCanvas.style.transform = `scale(${z}) translate(${x}px,${y}px)`;
   // Szöveg méret kompenzálás: viewport-arányos célméret / scale = canvas px
   const vw = VW();
-  const iconTarget     = Math.max(16, Math.round(vw * 0.028));  // ~2.8vw
-  const labelTarget    = Math.max(10, Math.round(vw * 0.014));  // ~1.4vw
-  const hubTitleTarget = Math.max(14, Math.round(vw * 0.022));  // ~2.2vw
-  const hubSubTarget   = Math.max( 8, Math.round(vw * 0.009));  // ~0.9vw
-  const iconPx     = Math.round(iconTarget     / z);
-  const labelPx    = Math.round(labelTarget    / z);
-  const hubTitlePx = Math.round(hubTitleTarget / z);
-  const hubSubPx   = Math.round(hubSubTarget   / z);
+  // Betűméret = tile fizikai magasságának fix aránya — zoom-arányos, automatikus
+  // TH * z = tile fizikai magasság px-ben
+  const iconPx     = Math.round(TH * 0.35);
+  const labelPx    = Math.round(TW * 0.082);
+  const hubTitlePx = Math.round(HR * 0.30);
+  const hubSubPx   = Math.round(HR * 0.12);
   document.querySelectorAll('.ov-tile-icon').forEach(el => el.style.fontSize = iconPx+'px');
   document.querySelectorAll('.ov-tile-cat').forEach(el => el.style.fontSize = labelPx+'px');
   const ht = document.getElementById('ov-hub-title');
@@ -1662,9 +1666,9 @@ function setCamera(cx, cy, z, instant){
 function resetView(){
   closeCatDetail();
   // Fit the full ellipse + tile padding into the viewport tightly
-  const padX = TW * 0.6, padY = TH * 0.6;
-  const z = Math.min(VW() / ((RX + TW/2 + padX) * 2),
-                     VH() / ((RY + TH/2 + padY) * 2));
+  const padX = effTW() * 0.6, padY = effTH() * 0.6;
+  const z = Math.min(VW() / ((effRX() + effTW()/2 + padX) * 2),
+                     VH() / ((effRY() + effTH()/2 + padY) * 2));
   setCamera(HCX, HCY, z);
 }
 
@@ -1672,9 +1676,9 @@ function resetView(){
 window.addEventListener('resize', ()=>{
   if(document.getElementById('overview').classList.contains('active')){
     // Csak zoom újraszámolás, closeCatDetail() nélkül
-    const padX = TW * 0.6, padY = TH * 0.6;
-    const z = Math.min(VW() / ((RX + TW/2 + padX) * 2),
-                       VH() / ((RY + TH/2 + padY) * 2));
+    const padX = effTW() * 0.6, padY = effTH() * 0.6;
+    const z = Math.min(VW() / ((effRX() + effTW()/2 + padX) * 2),
+                       VH() / ((effRY() + effTH()/2 + padY) * 2));
     setCamera(HCX, HCY, z);
   }
 });
