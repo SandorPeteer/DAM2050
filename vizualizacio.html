@@ -303,6 +303,13 @@ nav a:hover { color: var(--accent); border-color: var(--accent); }
   overflow: hidden;
 }
 
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
 .feature-cell {
   background: var(--surface);
   padding: 1.75rem;
@@ -319,6 +326,29 @@ nav a:hover { color: var(--accent); border-color: var(--accent); }
   object-fit: cover; border-radius: 5px;
   margin-bottom: 0.9rem; display: block;
 }
+
+.feature-card .feature-cell-thumb {
+  height: 150px;
+  margin: -1.1rem -1.1rem 1.2rem;
+  width: calc(100% + 2.2rem);
+  max-width: none;
+  border-radius: 7px 7px 0 0;
+  filter: saturate(0.95) contrast(1.03) brightness(0.9);
+  transition: transform 0.35s ease, filter 0.35s ease;
+}
+
+.city-card-header.has-pic {
+  background: #000 !important;
+  overflow: hidden;
+}
+.city-card-header.has-pic img {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.86;
+}
+.city-card-header.has-pic .pic-badge { z-index: 1; }
 
 /* Lightbox */
 #lightbox {
@@ -747,12 +777,29 @@ footer strong { color: var(--accent); }
 
 /* Klikkelhetőség jelzése a kártyákon */
 .building-card { cursor: pointer; }
-.city-card     { cursor: pointer; }
-.feature-card  { cursor: pointer; position: relative; overflow: hidden; }
+.city-card     { cursor: default; }
+.city-card.has-lightbox { cursor: pointer; }
+.feature-card  {
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  min-height: 100%;
+  padding: 1.1rem;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01)),
+    rgba(10,14,24,0.92);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 12px 34px rgba(0,0,0,0.18);
+}
+.feature-card > * {
+  position: relative;
+  z-index: 1;
+}
 
 /* Hover overlay: ▶ MEGNYITÁS felirat */
-.building-card .building-visual::after,
-.feature-card::after {
+.building-card .building-visual::after {
   content: '▶  MEGNYITÁS';
   position: absolute;
   inset: 0;
@@ -768,18 +815,65 @@ footer strong { color: var(--accent); }
   pointer-events: none;
   z-index: 2;
 }
-.building-card:hover .building-visual::after,
-.feature-card:hover::after {
+.building-card:hover .building-visual::after {
   color: rgba(255,255,255,0.92);
   background: rgba(0,0,0,0.48);
 }
+.feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent, rgba(0,200,255,0.28), rgba(0,255,153,0.18), transparent) top left / 100% 1px no-repeat,
+    radial-gradient(circle at 20% 0%, rgba(0,200,255,0.13), transparent 36%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.feature-card::after {
+  content: 'MEGNYITÁS';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  padding: 5px 9px;
+  border: 1px solid rgba(0,200,255,0.42);
+  border-radius: 999px;
+  background: rgba(4,10,18,0.78);
+  color: rgba(225,250,255,0.92);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+.feature-card:hover::before { opacity: 1; }
+.feature-card:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: rgba(0,255,153,0.55);
+}
+.feature-card:hover .feature-cell-thumb {
+  transform: scale(1.035);
+  filter: saturate(1.08) contrast(1.06) brightness(1);
+}
 /* Scale + glow animáció minden kattintható kártyán */
 .building-card, .feature-card, .city-card {
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
 }
 .building-card:hover, .feature-card:hover, .city-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 8px 32px rgba(0,200,255,0.18), 0 2px 8px rgba(0,0,0,0.5);
+  transform: translateY(-4px);
+  box-shadow: 0 18px 46px rgba(0,0,0,0.34), 0 0 0 1px rgba(0,200,255,0.12);
+}
+.feature-card:hover {
+  border-color: rgba(0,200,255,0.32);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018)),
+    rgba(12,18,30,0.96);
 }
 
 @media (max-width: 900px) {
@@ -920,17 +1014,21 @@ footer strong { color: var(--accent); }
 </section>
 
 <nav>
-  <a href="index.html" style="margin-right:1rem;opacity:0.6;font-size:0.75rem;letter-spacing:1px;white-space:nowrap;">← FŐOLDAL</a>
+  <a href="dam_prezentacio.html" style="margin-right:1rem;font-size:0.75rem;letter-spacing:1px;white-space:nowrap;color:var(--accent2);border-bottom:1px solid var(--accent2);">← Prezentáció</a>
   <a href="#epuletek">Épületek</a>
   <a href="#energia">Energia</a>
   <a href="#kozlekedes">Közlekedés</a>
+  <a href="#hulladek">Hulladék</a>
+  <a href="#elelmiszer">Élelmiszer</a>
   <a href="#logisztika">Logisztika</a>
   <a href="#egeszseg">Egészségügy</a>
-  <a href="#sport">Sport & Közösség</a>
+  <a href="#sport">Sport</a>
+  <a href="#smartcity">Smart City</a>
   <a href="#varos">Városközpont</a>
   <a href="#oktatas">Oktatás</a>
   <a href="#kultura">Kultúra</a>
-  <a href="#zold">Zöld & Sétány</a>
+  <a href="#zold">Zöld</a>
+  <a href="#gazdasag">Gazdaság</a>
   <a href="#zonazas">Zónák</a>
   <a href="#utemezés">Ütemezés</a>
 </nav>
@@ -1159,7 +1257,7 @@ footer strong { color: var(--accent); }
     <!-- NAPELEM + SZÉLERŐMŰ — BONTOTT TERÜLETEK -->
     <div class="building-card" data-modal="1"
       data-name="Naperőmű + Szélerőmű Park"
-      data-pic="Bifaciális napelemek"
+      data-pic="Naperőmű + Szélerőmű Park"
       data-tag="Bontott területek" data-tagclass="tag-demo"
       data-use="Megújuló energiatermelés a lebontott csarnokok helyén"
       data-desc="A fémszerkezetes, lebontott csarnokok helyén ground-mounted bifaciális napelempark épül. Urban wind turbines a szabad területeken. A felesleges energiát a hűtőtornyok pumpált vizes rendszere tárolja. A terület energiamérlegét egy AI-vezérelt Smart Grid optimalizálja valós időben."
@@ -1388,7 +1486,7 @@ footer strong { color: var(--accent); }
     <!-- STARTUP & IRODA HUB -->
     <div class="building-card" data-modal="1"
       data-name="Startup & Iroda Hub"
-      data-pic="Startup Hub"
+      data-pic="Startup & Iroda Hub"
       data-tag="Új funkció" data-tagclass="tag-infra"
       data-use="Inkubátor · Coworking · Digitális készségközpont"
       data-desc="Az egykori irodaépületek és kisebb csarnokok innovációs parkká alakulnak. Startup inkubátor: mentorprogram, kockázati tőke kapcsolat, prototípus labor. Coworking irodák KKV-knak és remote-worker közösségnek. Digitális készségközpont: ipar 4.0 átképzési programok, VR-szimulációs oktatás, robotika workshop fiataloknak."
@@ -1589,10 +1687,15 @@ footer strong { color: var(--accent); }
       <div class="feature-title">AI forgalomirányítás</div>
       <div class="feature-text">Pittsburgh SURTRAC-típusú rendszer: minden lámpa valós idejű forgalom alapján dönt. Eredmény: 25%-kal rövidebb menetidő, 40%-kal kevesebb várakozás, 20%-kal alacsonyabb CO₂.</div>
     </div>
-    <div class="feature-cell" data-pic="Kisvasút  ipari örökség" onclick="openLightbox(this)">
+    <div class="feature-cell" data-pic="Kisvasút ipari örökség" onclick="openLightbox(this)">
       <span class="feature-icon">🚂</span>
       <div class="feature-title">Kisvasút / ipari örökség</div>
       <div class="feature-text">A meglévő iparvágányon turisztikai kisvasút a területen belül. Teherszállításhoz konténeres ipari vasút — kamion nélkül.</div>
+    </div>
+    <div class="feature-cell" data-pic="Kisvasút ipari örökség" onclick="openLightbox(this)">
+      <span class="feature-icon">🚉</span>
+      <div class="feature-title">Ipari vasút mint élményútvonal</div>
+      <div class="feature-text">A gyár belső sínpályái látogatói útvonalként is működnek: ipartörténeti megállók, fotópontok és kisvasúti kapcsolat a kulturális zónához.</div>
     </div>
     <div class="feature-cell" data-pic="Drón folyosók" onclick="openLightbox(this)">
       <span class="feature-icon">🛸</span>
@@ -1626,22 +1729,22 @@ footer strong { color: var(--accent); }
       <div class="feature-title">Vertikális farm → élelmiszertár</div>
       <div class="feature-text">Beltéri termesztésből közvetlenül az automatizált élelmiszer-raktárba. Robotok szedik, csomagolják, hűtik. Nulla élelmiszer-pazarlás.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Robot házhozszállítás" onclick="openLightbox(this)">
       <span class="feature-icon">📦</span>
       <div class="feature-title">Robot házhozszállítás</div>
       <div class="feature-text">Starship Technologies-típusú járdai robotok + drónok. QR-alapú digitális cím minden lakásnak. Nincs futár, nincs forgalmi torlódás.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Pneumatikus hulladékrendszer" onclick="openLightbox(this)">
       <span class="feature-icon">🗑️</span>
       <div class="feature-title">Pneumatikus hulladékrendszer</div>
       <div class="feature-text">Envac típusú: a szemét vákuumcsöveken fut a gyűjtőközpontba. Nincs kukásautó a közterületen. 90%-kal kevesebb gyűjtőjárat.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Robot-hulladékválogató" onclick="openLightbox(this)">
       <span class="feature-icon">♻️</span>
       <div class="feature-title">Robot-hulladékválogató</div>
       <div class="feature-text">Multiszpektrális kamera + robotkar: 99%-os tisztaságú újrahasznosítható anyagválogatás. AI azonosítja az anyagtípust, a robot szétválogatja.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Vasúti hulladékelszállítás" onclick="openLightbox(this)">
       <span class="feature-icon">🚃</span>
       <div class="feature-title">Vasúti hulladékelszállítás</div>
       <div class="feature-text">A nem újrahasznosítható hulladékot konténerben a meglévő iparvágányon szállítják el. Nincs kamion a városban ezért sem.</div>
@@ -1658,32 +1761,32 @@ footer strong { color: var(--accent); }
     <p class="section-desc">Nem csak a gazdagoknak. A DAM Egészségügyi Centruma megfizethető, automatizált, és megelőzés-fókuszú.</p>
   </div>
   <div class="feature-grid">
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="DaVinci robot sebészet" onclick="openLightbox(this)">
       <span class="feature-icon">🦾</span>
       <div class="feature-title">DaVinci robot sebészet</div>
       <div class="feature-text">Minimálisan invazív műtétek precíziós robot asszisztenciával. Kisebb seb, rövidebb gyógyulás, kevesebb kórházi nap.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="AI diagnosztika" onclick="openLightbox(this)">
       <span class="feature-icon">🧠</span>
       <div class="feature-title">AI diagnosztika</div>
       <div class="feature-text">MRI, CT, röntgen leletek AI értékelése percek alatt. Radiológus felügyelettel, de a szoftver nem hagy ki apró eltéréseket.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Telemedicina hub" onclick="openLightbox(this)">
       <span class="feature-icon">📱</span>
       <div class="feature-title">Telemedicina hub</div>
       <div class="feature-text">5G-s videókonsultációs fülkék a területen: szakorvos érhető el Miskolcon kívül is. Wearable integráció: okosóra adatai bekerülnek a kórházi rendszerbe.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Drón-mentőszolgálat" onclick="openLightbox(this)">
       <span class="feature-icon">🚁</span>
       <div class="feature-title">Drón-mentőszolgálat</div>
       <div class="feature-text">AED defibrillátor drónnal 90 másodperc alatt bárhova a területen. Már ma is üzemel Svédországban, életeket ment.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Automata gyógyszerkiadó" onclick="openLightbox(this)">
       <span class="feature-icon">💊</span>
       <div class="feature-title">Automata gyógyszerkiadó</div>
       <div class="feature-text">Recept alapján automatikusan kiadja a gyógyszereket. Appban nyomon követhető, nincs sor, nincs várakozás.</div>
     </div>
-    <div class="feature-cell">
+    <div class="feature-cell" data-pic="Wellness + geotermikus fürdő" onclick="openLightbox(this)">
       <span class="feature-icon">♨️</span>
       <div class="feature-title">Wellness + geotermikus fürdő</div>
       <div class="feature-text">A Vasgyári Fürdő geotermikus energiával fűtött medencékkel, fizioterápiával és prevenciós szűrővizsgálatokkal éled újjá.</div>
@@ -1711,7 +1814,7 @@ footer strong { color: var(--accent); }
       data-lat="48.0916379" data-lng="20.7338162" data-polykey="mozdonyszin"
       data-cost="~3–5 Mrd Ft"
       data-cost-detail="Csarnok belső átalakítás + akusztika: 0,8–1,5 Mrd · LED mennyezet programozható RGB: 0,5–1 Mrd · Hangrendszer: 0,3–0,5 Mrd · Görpálya burkolat: 0,2–0,4 Mrd · Smart belépő + IT: 0,2–0,3 Mrd">
-      <div class="building-visual" data-pic="gorkorizo" style="background: linear-gradient(160deg, #0a0a2e 0%, #1a0a40 100%);">
+      <div class="building-visual" style="background: linear-gradient(160deg, #0a0a2e 0%, #1a0a40 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <ellipse cx="140" cy="130" rx="110" ry="20" fill="rgba(150,0,255,0.1)" stroke="rgba(150,0,255,0.2)" stroke-width="1"/>
           <ellipse cx="140" cy="130" rx="80" ry="14" fill="rgba(150,0,255,0.08)"/>
@@ -1746,7 +1849,7 @@ footer strong { color: var(--accent); }
       data-lat="48.095000" data-lng="20.734000"
       data-cost="~1–2 Mrd Ft"
       data-cost-detail="Pályaburkolatok (6 pálya): 0,3–0,5 Mrd · Szenzor hálózat + AI rendszer: 0,3–0,5 Mrd · LED világítás napelem: 0,2–0,4 Mrd · App + foglalási rendszer: 0,1–0,2 Mrd · Kerítés, öltöző: 0,2–0,4 Mrd">
-      <div class="building-visual" data-pic="sportpalya" style="background: linear-gradient(160deg, #001a10 0%, #002a18 100%);">
+      <div class="building-visual" style="background: linear-gradient(160deg, #001a10 0%, #002a18 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Teniszpálya -->
           <rect x="30" y="50" width="220" height="100" fill="rgba(0,180,80,0.08)" stroke="rgba(0,255,100,0.3)" stroke-width="1"/>
@@ -1775,13 +1878,14 @@ footer strong { color: var(--accent); }
 
     <div class="building-card" data-modal="1"
       data-name="Okos Uszoda"
+      data-pic="Okos Uszoda"
       data-tag="Rekreáció" data-tagclass="tag-infra"
       data-use="Geotermikus fűtés · IoT vízminőség · AI úszóedző"
       data-desc="Geotermikus energiával fűtött medence — télen sem drága. IoT szenzorok folyamatosan mérik a pH-t, hőmérsékletet, klórt, automatikusan adagolják a vegyszert. AI kamerarendszer elemzi az úszók technikáját és valós idejű tanácsot küld. Okos kapacitásjelző az appban."
       data-lat="48.095500" data-lng="20.735000"
       data-cost="~4–7 Mrd Ft"
       data-cost-detail="Medence építés (50m + tanmedence): 1,5–2,5 Mrd · Geotermikus fűtés: 0,5–1 Mrd · IoT vízkezelő rendszer: 0,3–0,5 Mrd · AI kamera + edző app: 0,2–0,4 Mrd · Öltöző, gépészet: 0,8–1,5 Mrd">
-      <div class="building-visual" data-pic="uszouszoda" style="background: linear-gradient(160deg, #001525 0%, #002540 100%);">
+      <div class="building-visual" style="background: linear-gradient(160deg, #001525 0%, #002540 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Medence -->
           <rect x="20" y="60" width="240" height="80" rx="4" fill="rgba(0,150,255,0.1)" stroke="rgba(0,150,255,0.35)" stroke-width="1"/>
@@ -1810,13 +1914,14 @@ footer strong { color: var(--accent); }
 
     <div class="building-card" data-modal="1"
       data-name="E-sport Aréna"
+      data-pic="E-SPORT ARÉNA"
       data-tag="Rekreáció" data-tagclass="tag-infra"
       data-use="Ipari csarnokban · 5G · Streaming stúdió"
       data-desc="Professzionális e-sport versenyközpont egy egykori ipari csarnokban. 5G ultra-low latency hálózat, 500+ PC/konzol állomás, livestream stúdió. Nézőtér 1000+ főnek. Helyi és regionális bajnokságok otthona. Napenergiával táplált, hővisszanyerős klímarendszerrel."
       data-lat="48.093000" data-lng="20.732000"
       data-cost="~2–4 Mrd Ft"
       data-cost-detail="Csarnok belső kialakítás + klimatizálás: 0,6–1 Mrd · 500 gaming PC állomás: 0,5–0,8 Mrd · 5G privát hálózat: 0,3–0,5 Mrd · Streaming stúdió: 0,2–0,4 Mrd · Nézőtér, hangtechnika: 0,4–0,8 Mrd">
-      <div class="building-visual" data-pic="esport" style="background: linear-gradient(160deg, #0a001a 0%, #150030 100%);">
+      <div class="building-visual" style="background: linear-gradient(160deg, #0a001a 0%, #150030 100%);">
         <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
           <!-- Monitorok -->
           <rect x="25" y="50" width="70" height="45" rx="3" fill="rgba(100,0,255,0.15)" stroke="rgba(150,0,255,0.4)" stroke-width="1"/>
@@ -1842,70 +1947,6 @@ footer strong { color: var(--accent); }
       </div>
     </div>
 
-    <div class="building-card" data-modal="1"
-      data-name="Ipartörténeti Múzeum"
-      data-tag="Helyi védett" data-tagclass="tag-protected"
-      data-use="I. Hivatalház · Mozdonyszín · Konzumsor"
-      data-desc="A védett épületekben sétálható ipari örökség-múzeum. AR-appban a látogató telefonjával virtuálisan látja, hogyan dolgoztak az acélmű fénykorában. Interaktív kiállítás, hanginstallációk, eredeti gépek. QR-kódos önvezető túra. Digitális archívum 1868-tól napjainkig."
-      data-lat="48.09452"  data-lng="20.730507" data-polykey="hivatalhaz"
-      data-cost="~2–4 Mrd Ft"
-      data-cost-detail="Épület felújítás (I. Hivatalház + Mozdonyszín): 1–2 Mrd · Kiállítás tervezés + kivitelezés: 0,5–1 Mrd · AR app fejlesztés: 0,2–0,4 Mrd · Digitális archívum: 0,1–0,2 Mrd · Berendezések, eredeti gépek restaurálás: 0,3–0,5 Mrd">
-      <div class="building-visual" data-pic="muzeum" style="background: linear-gradient(160deg, #1a1000 0%, #2a1800 100%);">
-        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
-          <!-- Épület homlokzat -->
-          <rect x="30" y="55" width="220" height="95" fill="rgba(240,180,41,0.05)" stroke="rgba(240,180,41,0.25)" stroke-width="1"/>
-          <path d="M20,55 L140,15 L260,55" fill="rgba(240,180,41,0.08)" stroke="rgba(240,180,41,0.3)" stroke-width="1"/>
-          <!-- Oszlopok -->
-          <rect x="55" y="55" width="12" height="95" fill="rgba(240,180,41,0.1)" stroke="rgba(240,180,41,0.2)" stroke-width="0.5"/>
-          <rect x="90" y="55" width="12" height="95" fill="rgba(240,180,41,0.1)" stroke="rgba(240,180,41,0.2)" stroke-width="0.5"/>
-          <rect x="178" y="55" width="12" height="95" fill="rgba(240,180,41,0.1)" stroke="rgba(240,180,41,0.2)" stroke-width="0.5"/>
-          <rect x="213" y="55" width="12" height="95" fill="rgba(240,180,41,0.1)" stroke="rgba(240,180,41,0.2)" stroke-width="0.5"/>
-          <!-- AR szimbólum -->
-          <rect x="110" y="75" width="60" height="50" rx="2" fill="none" stroke="rgba(0,200,255,0.4)" stroke-width="1" stroke-dasharray="3 3"/>
-          <text x="140" y="105" text-anchor="middle" fill="rgba(0,200,255,0.4)" font-size="9" font-family="monospace">AR</text>
-          <text x="140" y="35" text-anchor="middle" fill="rgba(240,180,41,0.4)" font-size="8" letter-spacing="2" font-family="monospace">IPARTÖRTÉNETI MÚZEUM · AR APP</text>
-        </svg>
-      </div>
-      <div class="building-card-body">
-        <span class="building-tag tag-protected">Helyi védett</span>
-        <div class="building-name">Ipartörténeti Múzeum</div>
-        <div class="building-use">I. Hivatalház · Mozdonyszín · Konzumsor</div>
-        <div class="building-desc">A védett épületekben sétálható ipari örökség-múzeum. AR-appban a látogató telefonjával virtuálisan látja, hogyan dolgoztak az acélmű fénykorában. Interaktív kiállítás, hanginstallációk, eredeti gépek. QR-kódos önvezető túra. Digitális archívum 1868-tól napjainkig.</div>
-      </div>
-    </div>
-
-    <div class="building-card" data-modal="1"
-      data-name="Makers District"
-      data-tag="Helyi védett" data-tagclass="tag-protected"
-      data-use="Sörfőzde · Kávézó · Alkotóközösség · Kisüzemek"
-      data-desc="A volt ipari épületek kreatív negyeddé alakulnak — Ruhr-vidék mintájára. Kézműves sörfőzde, specialty kávézó, alkotóközösségek, kisüzemek. Kulturális rendezvények, koncertek a csarnokban. Smart belépő, appban program-értesítők, cashless fizetés."
-      data-lat="48.0940205" data-lng="20.7301823" data-polykey="konzumsor"
-      data-cost="~1,5–3 Mrd Ft"
-      data-cost-detail="Épület felújítás (Konzumsor): 0,6–1,2 Mrd · Sörfőzde technológia: 0,3–0,6 Mrd · Kávézó + kisüzem kialakítás: 0,2–0,4 Mrd · Hangrendszer + LED: 0,2–0,4 Mrd · Smart belépő, cashless rendszer: 0,1–0,2 Mrd">
-      <div class="building-visual" data-pic="makersdistrict" style="background: linear-gradient(160deg, #1a0800 0%, #2a1000 100%);">
-        <svg width="280" height="160" viewBox="0 0 280 160" fill="none">
-          <!-- Téglaépület stílus -->
-          <rect x="20" y="40" width="240" height="110" fill="rgba(255,107,53,0.05)" stroke="rgba(255,107,53,0.2)" stroke-width="1"/>
-          <!-- Ablakok -->
-          <rect x="35" y="55" width="30" height="35" fill="rgba(255,200,0,0.1)" stroke="rgba(255,200,0,0.3)" stroke-width="1" rx="1"/>
-          <rect x="80" y="55" width="30" height="35" fill="rgba(255,200,0,0.1)" stroke="rgba(255,200,0,0.3)" stroke-width="1" rx="1"/>
-          <!-- Sörfőzde tartály -->
-          <ellipse cx="175" cy="85" rx="25" ry="30" fill="rgba(255,200,0,0.08)" stroke="rgba(255,200,0,0.3)" stroke-width="1"/>
-          <ellipse cx="175" cy="60" rx="25" ry="8" fill="rgba(255,200,0,0.12)" stroke="rgba(255,200,0,0.35)" stroke-width="1"/>
-          <ellipse cx="220" cy="90" rx="18" ry="22" fill="rgba(255,200,0,0.06)" stroke="rgba(255,200,0,0.25)" stroke-width="1"/>
-          <!-- Kávé csésze -->
-          <path d="M50,115 Q65,108 80,115 L78,135 Q65,140 52,135 Z" fill="rgba(150,80,0,0.2)" stroke="rgba(255,150,50,0.3)" stroke-width="1"/>
-          <text x="140" y="28" text-anchor="middle" fill="rgba(255,107,53,0.4)" font-size="8" letter-spacing="2" font-family="monospace">MAKERS DISTRICT · SÖRFŐZDE · KÁVÉZÓ</text>
-        </svg>
-      </div>
-      <div class="building-card-body">
-        <span class="building-tag tag-protected">Helyi védett</span>
-        <div class="building-name">Makers District</div>
-        <div class="building-use">Sörfőzde · Kávézó · Alkotóközösség · Kisüzemek</div>
-        <div class="building-desc">A volt ipari épületek kreatív negyeddé alakulnak — Ruhr-vidék mintájára. Kézműves sörfőzde, specialty kávézó, alkotóközösségek, kisüzemek. Kulturális rendezvények, koncertek a csarnokban. Smart belépő, appban program-értesítők, cashless fizetés.</div>
-      </div>
-    </div>
-
   </div>
 </section>
 
@@ -1921,7 +1962,7 @@ footer strong { color: var(--accent); }
   <div class="city-grid">
 
     <div class="city-card">
-      <div class="city-card-header" data-pic="plaza" style="background: linear-gradient(135deg, #0d1a30 0%, #1a2a40 100%);">
+      <div class="city-card-header" data-pic="dampláza" style="background: linear-gradient(135deg, #0d1a30 0%, #1a2a40 100%);">
         🛍️
         <span class="pic-badge">SMART PLAZA</span>
       </div>
@@ -1933,7 +1974,7 @@ footer strong { color: var(--accent); }
     </div>
 
     <div class="city-card">
-      <div class="city-card-header" data-pic="mozi" style="background: linear-gradient(135deg, #1a0a20 0%, #2a1035 100%);">
+      <div class="city-card-header" data-pic="damcinema" style="background: linear-gradient(135deg, #1a0a20 0%, #2a1035 100%);">
         🎬
         <span class="pic-badge">SMART MOZI</span>
       </div>
@@ -1945,7 +1986,7 @@ footer strong { color: var(--accent); }
     </div>
 
     <div class="city-card">
-      <div class="city-card-header" data-pic="etterem" style="background: linear-gradient(135deg, #1a0800 0%, #2a1200 100%);">
+      <div class="city-card-header" data-pic="damfoodhall" style="background: linear-gradient(135deg, #1a0800 0%, #2a1200 100%);">
         🍽️
         <span class="pic-badge">FOOD HUB</span>
       </div>
@@ -1957,7 +1998,7 @@ footer strong { color: var(--accent); }
     </div>
 
     <div class="city-card">
-      <div class="city-card-header" data-pic="konyvtar" style="background: linear-gradient(135deg, #001520 0%, #002535 100%);">
+      <div class="city-card-header" data-pic="Digitális Könyvtár" style="background: linear-gradient(135deg, #001520 0%, #002535 100%);">
         📚
         <span class="pic-badge">SMART KÖNYVTÁR</span>
       </div>
@@ -1969,7 +2010,7 @@ footer strong { color: var(--accent); }
     </div>
 
     <div class="city-card">
-      <div class="city-card-header" data-pic="bank_posta" style="background: linear-gradient(135deg, #001a10 0%, #002a18 100%);">
+      <div class="city-card-header" data-pic="Önkormányzati & Pénzügyi Hub" style="background: linear-gradient(135deg, #001a10 0%, #002a18 100%);">
         🏦
         <span class="pic-badge">SMART SZOLGÁLTATÁSOK</span>
       </div>
@@ -1981,7 +2022,7 @@ footer strong { color: var(--accent); }
     </div>
 
     <div class="city-card">
-      <div class="city-card-header" data-pic="park_plaza" style="background: linear-gradient(135deg, #001510 0%, #002518 100%);">
+      <div class="city-card-header" data-pic="Tető-Park & Közösségi Tér" style="background: linear-gradient(135deg, #001510 0%, #002518 100%);">
         🌳
         <span class="pic-badge">ZÖLD TETŐ PARK</span>
       </div>
@@ -2007,7 +2048,7 @@ footer strong { color: var(--accent); }
   <div class="city-grid">
 
     <div class="city-card">
-      <div class="city-card-header" data-pic="ovoda" style="background: linear-gradient(135deg, #1a0f00 0%, #2a1800 100%);">
+      <div class="city-card-header" data-pic="smartóvoda" style="background: linear-gradient(135deg, #1a0f00 0%, #2a1800 100%);">
         🧒
         <span class="pic-badge">SMART ÓVODA</span>
       </div>
@@ -2019,7 +2060,7 @@ footer strong { color: var(--accent); }
     </div>
 
     <div class="city-card">
-      <div class="city-card-header" data-pic="altalanos" style="background: linear-gradient(135deg, #001525 0%, #002040 100%);">
+      <div class="city-card-header" data-pic="digitálisáltalánosiskola" style="background: linear-gradient(135deg, #001525 0%, #002040 100%);">
         🎒
         <span class="pic-badge">SMART ÁLTALÁNOS</span>
       </div>
@@ -2031,7 +2072,7 @@ footer strong { color: var(--accent); }
     </div>
 
     <div class="city-card">
-      <div class="city-card-header" data-pic="gimnazium" style="background: linear-gradient(135deg, #100020 0%, #1a0035 100%);">
+      <div class="city-card-header" data-pic="digitálisgimnázium" style="background: linear-gradient(135deg, #100020 0%, #1a0035 100%);">
         🎓
         <span class="pic-badge">SMART GIMNÁZIUM</span>
       </div>
@@ -2043,7 +2084,7 @@ footer strong { color: var(--accent); }
     </div>
 
     <div class="city-card">
-      <div class="city-card-header" data-pic="egyetem_inkubator" style="background: linear-gradient(135deg, #001a1a 0%, #002a2a 100%);">
+      <div class="city-card-header" data-pic="egyetemlabor" style="background: linear-gradient(135deg, #001a1a 0%, #002a2a 100%);">
         🔬
         <span class="pic-badge">EGYETEMI LABOR</span>
       </div>
@@ -2055,7 +2096,7 @@ footer strong { color: var(--accent); }
     </div>
 
     <div class="city-card">
-      <div class="city-card-header" data-pic="atkepezes" style="background: linear-gradient(135deg, #0a1500 0%, #142000 100%);">
+      <div class="city-card-header" data-pic="ipar4.0" style="background: linear-gradient(135deg, #0a1500 0%, #142000 100%);">
         🔧
         <span class="pic-badge">ÁTKÉPZŐ CENTRUM</span>
       </div>
@@ -2067,7 +2108,7 @@ footer strong { color: var(--accent); }
     </div>
 
     <div class="city-card">
-      <div class="city-card-header" data-pic="gyermekpark" style="background: linear-gradient(135deg, #0a1a00 0%, #142800 100%);">
+      <div class="city-card-header" data-pic="steamkalandpark" style="background: linear-gradient(135deg, #0a1a00 0%, #142800 100%);">
         🎠
         <span class="pic-badge">KALANDPARK</span>
       </div>
@@ -2093,6 +2134,7 @@ footer strong { color: var(--accent); }
 
     <div class="feature-card" data-modal="1"
       data-name="DAM Fesztivál Aréna"
+      data-pic="DAM Fesztivál Aréna"
       data-tag="Új funkció" data-tagclass="tag-infra"
       data-use="Szabadtéri nagyszínpad · 5 000–15 000 fő"
       data-desc="A lebontott csarnokok helyén kialakított szabadtéri rendezvénytér. Moduláris színpad, fedett nézőtér-szektorok, LED-falak. Zenei fesztiválok, open-air filmvetítések, városi ünnepek. A terület iparvasútján érkező látogatók tömegközlekedéssel jutnak be — nincs parkolókáosz."
@@ -2106,6 +2148,7 @@ footer strong { color: var(--accent); }
 
     <div class="feature-card" data-modal="1"
       data-name="Acél Kultúrközpont"
+      data-pic="Acél Kultúrközpont"
       data-tag="Védett épület" data-tagclass="tag-vedett"
       data-use="Konferenciaközpont · Kiállítótér · 1 000 fő"
       data-desc="A Keleti Erőmű vagy Középhengermű valamelyik szárnyában kialakított multifunkciós kulturális centrum. Konferenciaterem 500 főnek, három kisebb szekciós terem, állandó ipartörténeti kiállítás, mozgóképtár. A nyerstégla falak és vas tartószerkezetek megmaradnak — ez az esztétika a brand."
@@ -2119,6 +2162,7 @@ footer strong { color: var(--accent); }
 
     <div class="feature-card" data-modal="1"
       data-name="DAM Mozi & Médiaközpont"
+      data-pic="DAM Mozi & Médiaközpont"
       data-tag="Új funkció" data-tagclass="tag-infra"
       data-use="8 termes multiplex · Podcast & streaming studio"
       data-desc="Modern 8 termes multiplex mozi VIP szektorral, 4DX teremmel és gyerekmozival. Mellette médiaközpont: podcast stúdiók, YouTube-creator terek, gaming zóna — bérelhető óránként. Az épület tetején drive-in vetítő a parkolóból nézhető filmekhez nyáron."
@@ -2131,42 +2175,45 @@ footer strong { color: var(--accent); }
     </div>
 
     <div class="feature-card" data-modal="1"
-      data-name="Ipartörténeti Múzeum & Makers Space"
+      data-name="Ipartörténeti Múzeum"
+      data-pic="Ipartörténeti Múzeum & Makers Space"
       data-tag="Védett épület" data-tagclass="tag-vedett"
-      data-use="Múzeum · FabLab · Alkotóközpont"
-      data-desc="A Mozdonyszín vagy Turbókompresszor gépház épületében: interaktív ipartörténeti múzeum sétálható AR-applikációval (a régi gyár virtuális rekonstrukciója). Mellette FabLab — 3D nyomtatók, CNC, lézervágó, hegesztő állomások bérelhető műhelyként KKV-knak és alkotóknak."
-      data-cost="~3–6 Mrd Ft"
-      data-cost-detail="Épület felújítás: 1,5 Mrd · Múzeum kiállítás, AR rendszer: 1,5 Mrd · FabLab géppark: 1 Mrd · IT infrastruktúra: 0,5 Mrd">
-      <div class="feature-icon">⚙️</div>
-      <div class="feature-title">Ipartörténeti Múzeum & Makers Space</div>
-      <span class="building-tag tag-vedett">Védett épület</span>
-      <div class="building-desc">Sétálható AR-múzeum a régi acélmű világáról + FabLab alkotóközpont CNC-vel, 3D nyomtatókkal.</div>
-    </div>
-
-    <div class="feature-card" data-modal="1"
-      data-name="E-sport & Gaming Aréna"
-      data-tag="Új funkció" data-tagclass="tag-infra"
-      data-use="500 férőhelyes e-sport aréna · VR zóna"
-      data-desc="Ipari csarnokban kialakított profi e-sport aréna 500 néző befogadására. 5G ultra-low latency kapcsolat, profi stream studio, szponzori boxok. Mellette nyilvános gaming zóna VR headsetekkel, szimulátorokkal — bérelhető óránként. Regionális e-sport bajnokságok állandó helyszíne."
+      data-use="I. Hivatalház · Mozdonyszín · Konzumsor"
+      data-desc="A védett épületekben sétálható ipari örökség-múzeum működik. AR-appban a látogató virtuálisan látja az acélmű fénykorát, interaktív kiállítással, eredeti gépekkel, hanginstallációkkal és digitális archívummal."
       data-cost="~2–4 Mrd Ft"
-      data-cost-detail="Csarnok kialakítás: 0,8 Mrd · PC/konzol infrastruktúra: 0,8 Mrd · VR zóna: 0,6 Mrd · Streaming, hang, fény: 0,8 Mrd">
-      <div class="feature-icon">🎮</div>
-      <div class="feature-title">E-sport & Gaming Aréna</div>
-      <span class="building-tag tag-infra">Új funkció</span>
-      <div class="building-desc">500 férőhelyes profi e-sport aréna + VR zóna. 5G, stream stúdió, regionális bajnokságok helyszíne.</div>
+      data-cost-detail="Épület felújítás (I. Hivatalház + Mozdonyszín): 1–2 Mrd · Kiállítás tervezés + kivitelezés: 0,5–1 Mrd · AR app fejlesztés: 0,2–0,4 Mrd · Digitális archívum: 0,1–0,2 Mrd · Berendezések restaurálása: 0,3–0,5 Mrd">
+      <div class="feature-icon">🏛️</div>
+      <div class="feature-title">Ipartörténeti Múzeum</div>
+      <span class="building-tag tag-vedett">Védett épület</span>
+      <div class="building-desc">Sétálható AR-múzeum a régi acélmű világáról, eredeti gépekkel és digitális archívummal.</div>
     </div>
 
     <div class="feature-card" data-modal="1"
-      data-name="DAM Sörfőzde & Gasztro Negyed"
+      data-name="Makers District"
+      data-pic="Makers District"
       data-tag="Hasznosítandó" data-tagclass="tag-hasznosit"
-      data-use="Craft sörfőzde · Étterem sor · Piac"
-      data-desc="A Konzumsor rehabilitált épületeiben craft sörfőzde taproom-mal, 8–10 különböző étterem (helyi, nemzetközi konyhák), heti farmer piac friss DAM vertikális farm termékekkel. Fedett-nyitott belső udvar — télen is élhető, nyáron utcabútor. Az ipari karakter megtartva: csupasz tégla, acél, beton."
+      data-use="Sörfőzde · Kávézó · Alkotóközösség · Kisüzemek"
+      data-desc="A Konzumsor és a kapcsolódó ipari épületek kreatív negyeddé alakulnak: craft sörfőzde, specialty kávézó, étteremsor, kisüzemek, FabLab és alkotóműhelyek. A karakter marad: csupasz tégla, acél, beton, ipari hangulat."
       data-cost="~2–5 Mrd Ft"
-      data-cost-detail="Konzumsor felújítás: 1,5 Mrd · Sörfőzde gépészet: 0,8 Mrd · Belső tér, bútor: 0,8 Mrd · Piac infrastruktúra: 0,4 Mrd">
+      data-cost-detail="Konzumsor felújítás: 1,5 Mrd · Sörfőzde és vendéglátó technológia: 0,8 Mrd · Alkotóműhelyek és FabLab: 0,8 Mrd · Belső tér, piac infrastruktúra: 0,4 Mrd">
       <div class="feature-icon">🍺</div>
-      <div class="feature-title">DAM Sörfőzde & Gasztro Negyed</div>
+      <div class="feature-title">Makers District</div>
       <span class="building-tag tag-hasznosit">Hasznosítandó</span>
-      <div class="building-desc">Craft sörfőzde, 8–10 étterem, heti piac a Konzumsor felújított épületeiben — ipari esztétikával.</div>
+      <div class="building-desc">Sörfőzde, kávézó, étteremsor, FabLab és kisüzemek a Konzumsor ipari karakterével.</div>
+    </div>
+
+    <div class="feature-card" data-modal="1"
+      data-name="Ipartörténeti Múzeum & Makers Space"
+      data-pic="Ipartörténeti Múzeum & Makers Space"
+      data-tag="Kreatív örökség" data-tagclass="tag-hasznosit"
+      data-use="AR múzeum · FabLab · Alkotóműhely · Közösségi programok"
+      data-desc="A múzeumi és makers funkciók közös csomópontja: nappal ipartörténeti tanulóút és AR bemutató, mellette FabLab, prototípus-műhely és közösségi alkotótér. A cél, hogy az ipari örökség ne csak kiállítás legyen, hanem aktív, használható kreatív infrastruktúra."
+      data-cost="~3–6 Mrd Ft"
+      data-cost-detail="Kiállítás + AR réteg: 0,8–1,5 Mrd · FabLab és műhelytechnológia: 0,8–1,2 Mrd · Belsőépítészet, közösségi terek: 0,8–1,5 Mrd · Oktatási programok és üzemeltetési indítás: 0,4–0,8 Mrd">
+      <div class="feature-icon">🧰</div>
+      <div class="feature-title">Ipartörténeti Múzeum & Makers Space</div>
+      <span class="building-tag tag-hasznosit">Kreatív örökség</span>
+      <div class="building-desc">AR ipartörténet és FabLab egyben: a régi gyár története aktív alkotótérré válik.</div>
     </div>
 
   </div>
@@ -2184,6 +2231,7 @@ footer strong { color: var(--accent); }
 
     <div class="feature-card" data-modal="1"
       data-name="DAM Sétány — Fő zöld tengely"
+      data-pic="DAM Sétány — Fő zöld tengely"
       data-tag="Zöld infrastruktúra" data-tagclass="tag-infra"
       data-use="K–Ny gyalogos-kerékpáros főtengely · 2,4 km"
       data-desc="A terület teljes szélességét átszelő, kelet–nyugat irányú zöld főtengely. 6 méter széles kerékpárút, 4 méter sétány, kétoldalt fasor (1 500 új fa). Okos közvilágítás mozgásérzékelővel, padok beépített töltőkkel, ivókutak, kerékpárjavító állomások 500 méterenként. Télen jégpálya egyes szakaszokon."
@@ -2197,6 +2245,7 @@ footer strong { color: var(--accent); }
 
     <div class="feature-card" data-modal="1"
       data-name="Kerékpár hálózat & Sharing"
+      data-pic="Kerékpár hálózat & Sharing"
       data-tag="Okos mobilitás" data-tagclass="tag-auto"
       data-use="25 km kerékpárút · 15 dokkoló állomás"
       data-desc="Az egész területet lefedő, egybefüggő kerékpárút hálózat — elválasztva a gyalogosoktól és az autóktól. 15 dokkoló állomás elektromos és normál kerékpárokkal (sharing), QR-kódos kölcsönzés appból. Kerékpártároló minden épületnél, zárt, kamerás. Javítóállomás pumpával 8 helyen."
@@ -2210,6 +2259,7 @@ footer strong { color: var(--accent); }
 
     <div class="feature-card" data-modal="1"
       data-name="Szabadtéri Fitness Parkok"
+      data-pic="Szabadtéri Fitness Parkok"
       data-tag="Sport & Rekreáció" data-tagclass="tag-sport"
       data-use="6 fitness park · Kinetikus energiatermelés"
       data-desc="Hat különböző fitness park a terület különböző pontjain, különböző célközönségekre: crossfit zóna, kültéri erőgépek (kinetikus energiatermelőkkel!), street workout, nyugdíjas torna terület, gyerek kaland park, ninja pálya. Az erőgépek pedáljai és karok emberi erőből elektromos energiát termelnek — az okos padok töltik a telefont."
@@ -2223,6 +2273,7 @@ footer strong { color: var(--accent); }
 
     <div class="feature-card" data-modal="1"
       data-name="DAM Zöld Parkok & Pihenőterek"
+      data-pic="DAM Zöld Parkok & Pihenőterek"
       data-tag="Zöld infrastruktúra" data-tagclass="tag-infra"
       data-use="18 ha zöldfelület · Közösségi kertek"
       data-desc="A lebontott épületek helyén kialakított zöldfelületek: ligetek, füves dombok, tematikus parkok (pillangókert, fűszernövény kert, gyermekjátszóterek). Közösségi kertek bérelhető ágyásokkal lakóknak. Esővízgyűjtő rendszer az öntözéshez. Minden 50 méteren egy pad és kuka — okos szenzorokkal jelzi ha teli."
@@ -2236,6 +2287,7 @@ footer strong { color: var(--accent); }
 
     <div class="feature-card" data-modal="1"
       data-name="Szinva Zöldfolyosó kapcsolat"
+      data-pic="Szinva Zöldfolyosó kapcsolat"
       data-tag="Zöld infrastruktúra" data-tagclass="tag-infra"
       data-use="Vízparti sétány · Ökológiai folyosó"
       data-desc="A DAM területét a Szinva-patak völgyéhez összekötő zöld ökológiai folyosó. Vízparti sétány, horgászhelyek, madármegfigyelő pontok. A patak medre renaturalizálva — betonágyból visszakapja természetes mederkanyarulatait. Árvízvédelmi tározó a területen belül, ami száraz időben rekreációs tóként működik."
@@ -2249,6 +2301,7 @@ footer strong { color: var(--accent); }
 
     <div class="feature-card" data-modal="1"
       data-name="Okos Közvilágítás & Smart Bútorok"
+      data-pic="Okos Közvilágítás & Smart Bútorok"
       data-tag="Smart City" data-tagclass="tag-smart"
       data-use="IoT világítás · Töltők · Szenzorhálózat"
       data-desc="Az egész terület közterületein okos LED lámpaoszlopok: mozgásérzékelővel 20%-ra sötétítenek, ha senki nincs a közelben. Minden oszlopban WiFi hotspot, levegőminőség szenzor, zajszintmérő. A padokba épített USB és Qi töltők napelemről működnek. Az adatok valós időben láthatók a Citizen App-ban."
@@ -2260,6 +2313,174 @@ footer strong { color: var(--accent); }
       <div class="building-desc">IoT lámpaoszlopok WiFi-val és szenzorokkal, napelemes töltős padok — a közterület maga is adatot gyűjt.</div>
     </div>
 
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ HULLADÉK ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="hulladek">
+  <div class="section-header">
+    <div class="section-label">Okos hulladékgazdálkodás</div>
+    <h2 class="section-title">90%-kal kevesebb gyűjtőjárat —<br>láthatatlan hulladékkezelés</h2>
+    <p class="section-desc">A terület teljes hulladékkörforgása automatizált: a szemét a föld alatt utazik, a robotok szortírozzák, a vasút szállítja el. Kukásautó a közterületen: nulla.</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-cell" data-pic="Pneumatikus hulladékrendszer" onclick="openLightbox(this)">
+      <span class="feature-icon">🕳️</span>
+      <div class="feature-title">Pneumatikus hulladékgyűjtők</div>
+      <div class="feature-text">Föld alatti vákuumcsövek szállítják a szemetet egy gyűjtőközpontba. Nincs kukásautó a közterületen. (Envac rendszer — Stockholm, Barcelona)</div>
+    </div>
+    <div class="feature-cell" data-pic="AI-szenzoros smart bin" onclick="openLightbox(this)">
+      <span class="feature-icon">🗑️</span>
+      <div class="feature-title">AI-szenzoros smart bin</div>
+      <div class="feature-text">Ultrahangos töltöttségmérő + kamerás hulladékfelismerés. Csak akkor küld gyűjtőjáratot, ha teli — 30–50%-os útköltség-csökkentés.</div>
+    </div>
+    <div class="feature-cell" data-pic="Robot-hulladékválogató" onclick="openLightbox(this)">
+      <span class="feature-icon">🤖</span>
+      <div class="feature-title">Robotizált hulladékválogató</div>
+      <div class="feature-text">Multiszpektrális kamera + robotkar. 99%-os tisztaságú újrahasznosítható anyagválogatás anyagtípusonként — műanyag-polimer azonosítással.</div>
+    </div>
+    <div class="feature-cell" data-pic="Vasúti hulladékelszállítás" onclick="openLightbox(this)">
+      <span class="feature-icon">🚂</span>
+      <div class="feature-title">Vasúti hulladékelszállítás</div>
+      <div class="feature-text">A gyár meglévő belső vasúthálózatán konténeres elszállítás. Nincs kamion a városban — tisztán vasúton.</div>
+    </div>
+    <div class="feature-cell" data-pic="Waste-to-Energy" onclick="openLightbox(this)">
+      <span class="feature-icon">🔥</span>
+      <div class="feature-title">Waste-to-Energy</div>
+      <div class="feature-text">A nem újrahasznosítható frakció helyi erőműben elégetése, áramtermelés — zárt körforgás, nulla lerakó.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ ÉLELMISZER ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="elelmiszer">
+  <div class="section-header">
+    <div class="section-label">Élelmiszer & ellátás</div>
+    <h2 class="section-title">Vertikális farm, robot-kiszállítás —<br>teljesen automatizált ellátás</h2>
+    <p class="section-desc">A terület saját élelmiszer-önellátásra törekszik: beltéri termesztéstől a robot-házhozszállításig minden a DAM-on belül zajlik.</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-cell" data-pic="Vertikális Farm" onclick="openLightbox(this)">
+      <span class="feature-icon">🌾</span>
+      <div class="feature-title">Vertikális farm</div>
+      <div class="feature-text">LED-es, aeroponikus beltéri termesztés ipari csarnokban. Évi 365 nap, 95%-kal kevesebb víz mint a hagyományos termesztésnél. (AeroFarms / Plenty technológia)</div>
+    </div>
+    <div class="feature-cell" data-pic="DAM_NEXUS_AutomatizáltLogisztika" onclick="openLightbox(this)">
+      <span class="feature-icon">🏭</span>
+      <div class="feature-title">Automatizált élelmiszerraktár</div>
+      <div class="feature-text">AS/RS (Automated Storage and Retrieval System): robotok pakolnak, válogatnak, szállítanak. Emberi beavatkozás minimális.</div>
+    </div>
+    <div class="feature-cell" data-pic="Robot házhozszállítás" onclick="openLightbox(this)">
+      <span class="feature-icon">🤖</span>
+      <div class="feature-title">Robot-kiszállítás a területen</div>
+      <div class="feature-text">Önjáró járdai robotok (Starship Technologies típus) háztól házig. Drón-kiszállítás sürgős / kisméretű megrendelésekhez.</div>
+    </div>
+    <div class="feature-cell" data-pic="okoshűtő" onclick="openLightbox(this)">
+      <span class="feature-icon">🍱</span>
+      <div class="feature-title">Okos hűtőszekrény hálózat</div>
+      <div class="feature-text">QR-kódos önkiszolgáló automata sarkokon. Napszakosan frissített készlet a vertikális farmról — friss élelmiszer 24/7.</div>
+    </div>
+    <div class="feature-cell" data-pic="drón-postahivata" onclick="openLightbox(this)">
+      <span class="feature-icon">✈️</span>
+      <div class="feature-title">Drón-postahivatal</div>
+      <div class="feature-text">Csomag be: automata. Csomag ki: drón viszi a területen belüli lakcímre vagy csomagpontra. Digitális postacím QR azonosítóval.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ SMART CITY ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="smartcity">
+  <div class="section-header">
+    <div class="section-label">Smart City platform</div>
+    <h2 class="section-title">Digital Twin, City OS —<br>a DAM digitális agya</h2>
+    <p class="section-desc">Minden szenzor, jármű, épület és lakó egyetlen platformon — valós időben, AI-vezérelten, nyílt API-val. Ez nem jövő, ez a terv.</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-cell" data-pic="Digitál Twin" onclick="openLightbox(this)">
+      <span class="feature-icon">🏙️</span>
+      <div class="feature-title">Digital Twin</div>
+      <div class="feature-text">Az egész 130 hektár valós idejű digitális mása. Városmérnökök szimulálhatnak katasztrófát, energiakimaradást, tömegrendezvényt — mielőtt megtörténik.</div>
+    </div>
+    <div class="feature-cell" data-pic="cityos" onclick="openLightbox(this)">
+      <span class="feature-icon">⚙️</span>
+      <div class="feature-title">City OS / Adat-platform</div>
+      <div class="feature-text">Minden szenzor, kamera, eszköz egyetlen platformra fut. Nyílt API-val harmadik fejlesztőknek — startup ökoszisztéma alapja.</div>
+    </div>
+    <div class="feature-cell" data-pic="5g+lorawan" onclick="openLightbox(this)">
+      <span class="feature-icon">📡</span>
+      <div class="feature-title">5G + LoRaWAN hálózat</div>
+      <div class="feature-text">Az összes IoT-eszköz teljes lefedése. 5G az autonóm közlekedésnek, LoRa az energiaszenzoroknak és a szenzorháló elemeinek.</div>
+    </div>
+    <div class="feature-cell" data-pic="citizen app" onclick="openLightbox(this)">
+      <span class="feature-icon">📱</span>
+      <div class="feature-title">Citizen App</div>
+      <div class="feature-text">Lakóknak: közlekedés, hulladék, egészségügy, sport foglalás, energia-dashboard, közösségi bejelentés — egy helyen.</div>
+    </div>
+    <div class="feature-cell" data-pic="AI prevektív karbantartás" onclick="openLightbox(this)">
+      <span class="feature-icon">🔮</span>
+      <div class="feature-title">AI prediktív karbantartás</div>
+      <div class="feature-text">Szenzorok jelzik az épület, út vagy gép meghibásodását MIELŐTT megtörténik — nulla nem tervezett leállás.</div>
+    </div>
+    <div class="feature-cell" data-pic="kiber biztonság" onclick="openLightbox(this)">
+      <span class="feature-icon">🔒</span>
+      <div class="feature-title">Kiberbiztonság</div>
+      <div class="feature-text">Zero Trust Architecture. Minden IoT-eszköz auditált, titkosított kommunikáció — a város nem támadható le.</div>
+    </div>
+    <div class="feature-cell" data-pic="city os kamera" onclick="openLightbox(this)">
+      <span class="feature-icon">🎥</span>
+      <div class="feature-title">City OS kamera- és szenzorháló</div>
+      <div class="feature-text">Forgalom, közbiztonság, zaj, levegőminőség és közterületi terhelés egy közös képi-szenzoros rétegben. A rendszer nem önálló megfigyelés, hanem a városüzemeltetés adatforrása.</div>
+    </div>
+    <div class="feature-cell" data-pic="digital twin" onclick="openLightbox(this)">
+      <span class="feature-icon">🧭</span>
+      <div class="feature-title">Digital Twin vezérlőközpont</div>
+      <div class="feature-text">A digitális iker operátori nézete: térkép, események, energia, közlekedés és karbantartási riasztások egyetlen döntéstámogató felületen.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ GAZDASÁG ═══════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="gazdasag">
+  <div class="section-header">
+    <div class="section-label">Gazdaság & társadalom</div>
+    <h2 class="section-title">Innováció, oktatás, közösség —<br>az ember a középpontban</h2>
+    <p class="section-desc">A DAM nem csak technológia — egy új gazdasági és társadalmi modell. Az egykori gyár falai között startup hub, digitális képzés és közösségi tulajdon születik.</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-cell" data-pic="Startup & Iroda Hub" onclick="openLightbox(this)">
+      <span class="feature-icon">🚀</span>
+      <div class="feature-title">Startup inkubátor</div>
+      <div class="feature-text">Az egykori ipari csarnokok innovációs laborokká alakítva. Mentorprogram, kockázati tőke kapcsolat, prototípus labor — helyi és nemzetközi startupoknak.</div>
+    </div>
+    <div class="feature-cell" data-pic="Oktatási Campus" onclick="openLightbox(this)">
+      <span class="feature-icon">🎓</span>
+      <div class="feature-title">Digitális készségközpont</div>
+      <div class="feature-text">Átképzés az Ipar 4.0 munkahelyekre. VR-alapú szimulációs oktatás, robotika workshop fiataloknak — a Miskolci Egyetemmel közösen.</div>
+    </div>
+    <div class="feature-cell" data-pic="Blokklánc ingatlan-nyilvántartás" onclick="openLightbox(this)">
+      <span class="feature-icon">⛓️</span>
+      <div class="feature-title">Blokklánc ingatlan-nyilvántartás</div>
+      <div class="feature-text">A 144 tulajdonos osztatlan közös tulajdon kezelése transzparensen, digitálisan — minden tranzakció auditálható és visszakereshető.</div>
+    </div>
+    <div class="feature-cell" data-pic="Helyi valuta  pontrendszer" onclick="openLightbox(this)">
+      <span class="feature-icon">🪙</span>
+      <div class="feature-title">Helyi valuta / pontrendszer</div>
+      <div class="feature-text">Fenntartható viselkedés jutalmazása: tömegközlekedés, szelektív hulladék, kerékpározás → kedvezmények, szolgáltatások.</div>
+    </div>
+    <div class="feature-cell" data-pic="Oktatási Campus" onclick="openLightbox(this)">
+      <span class="feature-icon">🏫</span>
+      <div class="feature-title">Miskolci Egyetem campus</div>
+      <div class="feature-text">Smart City labor valódi városadatokon. Robotikai tesztpálya, Digital Twin VR-terem az egész 130 hektárról. Ösztöndíjas lakhatás helyben.</div>
+    </div>
+    <div class="feature-cell" data-pic="Kulturális Negyed" onclick="openLightbox(this)">
+      <span class="feature-icon">🏙️</span>
+      <div class="feature-title">Városközpont & kultúra</div>
+      <div class="feature-text">Pláza, mozi, étterem, fesztivál — smart módra. Az ipari örökség falai között új közösségi és kulturális élet virágzik.</div>
+    </div>
   </div>
 </section>
 
@@ -2425,12 +2646,31 @@ const BUILDING_POLYS = {
 const EXTS = ['jpg','jpeg','png','webp','avif'];
 const FOLDER = 'DAM_PIC/';
 
+function picCandidates(key) {
+  const values = [
+    key,
+    key.normalize('NFC'),
+    key.normalize('NFD'),
+    key.replace(/\s+/g, ' ').trim(),
+    key.replace(/\s+/g, ' ').trim().normalize('NFC'),
+    key.replace(/\s+/g, ' ').trim().normalize('NFD'),
+  ];
+
+  return [...new Set(values.filter(Boolean))];
+}
+
 function findPic(key, cb) {
   if (!key) return cb(null);
-  let i = 0;
+  const names = picCandidates(key);
+  let nameIdx = 0;
+  let extIdx = 0;
   function next() {
-    if (i >= EXTS.length) return cb(null);
-    const raw = FOLDER + key + '.' + EXTS[i++];
+    if (nameIdx >= names.length) return cb(null);
+    const raw = FOLDER + names[nameIdx] + '.' + EXTS[extIdx++];
+    if (extIdx >= EXTS.length) {
+      extIdx = 0;
+      nameIdx++;
+    }
     // URL encode: szóközök és ékezetek miatt szükséges
     const encoded = raw.split('/').map((seg, idx) => idx === 0 ? seg : encodeURIComponent(seg)).join('/');
     const img = new Image();
@@ -2439,6 +2679,27 @@ function findPic(key, cb) {
     img.src = encoded;
   }
   next();
+}
+
+const picCache = new Map();
+
+function findPicAsync(key) {
+  if (!key) return Promise.resolve(null);
+  if (!picCache.has(key)) {
+    picCache.set(key, new Promise(resolve => findPic(key, resolve)));
+  }
+  return picCache.get(key);
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function runSequentially(tasks, gapMs = 90) {
+  for (const task of tasks) {
+    await task();
+    if (gapMs) await delay(gapMs);
+  }
 }
 
 // ── MODAL ──
@@ -2476,12 +2737,13 @@ function openModal(card, idx) {
   noImg.style.display = 'flex';
   const picToken = Symbol();
   imgWrap._picToken = picToken;
-  findPic(d.pic, src => {
+  findPicAsync(d.pic).then(src => {
     if (imgWrap._picToken !== picToken) return; // időközben másik kártya nyílt
     if (src) {
       noImg.style.display = 'none';
       const img = document.createElement('img');
       img.src = src; img.alt = d.name || '';
+      img.decoding = 'async';
       imgWrap.appendChild(img);
     }
   });
@@ -2577,10 +2839,14 @@ function addCostBadges() {
 // ── SETUP ──
 // ── LIGHTBOX (feature-cell képekhez) ──
 function openLightbox(cell) {
-  const pic = cell.dataset.pic;
-  const title = cell.querySelector('.feature-title')?.textContent || '';
+  const pic = cell.dataset.pic || cell.querySelector('[data-pic]')?.dataset.pic;
+  const title =
+    cell.querySelector('.feature-title, .city-card-title')?.textContent ||
+    cell.closest('.city-card')?.querySelector('.city-card-title')?.textContent ||
+    cell.dataset.name ||
+    '';
   if (!pic) return;
-  findPic(pic, src => {
+  findPicAsync(pic).then(src => {
     if (!src) return;
     document.getElementById('lightbox-img').src = src;
     document.getElementById('lightbox-caption').textContent = title;
@@ -2596,21 +2862,65 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeLightbox();
 });
 
-// ── THUMBNAIL betöltés feature-cell-ekbe ──
-function loadCellThumbs() {
-  document.querySelectorAll('.feature-cell[data-pic]').forEach(cell => {
+// ── THUMBNAIL betöltés kis kártyákba ──
+function loadInlinePics() {
+  const tasks = [];
+  const items = Array.from(document.querySelectorAll(
+    '.feature-cell[data-pic], .feature-card[data-pic], .city-card-header[data-pic]'
+  )).sort((a, b) => {
+    if (a === b) return 0;
+    return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+  });
+
+  items.forEach(item => {
+    if (item.classList.contains('city-card-header')) {
+      const header = item;
+      const pic = header.dataset.pic;
+      if (!pic || header.querySelector('img')) return;
+      tasks.push(async () => {
+        const src = await findPicAsync(pic);
+        if (!src) return;
+        const card = header.closest('.city-card');
+        if (card) {
+          card.classList.add('has-lightbox');
+          if (!card.dataset.lightboxBound) {
+            card.dataset.lightboxBound = '1';
+            card.addEventListener('click', () => openLightbox(header));
+          }
+        }
+        header.classList.add('has-pic');
+        header.childNodes.forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE) node.textContent = '';
+        });
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = header.closest('.city-card')?.querySelector('.city-card-title')?.textContent || pic;
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        header.insertBefore(img, header.firstChild);
+      });
+      return;
+    }
+
+    const cell = item;
     const pic = cell.dataset.pic;
     const title = cell.querySelector('.feature-title');
     if (!pic || !title) return;
-    findPic(pic, src => {
+    if (cell.querySelector(':scope > img.feature-cell-thumb')) return;
+    tasks.push(async () => {
+      const src = await findPicAsync(pic);
       if (!src) return;
       const thumb = document.createElement('img');
       thumb.src = src;
       thumb.className = 'feature-cell-thumb';
       thumb.alt = title.textContent;
+      thumb.loading = 'lazy';
+      thumb.decoding = 'async';
       cell.insertBefore(thumb, cell.firstChild);
     });
   });
+
+  runSequentially(tasks);
 }
 
 function setupCards() {
@@ -2619,7 +2929,7 @@ function setupCards() {
     card.addEventListener('click', () => openModal(card, idx));
   });
   addCostBadges();
-  loadCellThumbs();
+  loadInlinePics();
 }
 
 document.getElementById('prez-prev').addEventListener('click', e => {
