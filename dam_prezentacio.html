@@ -649,12 +649,14 @@ html,body{width:100%;height:100%;overflow:hidden;
 }
 #preview-desc{
   flex:1;max-width:100%;
-  display:flex;flex-direction:column;gap:.8rem;
+  display:flex;flex-direction:column;gap:var(--pb-gap,.8rem);
+  overflow-y:auto;
 }
 #preview-desc .pb{
-  display:flex;align-items:baseline;gap:1rem;
-  font-size:clamp(1.3rem,2vw,1.7rem);font-weight:600;
-  color:rgba(255,255,255,.88);line-height:1.3;
+  display:flex;align-items:baseline;gap:.8rem;
+  font-size:var(--pb-size,2vh);font-weight:600;
+  color:rgba(255,255,255,.88);line-height:1.35;
+  flex-shrink:0;
 }
 #preview-desc .pb::before{
   content:'';
@@ -1100,7 +1102,7 @@ const SLIDES = [
    title:'Vertikális Farm',
    desc:'LED-es, aeroponikus beltéri termesztés ipari csarnokban. Évi 365 nap, 95%-kal kevesebb víz mint hagyományos termesztésnél. AeroFarms/Plenty technológia.',
    cost:'~5–9 Mrd Ft'},
-  {cat:3,img:'DAM_PIC/Robot házhozszállítás.png',
+  {cat:3,img:'DAM_PIC/DAM_NEXUS_AutomatizáltLogisztika.png',
    title:'Automatizált élelmiszerraktár',
    desc:'AS/RS rendszer: robotok pakolnak, válogatnak, hűtenek. A vertikális farmról közvetlenül az automatizált raktárba — nulla élelmiszer-pazarlás.',
    cost:'~3–5 Mrd Ft'},
@@ -1126,7 +1128,7 @@ const SLIDES = [
    title:'Drón-postahivatal',
    desc:'Csomag be: automata. Csomag ki: drón viszi a területen belüli lakcímre percek alatt. Digitális postacím — minden lakáshoz QR azonosító.',
    cost:'~3–6 Mrd Ft'},
-  {cat:4,img:'DAM_PIC/Robot házhozszállítás.png',
+  {cat:4,img:'DAM_PIC/Robotaxi  pod-flotta.png',
    title:'Önjáró logisztikai robotok',
    desc:'Járdán közlekedő kis platórobotok nehezebb csomagokhoz. Reverse logistics: visszáruk és újrahasznosításra szánt eszközök automatikus begyűjtése.',
    cost:'~2–4 Mrd Ft'},
@@ -1241,7 +1243,7 @@ const SLIDES = [
    title:'Önkormányzati & Pénzügyi Hub',
    desc:'Egyablakos ügyintézés: okmányiroda, adóhivatal digitalizálva. Robot bankfiók, drón posta, csomag automata 24/7. Mindent intézni lehet az appból is.',
    cost:'~2–4 Mrd Ft'},
-  {cat:7,img:'DAM_PIC/Tető-Park & Közösségi Tér.png',
+  {cat:9,img:'DAM_PIC/Tető-Park & Közösségi Tér.png',
    title:'Tető-Park & Közösségi Tér',
    desc:'A Plaza és a mozi teteje zöld park: füves pihenők, fák, sétányok. Napelem borítja a nem zöld részeket. Smart padok beépített töltőkkel és WiFi-val.',
    cost:'~2–4 Mrd Ft'},
@@ -1767,10 +1769,15 @@ function openCat(ci){
   document.getElementById('preview-badge').style.background = cat.cc;
   document.getElementById('preview-title').textContent = cat.name;
   document.getElementById('preview-sub').textContent = cat.sub;
-  document.getElementById('preview-desc').innerHTML =
-    SLIDES.filter(s=>s.cat===ci)
-      .map(s=>`<div class="pb">${s.title}</div>`)
-      .join('');
+  const previewItems = SLIDES.filter(s=>s.cat===ci);
+  const descEl = document.getElementById('preview-desc');
+  descEl.innerHTML = previewItems.map(s=>`<div class="pb">${s.title}</div>`).join('');
+  // Scale font based on item count so everything fits in ~50vh
+  const n = previewItems.length;
+  const fsVh = Math.min(2.8, Math.max(1.0, 50 / (n * 2.0)));
+  const gapVh = Math.min(1.2, fsVh * 0.4);
+  descEl.style.setProperty('--pb-size', fsVh + 'vh');
+  descEl.style.setProperty('--pb-gap', gapVh + 'vh');
   document.getElementById('preview-budget-val').textContent = cat.budget;
 
   // Fullscreen — no manual positioning needed
